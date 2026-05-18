@@ -104,6 +104,31 @@ Avoid vague verbs like "高级起来" or "更震撼". Translate them into camera
 - 即梦 video: describe first frame, motion path, subject action, and end-state clearly.
 - 可灵 video: keep action physically plausible, state camera movement and duration, avoid too many simultaneous changes.
 
+## Banana 2K token-saving execution
+
+When the user wants Banana fast generation or token saving, keep the image request at `2K` and shorten only the prompt sent to the API.
+
+Output both:
+- `完整可复制提示词`: full version for review, revision, and client-facing prompt records.
+- `Banana 2K省token提示词` / `compactPrompt`: compact execution version for Banana API calls.
+
+The compact prompt must keep:
+- subject and action
+- composition and camera angle
+- camera system, lens/focal length, and lighting
+- core color/material/texture rules
+- ratio and `2K`
+- important negative constraints
+
+The compact prompt should remove:
+- proposal explanations
+- creative rationale
+- repeated style package text
+- weak or generic negative words
+- anything not needed by the image model to draw the frame
+
+Do not reduce the image size below `2K` unless the user explicitly asks.
+
 ## Prompt fields
 
 Each prompt should include:

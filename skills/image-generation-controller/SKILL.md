@@ -60,6 +60,7 @@ node .\scripts\run-image-generation.mjs --tool banana --input H:\yingshi\input.j
 node .\scripts\run-image-generation.mjs --tool openai --input H:\yingshi\input.json --dry-run
 node .\scripts\run-image-generation.mjs --job H:\yingshi\projects\project\generation-jobs\job.json
 node .\scripts\run-image-generation.mjs --job H:\yingshi\projects\project\generation-jobs\job.json --dry-run
+node .\scripts\run-image-generation.mjs --tool banana --input H:\yingshi\input.json --prompt-mode compact
 ```
 
 Optional:
@@ -100,6 +101,7 @@ The controller returns a JSON summary:
 ## Rules
 
 - Default concurrency is `1`; do not parallelize API calls in v1.
+- Banana defaults to `2K` and `prompt-mode compact` when compact prompts are available. This saves request tokens without reducing image size.
 - Do not call real APIs in dry-run mode.
 - Do not store or print API keys.
 - If the required API key is missing in real-generation mode, stop before calling the generator.

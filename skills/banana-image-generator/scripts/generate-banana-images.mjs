@@ -14,6 +14,7 @@ function parseArgs(argv) {
     if (arg === "--dry-run") args.dryRun = true;
     else if (arg === "--input") args.input = argv[++i];
     else if (arg === "--output-dir") args.outputDir = argv[++i];
+    else if (arg === "--prompt-mode") args.promptMode = String(argv[++i] || "").toLowerCase();
     else throw new Error(`Unknown argument: ${arg}`);
   }
   if (!args.input) throw new Error("Missing --input path.");
@@ -110,6 +111,9 @@ async function writePromptFiles({ promptDir, shot, tool, version, model, prompt,
     "实际请求提示词:",
     finalPrompt,
     "",
+    requestSettings?.sourcePrompt && requestSettings.sourcePrompt !== prompt ? "完整源提示词:" : "",
+    requestSettings?.sourcePrompt && requestSettings.sourcePrompt !== prompt ? requestSettings.sourcePrompt : "",
+    "",
   ].join("\n");
   const json = {
     shot,
@@ -145,10 +149,13 @@ async function normalizeReference(reference, index) {
 
 async function normalizeShot(raw, defaults) {
   const shot = raw.shot || raw.shotNumber || raw["镜号"];
-  const prompt = raw.prompt || raw.bananaPrompt || raw["Banana完整可复制提示词"] || raw["Banana/即梦完整可复制提示词"];
+  const sourcePrompt = raw.prompt || raw.bananaPrompt || raw["Banana完整可复制提示词"] || raw["Banana/即梦完整可复制提示词"];
+  const compactPrompt = raw.compactPrompt || raw.bananaCompactPrompt || raw["Banana 2K省token提示词"] || raw["省token提示词"];
+  const promptMode = String(raw.promptMode || defaults.promptMode || defaults.bananaPromptMode || "compact").toLowerCase();
+  const prompt = promptMode === "quality" ? sourcePrompt : (compactPrompt || sourcePrompt);
   const negativePrompt = raw.negativePrompt || raw.negative || raw["负面提示词"] || raw["Banana/即梦负面提示词"] || "";
   if (!shot) throw new Error("Shot is missing a shot number.");
-  if (!prompt) throw new Error(`Shot ${shot} is missing prompt.`);
+  if (!sourcePrompt) throw new Error(`Shot ${shot} is missing prompt.`);
 
   const references = [];
   for (const [index, reference] of (raw.references || raw["参考图"] || []).entries()) {
@@ -158,6 +165,9 @@ async function normalizeShot(raw, defaults) {
   return {
     shot: safeName(shot, "shot"),
     prompt,
+    sourcePrompt,
+    compactPrompt: compactPrompt || "",
+    promptMode,
     negativePrompt,
     finalPrompt: negativePrompt ? `${prompt}\n\n负面要求：${negativePrompt}` : prompt,
     aspect_ratio: inferRatio(raw, defaults.aspect_ratio || defaults.aspectRatio || "16:9"),
@@ -289,6 +299,7 @@ function buildPreflight({ projectName, model, outputDir, shots, hasApiKey }) {
 async function main() {
   const args = parseArgs(process.argv);
   const input = await readInput(args.input);
+  if (args.promptMode) input.promptMode = args.promptMode;
   const model = input.model || process.env.BANANA_MODEL || DEFAULT_MODEL;
   const projectName = safeName(input.projectName || input["项目名"], "banana-image-project");
   const outputDir = args.outputDir || input.outputDir || path.join(DEFAULT_BASE_DIR, projectName, timestamp());
@@ -325,6 +336,9 @@ async function main() {
       aspect_ratio: shot.aspect_ratio,
       image_size: shot.image_size,
       referenceCount: shot.references.length,
+      promptMode: shot.promptMode,
+      sourcePrompt: shot.sourcePrompt,
+      compactPromptAvailable: Boolean(shot.compactPrompt),
     };
     const { promptPath, promptJsonPath } = await writePromptFiles({
       promptDir,
@@ -347,6 +361,9 @@ async function main() {
       image_size: shot.image_size,
       promptSummary: promptSummary(shot.prompt),
       fullPrompt: shot.prompt,
+      sourcePrompt: shot.sourcePrompt,
+      promptMode: shot.promptMode,
+      compactPromptAvailable: Boolean(shot.compactPrompt),
       negativePrompt: shot.negativePrompt,
       finalPrompt: shot.finalPrompt,
       promptPath,

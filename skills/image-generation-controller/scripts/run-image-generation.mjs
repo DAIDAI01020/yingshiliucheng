@@ -30,6 +30,7 @@ function parseArgs(argv) {
     else if (arg === "--input") args.input = argv[++i];
     else if (arg === "--job") args.job = argv[++i];
     else if (arg === "--output-dir") args.outputDir = argv[++i];
+    else if (arg === "--prompt-mode") args.promptMode = String(argv[++i] || "").toLowerCase();
     else if (arg === "--dry-run") args.dryRun = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -114,6 +115,7 @@ async function resolveJob(args) {
       mode: args.dryRun ? "dry-run" : "real-generation",
       inputPath: path.resolve(args.input),
       outputDir: args.outputDir ? path.resolve(args.outputDir) : "",
+      promptMode: args.promptMode || "",
       projectRoot: "",
       jobPath: "",
     };
@@ -138,6 +140,7 @@ async function resolveJob(args) {
     mode,
     inputPath: jobPath,
     outputDir,
+    promptMode: args.promptMode || job.promptMode || job.bananaPromptMode || "",
     projectRoot,
     jobPath,
     projectName: job.projectName || safeName(path.basename(projectRoot || ""), "project"),
@@ -173,6 +176,7 @@ async function main() {
 
   const generatorArgs = ["--input", job.inputPath];
   if (job.outputDir) generatorArgs.push("--output-dir", job.outputDir);
+  if (job.tool === "banana" && job.promptMode) generatorArgs.push("--prompt-mode", job.promptMode);
   if (job.mode === "dry-run") generatorArgs.push("--dry-run");
 
   const generatorOutput = runNode(config.generator, generatorArgs);
@@ -208,6 +212,7 @@ async function main() {
     generationLog: logPath,
     reviewBoard: review.reviewBoard,
     projectRoot: job.projectRoot || null,
+    promptMode: job.promptMode || null,
     projectState,
     shotCount: (log.shots || []).length,
     failedCount: failedShots.length,

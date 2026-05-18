@@ -135,6 +135,7 @@ async function createJob(args) {
     projectRoot: state.projectRoot,
     tool,
     mode,
+    promptMode: args.promptMode || input.promptMode || input.bananaPromptMode || (tool === "banana" ? "compact" : ""),
     outputDir: args.outputDir || input.outputDir || "",
     model: input.model || "",
     aspect_ratio: input.aspect_ratio || input.aspectRatio || input.ratio || "16:9",

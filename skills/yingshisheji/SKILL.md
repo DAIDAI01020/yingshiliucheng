@@ -142,6 +142,7 @@ Default to a two-part delivery:
 - If the user gives vague client feedback like `不够高级`, `太AI`, `不够大气`, `不像品牌`, or `画面太乱`, use `$client-feedback-interpreter` before revision.
 - If the user explicitly says `用OpenAI出图`, `直接出图`, `批量生成图片`, `生成图片文件`, or `重出某个镜头`, use `$image-generation-controller` after OpenAI prompts are ready. The controller will call `$openai-image-generator` and then `$image-review-board`.
 - If the user explicitly says `用Banana出图`, `Banana直接生成`, `Nano Banana出图`, `OpenRouter出图`, or `重出某个Banana镜头`, use `$image-generation-controller` after Banana prompts are ready. The controller will call `$banana-image-generator` and then `$image-review-board`.
+- If the user says `Banana省token`, `Banana快速出图`, or `Banana先跑小样`, keep `image_size: 2K` but use compact Banana execution prompts and minimal chat output.
 - If the user says `先测一下`, `检查一下能不能出`, `dry-run`, or `出图前检查`, run or output dry-run/preflight only and do not call a real image API.
 - If the user says `帮我看生成图行不行`, `质检`, `这张能不能用`, `要不要重出`, or provides generated image paths for review, use `$image-qc-director`.
 - If the user says `给我看结果`, `出图结果整理`, `左边提示词右边图片`, `我要挑图`, `我要改图`, or asks to compare prompts with generated images, use `$image-review-board`.
@@ -206,8 +207,10 @@ For `Sheet 4 AI出图提示词`:
 - S级关键镜头 can include 3 style routes only during style exploration. Once a route is chosen, all prompts must use the same chosen route.
 - Include Banana/Jimeng tool adaptation through `$frame-vision-director`.
 - Use `$banana-pro` when Banana Pro / Nano Banana 2 / OpenRouter request settings, raw payloads, image size, aspect ratio, or reference image roles are needed.
+- For Banana token-saving execution, output a compact field named `Banana 2K省token提示词` or `compactPrompt` in addition to the full prompt. Preserve the cinematic essentials but remove proposal explanations, repeated style paragraphs, and low-value negative words.
 - Use `$image-generation-controller` for real image execution when the user explicitly chooses Banana or OpenAI. It should call the matching generator and then build the review board.
 - For managed projects, pass a unified `generation-job.json` from `$project-state-manager` into `$image-generation-controller` so generation results can be written back to `asset-index.json`.
+- For Banana managed jobs, default to `promptMode: compact` and keep `image_size: 2K`. Use `compactPrompt` / `bananaCompactPrompt` for the API request when available; keep the long full prompt in local prompt files or source fields for revision.
 - Use `$banana-image-generator` as the Banana/OpenRouter execution module behind `$image-generation-controller`. Do not call it for prompt-only requests.
 - Include OpenAI image prompt adaptation through `$openai-image-prompt-director` when the user asks for OpenAI/image-2/GPT Image prompts or when a full prompt table is requested.
 - Use `$openai-image-generator` as the OpenAI execution module behind `$image-generation-controller`. Do not call it for prompt-only requests.

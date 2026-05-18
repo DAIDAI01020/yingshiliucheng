@@ -24,6 +24,7 @@ This skill calls OpenRouter's Chat Completions endpoint for `google/gemini-3.1-f
 - Logs are saved in `logs\generation-log.json`.
 - Default aspect ratio: `16:9`.
 - Default image size: `2K`.
+- Default Banana prompt mode: `compact`, which keeps `2K` but uses `compactPrompt` / `bananaCompactPrompt` for the API request when available.
 - Output files use versioned names, such as `S01_banana_v01.png`, `S01_banana_v02.png`.
 
 ## Input JSON
@@ -40,6 +41,7 @@ Prepare a JSON file and run the script with `--input`.
     {
       "shot": "S01",
       "prompt": "Banana完整可复制提示词...",
+      "compactPrompt": "Banana 2K省token执行提示词...",
       "negativePrompt": "负面要求...",
       "ratio": "16:9",
       "references": [
@@ -57,6 +59,8 @@ Accepted shot number fields: `shot`, `shotNumber`, `镜号`.
 
 Accepted prompt fields: `prompt`, `bananaPrompt`, `Banana完整可复制提示词`, `Banana/即梦完整可复制提示词`.
 
+Accepted compact prompt fields: `compactPrompt`, `bananaCompactPrompt`, `Banana 2K省token提示词`, `省token提示词`.
+
 Accepted negative prompt fields: `negativePrompt`, `negative`, `负面提示词`, `Banana/即梦负面提示词`.
 
 Reference images can use:
@@ -72,6 +76,8 @@ From the skill folder:
 ```powershell
 node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json --dry-run
 node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json
+node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json --prompt-mode compact
+node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json --prompt-mode quality
 ```
 
 Use `--dry-run` before real generation to validate input, output paths, request settings, reference files, and whether `OPENROUTER_API_KEY` is present. Dry run does not call the API.
@@ -94,6 +100,8 @@ If any shot fails, keep generating the rest and record the error in `generation-
 The log uses shared fields with OpenAI generation: shot, version, tool, model, promptSummary, fullPrompt, negativePrompt, finalPrompt, promptPath, promptJsonPath, filePath, status, error, and retrySuggestion.
 `outputDir` is the task root. `imageDir` points to `images\`. `promptDir` points to `prompts\`. `logDir` points to `logs\`.
 
+For Banana 2K token-saving generation, `fullPrompt` is the actual compact request prompt. If a longer source prompt exists, it is saved as `sourcePrompt` in the log and prompt JSON. This saves request tokens without lowering `image_size`.
+
 ## Workflow
 
 1. If the user has no Banana prompt yet, first use `$frame-vision-director` and `$banana-pro`.
@@ -107,5 +115,6 @@ The log uses shared fields with OpenAI generation: shot, version, tool, model, p
 - Never ask for or print the plaintext API key.
 - Never write the API key into JSON input, logs, skill files, repo files, or final answers.
 - Do not call the API unless the user explicitly asked for real Banana image generation.
-- Use `2K` for normal storyboard/keyframe drafts unless the user asks for faster drafts or higher resolution.
+- Use `2K` for normal storyboard/keyframe drafts. Do not reduce to `1K` for token saving unless the user explicitly asks.
+- Prefer compact Banana prompts for execution: keep subject, composition, camera, light, material, ratio, and core negatives; remove proposal explanations and repeated client-facing rationale.
 - Keep generation records by shot number so revisions can target a single shot.

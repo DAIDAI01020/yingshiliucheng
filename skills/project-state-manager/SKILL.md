@@ -39,6 +39,7 @@ Use this shape:
   "projectRoot": "",
   "tool": "banana",
   "mode": "dry-run",
+  "promptMode": "compact",
   "outputDir": "",
   "shots": [
     {
@@ -53,6 +54,8 @@ Use this shape:
 ```
 
 `tool` must be `banana` or `openai`. `mode` must be `dry-run` or `real-generation`.
+
+For Banana jobs, default `promptMode` is `compact` so the generator can use `compactPrompt` / `bananaCompactPrompt` while keeping `image_size: 2K`.
 
 ## Script usage
 

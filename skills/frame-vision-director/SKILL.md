@@ -41,6 +41,7 @@ The `风格展开描述` must be detailed enough to paste into every shot prompt
 7. Do not let a single-shot reference image override the unified film style. If the reference conflicts with the film style, keep the film style and extract only the useful local feature.
 8. For S-priority key shots, provide A/B/C style routes only if the user is still choosing the film's overall style. Once a route is chosen, all shot prompts must follow that chosen route.
 9. For B/C-priority shots, give fewer prompts or recommend no image generation.
+10. For Banana execution, also provide `Banana 2K省token提示词` or `compactPrompt` when the user asks for fast/token-saving Banana generation. Keep image quality at `2K`; shorten only the request wording.
 
 ## Output
 
@@ -51,6 +52,11 @@ Use this table by default:
 
 Do not leave camera, lens, or lighting only in separate columns. They must appear inside `完整可复制提示词`.
 Do not write `风格同上` inside a prompt. Every `完整可复制提示词` must be self-contained.
+
+For Banana token-saving execution, add a separate compact field named `Banana 2K省token提示词` or `compactPrompt`:
+- Keep shot subject, composition, camera/lens, lighting, key color/material, ratio, `2K`, and the most important constraints.
+- Remove client proposal meaning, repeated explanations, long rationale, and low-risk negative words.
+- Never reduce image size below `2K` unless the user explicitly asks.
 
 Optional style exploration table, only before the user chooses a route:
 
