@@ -32,6 +32,7 @@ description: Film and screen visual proposal director for TVC ads, brand films, 
    - Image review board: `$image-review-board`
    - Asset management: `$asset-librarian`
    - Video prompts: `$ai-video-prompt-director`
+   - Seedance/Ark direct video generation: `$seedance-2-video`
    - Client feedback interpretation: `$client-feedback-interpreter`
    - Revision: `$revision-director`
    - Type guidance: `$tvc-director`, `$brand-film-director`, `$program-promo-director`, `$led-screen-director`, `$event-opener-director`, `$social-cutdown-director`
@@ -144,6 +145,7 @@ Default to a two-part delivery:
 - If the user explicitly says `用Banana出图`, `Banana直接生成`, `Nano Banana出图`, `OpenRouter出图`, or `重出某个Banana镜头`, use `$image-generation-controller` after Banana prompts are ready. The controller will call `$banana-image-generator` and then `$image-review-board`.
 - If the user says `Banana省token`, `Banana快速出图`, or `Banana先跑小样`, keep `image_size: 2K` but use compact Banana execution prompts and minimal chat output.
 - If the user says `先测一下`, `检查一下能不能出`, `dry-run`, or `出图前检查`, run or output dry-run/preflight only and do not call a real image API.
+- If the user explicitly says `用即梦Seedance出视频`, `Seedance出视频`, `Ark出视频`, or `直接生成视频`, use `$seedance-2-video` after the video prompt and public first-frame/reference image URL are ready. Do not pass local image paths; require public `http/https` image URLs.
 - If the user says `帮我看生成图行不行`, `质检`, `这张能不能用`, `要不要重出`, or provides generated image paths for review, use `$image-qc-director`.
 - If the user says `给我看结果`, `出图结果整理`, `左边提示词右边图片`, `我要挑图`, `我要改图`, or asks to compare prompts with generated images, use `$image-review-board`.
 - If the user does not specify a format, output both parts: first `PPT提案内容`, then `Excel执行表格`.
@@ -242,6 +244,7 @@ Load only the reference needed for the current request:
 - `references/output-templates.md`: use when producing a complete proposal package, script table, storyboard table, prompt table, client proposal language, or image priority table.
 - `references/visual-language.md`: use when defining cinematic tone, camera language, color, lighting, motion, material, and image texture.
 - `references/ai-prompt-guide.md`: use when writing Banana/Jimeng image prompts, frame vision prompts, or Jimeng/Kling video prompts.
+- Use `$seedance-2-video` only for real Seedance/Ark video generation, not for prompt-only video writing.
 - `references/project-type-guide.md`: use when choosing structure and priorities for TVC, brand film, program promo, event opener, LED screen visual, or social cutdown.
 - `references/reference-style-guide.md`: use when the user names a reference film, brand launch, ad, show package, or visual style.
 - `references/industry-style-guide.md`: use when the project belongs to a clear industry and needs a suitable default look.

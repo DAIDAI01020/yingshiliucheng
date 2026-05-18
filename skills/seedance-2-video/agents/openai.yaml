@@ -1,0 +1,4 @@
+interface:
+  display_name: "Seedance 2.0 Video"
+  short_description: "Generate videos through Ark Seedance 2.0"
+default_prompt: "Use $seedance-2-video to call Ark Seedance 2.0 directly with ARK_API_KEY or setup-key local credentials, public image URLs, a Chinese prompt, slow adaptive polling, final.mp4 download, and run_manifest.json output."

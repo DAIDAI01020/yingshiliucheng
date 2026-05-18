@@ -11,6 +11,7 @@ description: 生成影视AI视频提示词。用于把关键画面、分镜或AI
 2. Describe one dominant subject action and one dominant camera movement.
 3. Add environment and light changes only when they support the shot.
 4. Keep motion physically plausible and easy for video models to follow.
+5. When the next step is Seedance/Ark generation, write the prompt so it can pair with 1-9 public `http/https` reference image URLs. Keep the action simple, continuous, and physically plausible.
 
 ## Output
 
@@ -20,6 +21,7 @@ description: 生成影视AI视频提示词。用于把关键画面、分镜或AI
 ## Tool guidance
 
 - 即梦: specify first frame, camera movement, subject action, light change, and ending frame.
+- Seedance/Ark: specify first frame or reference image role, one main subject action, one camera movement, one environment/light change, duration, ratio, resolution, and forbidden artifacts.
 - 可灵: keep motion simple, continuous, and cinematic; avoid multiple competing transformations.
 
 ## Avoid
