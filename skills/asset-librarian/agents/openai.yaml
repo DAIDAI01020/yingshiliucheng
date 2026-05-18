@@ -1,0 +1,6 @@
+interface:
+  display_name: "Asset Librarian"
+  short_description: "Organize image versions, references, logs, and delivery assets"
+  default_prompt: "Use $asset-librarian to organize generated images, references, prompts, and project folders."
+policy:
+  allow_implicit_invocation: true

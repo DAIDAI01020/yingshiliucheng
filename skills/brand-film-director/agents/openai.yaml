@@ -1,0 +1,6 @@
+interface:
+  display_name: "品牌片导演"
+  short_description: "处理品牌片、城市片和形象片表达"
+  default_prompt: "Use $brand-film-director to plan a brand film proposal."
+policy:
+  allow_implicit_invocation: true

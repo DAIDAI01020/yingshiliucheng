@@ -1,0 +1,43 @@
+# Local generation outputs
+outputs/
+projects/
+
+# Local prompt/test inputs and temporary examples
+*_input.json
+dry-run-input.json
+real-test-input.json
+中华考工记_物勒工名_5段重点分镜与AI出图提示词.md
+中华考工记_物勒工名_5段重点分镜与摄影级AI出图提示词.md
+
+# Generated media and review artifacts
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.mp4
+*.mov
+*.wav
+*.mp3
+generation-log.json
+review-board.md
+
+# Secrets and local config
+.env
+.env.*
+*.key
+*.pem
+*secret*
+*token*
+
+# System/editor/cache files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+node_modules/
+.cache/
+tmp/
+temp/
+

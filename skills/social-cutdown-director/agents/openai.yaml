@@ -1,0 +1,6 @@
+interface:
+  display_name: "社媒切条导演"
+  short_description: "把主片创意改编成短视频和竖版物料"
+  default_prompt: "Use $social-cutdown-director to adapt this film idea into social cutdowns."
+policy:
+  allow_implicit_invocation: true

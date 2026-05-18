@@ -1,0 +1,6 @@
+interface:
+  display_name: "影视文稿写作"
+  short_description: "撰写广告片、宣传片和开场片文稿"
+  default_prompt: "Use $script-writer to draft a time-coded影视文稿."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Frame Vision Director"
+  short_description: "影视关键帧视觉与AI出图导演"
+  default_prompt: "Use $frame-vision-director to turn storyboard shots into consistent cinematic keyframe prompts."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Banana Pro"
+  short_description: "Banana Pro image prompt workflow"
+  default_prompt: "Use $banana-pro to prepare a Banana Pro image prompt and OpenRouter request settings."

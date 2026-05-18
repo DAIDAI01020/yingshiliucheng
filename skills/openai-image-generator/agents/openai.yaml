@@ -1,0 +1,6 @@
+interface:
+  display_name: "OpenAI Image Generator"
+  short_description: "Generate and save storyboard images with OpenAI Images API"
+  default_prompt: "Use $openai-image-generator to generate saved images from my OpenAI image prompts."
+policy:
+  allow_implicit_invocation: true

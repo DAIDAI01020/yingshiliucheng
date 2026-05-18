@@ -1,0 +1,6 @@
+interface:
+  display_name: "TVC广告导演"
+  short_description: "处理TVC卖点、节奏和广告记忆点"
+  default_prompt: "Use $tvc-director to shape this product film into a TVC proposal."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "大屏视觉导演"
+  short_description: "处理LED大屏、舞美和沉浸视觉"
+  default_prompt: "Use $led-screen-director to plan a large-screen visual proposal."
+policy:
+  allow_implicit_invocation: true

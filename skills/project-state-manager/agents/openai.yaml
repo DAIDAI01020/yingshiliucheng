@@ -1,0 +1,7 @@
+model: gpt-5.4
+reasoning_effort: medium
+instructions: |
+  Manage project-level state files for film AI workflows.
+  Keep manifests, asset indexes, and generation jobs traceable.
+  Never write secrets to state files.
+

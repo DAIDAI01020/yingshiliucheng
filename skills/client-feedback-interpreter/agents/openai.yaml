@@ -1,0 +1,6 @@
+interface:
+  display_name: "Client Feedback Interpreter"
+  short_description: "Translate vague client comments into concrete revision actions"
+  default_prompt: "Use $client-feedback-interpreter to turn client feedback into actionable film visual revisions."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "活动开场片导演"
+  short_description: "处理发布会、盛典和论坛开场片"
+  default_prompt: "Use $event-opener-director to create an event opener proposal."
+policy:
+  allow_implicit_invocation: true

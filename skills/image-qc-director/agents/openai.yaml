@@ -1,0 +1,6 @@
+interface:
+  display_name: "Image QC Director"
+  short_description: "QC generated keyframes and recommend fixes or regeneration"
+  default_prompt: "Use $image-qc-director to review generated images against storyboard prompts and decide whether to keep, revise, or regenerate."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Banana Image Generator"
+  short_description: "Generate and save Banana Pro images through OpenRouter"
+  default_prompt: "Use $banana-image-generator to generate saved images from my Banana prompts."
+policy:
+  allow_implicit_invocation: true

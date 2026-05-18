@@ -1,0 +1,6 @@
+interface:
+  display_name: "AI视频提示词"
+  short_description: "生成即梦和可灵视频镜头提示词"
+  default_prompt: "Use $ai-video-prompt-director to write video generation prompts for these storyboard shots."
+policy:
+  allow_implicit_invocation: true

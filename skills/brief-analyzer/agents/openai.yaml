@@ -1,0 +1,6 @@
+interface:
+  display_name: "影视Brief拆解"
+  short_description: "拆解影视brief、受众、卖点和限制"
+  default_prompt: "Use $brief-analyzer to analyze this影视项目brief."
+policy:
+  allow_implicit_invocation: true

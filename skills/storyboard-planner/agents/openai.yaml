@@ -1,0 +1,6 @@
+interface:
+  display_name: "提案分镜规划"
+  short_description: "输出提案级分镜和关键画面描述"
+  default_prompt: "Use $storyboard-planner to create a proposal-level storyboard."
+policy:
+  allow_implicit_invocation: true

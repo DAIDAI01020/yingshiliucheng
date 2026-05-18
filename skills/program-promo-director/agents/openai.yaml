@@ -1,0 +1,6 @@
+interface:
+  display_name: "节目宣传片导演"
+  short_description: "处理电视节目、综艺和栏目宣传片"
+  default_prompt: "Use $program-promo-director to develop a program promo concept."
+policy:
+  allow_implicit_invocation: true

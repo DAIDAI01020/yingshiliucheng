@@ -1,0 +1,6 @@
+interface:
+  display_name: "Pitch Deck Director"
+  short_description: "Build client-facing PPT proposal pages from creative and visual work"
+  default_prompt: "Use $pitch-deck-director to turn this film visual proposal into a PPT-ready deck structure."
+policy:
+  allow_implicit_invocation: true

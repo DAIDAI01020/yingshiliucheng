@@ -1,0 +1,6 @@
+interface:
+  display_name: "Style Bible Director"
+  short_description: "Maintain visual continuity and unified style rules across shots"
+  default_prompt: "Use $style-bible-director to create or update the unified visual style bible for this project."
+policy:
+  allow_implicit_invocation: true

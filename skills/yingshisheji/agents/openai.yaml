@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yingshi Sheji"
+  short_description: "Film proposal director for scripts, storyboards, and AI prompts"
+  default_prompt: "Use $yingshisheji to turn my影视项目brief into a proposal package."
+policy:
+  allow_implicit_invocation: true

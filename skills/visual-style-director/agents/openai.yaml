@@ -1,0 +1,6 @@
+interface:
+  display_name: "视觉风格指导"
+  short_description: "定义影视影调、镜头语言和视觉关键词"
+  default_prompt: "Use $visual-style-director to define the visual style for this film project."
+policy:
+  allow_implicit_invocation: true
