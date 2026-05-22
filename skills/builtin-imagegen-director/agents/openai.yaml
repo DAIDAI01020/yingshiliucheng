@@ -1,0 +1,3 @@
+display_name: Built-in Imagegen Director
+short_description: Use Codex built-in imagegen for fast film visual previews and edits.
+default_prompt: 用内置 imagegen 快速出一张影视概念图

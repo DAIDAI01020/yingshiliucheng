@@ -90,7 +90,7 @@ For vehicles, add: `多角度参考，保持同一车辆一致性，车身比例
 
 Before handing off, check:
 
-- The model is `google/gemini-3.1-flash-image-preview`.
+- The model is `google/gemini-3-pro-image-preview`.
 - `image_config.aspect_ratio` and `image_config.image_size` match the task.
 - Reference image roles are explicit when images are used.
 - Identity, product, UI, or scene continuity anchors are stated.

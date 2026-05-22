@@ -1,4 +1,4 @@
-# Output Templates
+﻿# Output Templates
 
 Use these templates when `$yingshisheji` needs to produce a complete delivery. The default structure is:
 
@@ -118,7 +118,7 @@ Use these priorities:
 
 再输出镜头提示词：
 
-| 镜号 | 优先级 | 参考图说明 | Banana/即梦完整可复制提示词 | Banana 2K省token提示词 | Banana/即梦负面提示词 | OpenAI完整可复制提示词 | OpenAI负面要求 | 比例 | 备注 |
+| 镜号 | 优先级 | 参考图说明 | Banana/即梦完整可复制提示词 | Banana 2K省token提示词 | Banana/即梦负面提示词 | ChatGPT Image完整可复制提示词 | ChatGPT Image负面要求 | 比例 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 Rules:
@@ -128,7 +128,7 @@ Rules:
 - B/C级镜头只在必要时给提示词。
 - Banana / 即梦提示词由 `$frame-vision-director` 负责，强调摄影机、镜头、灯光、材质和商业电影质感。
 - Banana 真实出图可额外使用 `Banana 2K省token提示词` / `compactPrompt`，保留 2K、主体、构图、摄影机、焦段、灯光、关键材质和核心禁止项，删掉提案解释和重复风格段落。
-- OpenAI提示词由 `$openai-image-prompt-director` 负责，强调主体层级、空间结构、文字/Logo/UI控制、参考图约束和禁止项。
+- ChatGPT Image提示词由 `$ChatGPT Image-image-prompt-director` 负责，强调主体层级、空间结构、文字/Logo/UI控制、参考图约束和禁止项。
 - 两套提示词共用同一个 `全片统一风格包`，不要为不同工具改变整组画面的主风格。
 - 摄影系统、镜头焦段、灯光方案必须写进 `完整可复制提示词`，不要只放在独立列里。
 - 摄影系统可使用 ARRI Alexa 35、ARRI Alexa Mini LF、Sony Venice 2、RED V-Raptor、Blackmagic URSA Cine 等作为影像语言。
@@ -146,7 +146,7 @@ Rules:
 - 工具以 即梦 / 可灵 为主。
 - 动态复杂镜头先做首帧，再写视频提示词。
 - 避免复杂文字、多人脸、手部细节、过多主体同时运动。
-- 真实出图执行优先交给 `$image-generation-controller`，由它串联 Banana/OpenAI 出图、日志、提示词文件和审片面板。
+- 真实出图执行优先交给 `$image-generation-controller`，由它串联 Banana/ChatGPT Image 出图、日志、提示词文件和审片面板。
 - 长项目或多轮修改优先建立 `$project-state-manager` 项目状态，统一维护 `project-manifest.json`、`asset-index.json` 和 `generation-job.json`。
 
 ### Sheet 6 客户反馈与修改
@@ -226,3 +226,4 @@ Rules:
 - Excel部分负责执行落地：字段完整，可直接复制到表格。
 - 如果用户只要提示词或最后整理，直接输出 Excel执行表格。
 - 如果用户要设计提案，优先输出 PPT提案内容，并附必要的 Excel执行表格。
+

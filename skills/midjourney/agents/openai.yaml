@@ -1,0 +1,4 @@
+interface:
+  display_name: "Midjourney"
+  short_description: "Generate Midjourney images via Legnext"
+  default_prompt: "Use $midjourney to generate a real Midjourney image through the standalone Legnext workflow."

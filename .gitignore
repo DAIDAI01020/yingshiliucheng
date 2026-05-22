@@ -37,7 +37,8 @@ desktop.ini
 .vscode/
 .idea/
 node_modules/
+__pycache__/
+*.pyc
 .cache/
 tmp/
 temp/
-

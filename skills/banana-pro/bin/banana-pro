@@ -1,0 +1,266 @@
+#!/usr/bin/env python3
+"""Generate images with Banana Pro through OpenRouter."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import mimetypes
+import os
+from pathlib import Path
+import sys
+import time
+from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+
+DEFAULT_MODEL = "google/gemini-3-pro-image-preview"
+DEFAULT_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_ENV_FILE = Path.home() / ".config" / "banana-pro" / "openrouter.env"
+
+
+def load_env_file(path: Path) -> None:
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+def read_prompt(args: argparse.Namespace) -> str:
+    parts: list[str] = []
+    if args.prompt:
+        parts.append(args.prompt)
+    if args.prompt_file:
+        parts.append(Path(args.prompt_file).read_text(encoding="utf-8"))
+    if not parts:
+        raise SystemExit("Provide a prompt argument or --prompt-file.")
+    return "\n\n".join(part.strip() for part in parts if part.strip())
+
+
+def image_to_data_url(value: str) -> str:
+    if value.startswith(("http://", "https://", "data:")):
+        return value
+
+    path = Path(value).expanduser()
+    if not path.exists():
+        raise SystemExit(f"Reference image not found: {path}")
+
+    mime_type, _ = mimetypes.guess_type(str(path))
+    if not mime_type:
+        suffix = path.suffix.lower()
+        mime_type = "image/png" if suffix == ".png" else "image/jpeg"
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime_type};base64,{encoded}"
+
+
+def build_content(prompt: str, images: list[str]) -> str | list[dict[str, Any]]:
+    if not images:
+        return prompt
+
+    content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
+    for image in images:
+        content.append(
+            {
+                "type": "image_url",
+                "image_url": {"url": image_to_data_url(image)},
+            }
+        )
+    return content
+
+
+def build_payload(args: argparse.Namespace) -> dict[str, Any]:
+    return {
+        "model": args.model,
+        "messages": [
+            {
+                "role": "user",
+                "content": build_content(read_prompt(args), args.image),
+            }
+        ],
+        "modalities": ["image", "text"],
+        "stream": False,
+        "image_config": {
+            "aspect_ratio": args.aspect_ratio,
+            "image_size": args.image_size,
+        },
+    }
+
+
+def request_openrouter(payload: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        raise SystemExit(
+            "Missing OPENROUTER_API_KEY. Set it in the environment or "
+            f"{DEFAULT_ENV_FILE}."
+        )
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "X-Title": os.environ.get("OPENROUTER_X_TITLE", "Banana Pro CLI"),
+    }
+    referer = os.environ.get("OPENROUTER_HTTP_REFERER")
+    if referer:
+        headers["HTTP-Referer"] = referer
+
+    data = json.dumps(payload).encode("utf-8")
+    request = Request(args.endpoint, data=data, headers=headers, method="POST")
+    try:
+        with urlopen(request, timeout=args.timeout) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise SystemExit(f"OpenRouter HTTP {exc.code}: {body}") from exc
+    except URLError as exc:
+        raise SystemExit(f"OpenRouter request failed: {exc}") from exc
+
+
+def iter_image_urls(response: dict[str, Any]) -> list[str]:
+    urls: list[str] = []
+    for choice in response.get("choices", []):
+        message = choice.get("message") or {}
+        for image in message.get("images") or []:
+            image_url = image.get("image_url") or {}
+            url = image_url.get("url")
+            if url:
+                urls.append(url)
+
+        content = message.get("content")
+        if isinstance(content, list):
+            for part in content:
+                if part.get("type") == "image_url":
+                    image_url = part.get("image_url") or {}
+                    url = image_url.get("url")
+                    if url:
+                        urls.append(url)
+    return urls
+
+
+def extract_text(response: dict[str, Any]) -> str:
+    texts: list[str] = []
+    for choice in response.get("choices", []):
+        content = (choice.get("message") or {}).get("content")
+        if isinstance(content, str) and content.strip():
+            texts.append(content.strip())
+        elif isinstance(content, list):
+            for part in content:
+                if part.get("type") == "text" and part.get("text"):
+                    texts.append(str(part["text"]).strip())
+    return "\n\n".join(texts)
+
+
+def save_data_url(url: str, out_dir: Path, index: int) -> Path | None:
+    if not url.startswith("data:"):
+        return None
+
+    header, encoded = url.split(",", 1)
+    media_type = header[5:].split(";", 1)[0]
+    ext = mimetypes.guess_extension(media_type) or ".png"
+    path = out_dir / f"banana-pro-{index:02d}{ext}"
+    path.write_bytes(base64.b64decode(encoded))
+    return path
+
+
+def download_url(url: str, out_dir: Path, index: int, timeout: int) -> Path:
+    request = Request(url, headers={"User-Agent": "Banana Pro CLI"})
+    with urlopen(request, timeout=timeout) as response:
+        content_type = response.headers.get_content_type()
+        ext = mimetypes.guess_extension(content_type) or ".png"
+        path = out_dir / f"banana-pro-{index:02d}{ext}"
+        path.write_bytes(response.read())
+        return path
+
+
+def save_outputs(response: dict[str, Any], args: argparse.Namespace) -> None:
+    out_dir = Path(args.output).expanduser()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.save_json:
+        (out_dir / "response.json").write_text(
+            json.dumps(response, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    urls = iter_image_urls(response)
+    saved: list[Path] = []
+    remote_urls: list[str] = []
+    for index, url in enumerate(urls, start=1):
+        path = save_data_url(url, out_dir, index)
+        if path is None:
+            remote_urls.append(url)
+            if args.download_remote:
+                path = download_url(url, out_dir, index, args.timeout)
+        if path is not None:
+            saved.append(path)
+
+    text = extract_text(response)
+    if text:
+        (out_dir / "message.txt").write_text(text + "\n", encoding="utf-8")
+
+    for path in saved:
+        print(path)
+    for url in remote_urls:
+        print(url)
+    if not saved and not remote_urls:
+        print(f"No image URL found. Full response saved in {out_dir / 'response.json'}")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="banana-pro",
+        description="Call OpenRouter Banana Pro / Gemini image generation and save outputs.",
+    )
+    parser.add_argument("prompt", nargs="?", help="Image generation prompt.")
+    parser.add_argument("--prompt-file", help="Read prompt text from a UTF-8 file.")
+    parser.add_argument(
+        "--image",
+        action="append",
+        default=[],
+        help="Reference image path, HTTPS URL, or data URL. Repeat for multiple references.",
+    )
+    parser.add_argument("--aspect-ratio", default="16:9", help="Aspect ratio, e.g. 16:9.")
+    parser.add_argument("--image-size", default="2K", help="Image size: 0.5K, 1K, 2K, or 4K.")
+    parser.add_argument("--model", default=os.environ.get("BANANA_PRO_MODEL", DEFAULT_MODEL))
+    parser.add_argument("--endpoint", default=os.environ.get("OPENROUTER_ENDPOINT", DEFAULT_ENDPOINT))
+    parser.add_argument("--output", "-o", default=f"banana-pro-output-{int(time.time())}")
+    parser.add_argument("--timeout", type=int, default=180)
+    parser.add_argument("--save-json", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--download-remote", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print the request payload without calling OpenRouter.",
+    )
+    parser.add_argument(
+        "--env-file",
+        default=os.environ.get("BANANA_PRO_ENV", str(DEFAULT_ENV_FILE)),
+        help="Env file containing OPENROUTER_API_KEY.",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    load_env_file(Path(args.env_file).expanduser())
+    payload = build_payload(args)
+
+    if args.dry_run:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 0
+
+    response = request_openrouter(payload, args)
+    save_outputs(response, args)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -13,10 +13,6 @@ const TOOL_CONFIG = {
     envKey: "OPENROUTER_API_KEY",
     generator: path.join(skillsRoot, "banana-image-generator", "scripts", "generate-banana-images.mjs"),
   },
-  openai: {
-    envKey: "OPENAI_API_KEY",
-    generator: path.join(skillsRoot, "openai-image-generator", "scripts", "generate-openai-images.mjs"),
-  },
 };
 
 const reviewBuilder = path.join(skillsRoot, "image-review-board", "scripts", "build-review-board.mjs");
@@ -109,13 +105,13 @@ function normalizeMode(mode, dryRunFlag) {
 async function resolveJob(args) {
   if (!args.job) {
     const tool = String(args.tool || "").toLowerCase();
-    if (!TOOL_CONFIG[tool]) throw new Error("Missing or invalid --tool. Use banana or openai.");
+    if (!TOOL_CONFIG[tool]) throw new Error("Missing or invalid --tool. Use banana.");
     return {
       tool,
       mode: args.dryRun ? "dry-run" : "real-generation",
       inputPath: path.resolve(args.input),
-      outputDir: args.outputDir ? path.resolve(args.outputDir) : "",
-      promptMode: args.promptMode || "",
+    outputDir: args.outputDir ? path.resolve(args.outputDir) : "",
+      promptMode: args.promptMode || "compact",
       projectRoot: "",
       jobPath: "",
     };
@@ -124,7 +120,7 @@ async function resolveJob(args) {
   const jobPath = path.resolve(args.job);
   const job = await readJson(jobPath);
   const tool = String(args.tool || job.tool || "").toLowerCase();
-  if (!TOOL_CONFIG[tool]) throw new Error("Missing or invalid tool in --job. Use banana or openai.");
+  if (!TOOL_CONFIG[tool]) throw new Error("Missing or invalid tool in --job. Use banana.");
   const mode = normalizeMode(job.mode, args.dryRun);
   const projectRoot = job.projectRoot ? path.resolve(job.projectRoot) : "";
   const outputDir = args.outputDir
@@ -140,7 +136,7 @@ async function resolveJob(args) {
     mode,
     inputPath: jobPath,
     outputDir,
-    promptMode: args.promptMode || job.promptMode || job.bananaPromptMode || "",
+    promptMode: args.promptMode || job.promptMode || job.bananaPromptMode || "compact",
     projectRoot,
     jobPath,
     projectName: job.projectName || safeName(path.basename(projectRoot || ""), "project"),
@@ -176,7 +172,7 @@ async function main() {
 
   const generatorArgs = ["--input", job.inputPath];
   if (job.outputDir) generatorArgs.push("--output-dir", job.outputDir);
-  if (job.tool === "banana" && job.promptMode) generatorArgs.push("--prompt-mode", job.promptMode);
+  if (job.promptMode) generatorArgs.push("--prompt-mode", job.promptMode);
   if (job.mode === "dry-run") generatorArgs.push("--dry-run");
 
   const generatorOutput = runNode(config.generator, generatorArgs);

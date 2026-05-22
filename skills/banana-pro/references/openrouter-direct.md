@@ -1,16 +1,14 @@
 # OpenRouter Direct Reference
 
-Use this reference when a user asks for raw OpenRouter payloads or integration details for Banana Pro / Nano Banana 2.
+Use this reference when a user asks for raw OpenRouter payloads, CLI execution, or integration details for Banana Pro.
 
 ## Model
 
 Use:
 
 ```text
-google/gemini-3.1-flash-image-preview
+google/gemini-3-pro-image-preview
 ```
-
-OpenRouter labels this model as `Google: Nano Banana 2 (Gemini 3.1 Flash Image Preview)`. It is the Banana Pro target for this skill.
 
 ## Endpoint
 
@@ -24,7 +22,7 @@ OpenRouter image generation uses Chat Completions or Responses. For Gemini-style
 
 ```json
 {
-  "model": "google/gemini-3.1-flash-image-preview",
+  "model": "google/gemini-3-pro-image-preview",
   "messages": [
     {
       "role": "user",
@@ -46,7 +44,7 @@ Use mixed message content with text plus image URLs. URLs may be public HTTPS UR
 
 ```json
 {
-  "model": "google/gemini-3.1-flash-image-preview",
+  "model": "google/gemini-3-pro-image-preview",
   "messages": [
     {
       "role": "user",
@@ -97,7 +95,7 @@ Common aspect ratios:
 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9
 ```
 
-The model page and docs also list extended ratios for `google/gemini-3.1-flash-image-preview`, including very tall or wide ratios such as `1:4`, `4:1`, `1:8`, and `8:1`.
+The model page and docs may list extended ratios for Gemini image models, including very tall or wide ratios such as `1:4`, `4:1`, `1:8`, and `8:1`.
 
 Image size:
 
@@ -123,7 +121,54 @@ HTTP-Referer: https://your-site.example
 X-Title: Your App Name
 ```
 
+## Installed CLI
+
+The skill provides a global `banana-pro` command after installation:
+
+```bash
+banana-pro "Generate a cinematic 16:9 product hero image..." -o ./banana-pro-output
+```
+
+On Windows/Codex, use the bundled PowerShell wrapper:
+
+```powershell
+H:\yingshi\skills\banana-pro\bin\banana-pro.cmd "Generate a cinematic 16:9 product hero image..." -o H:\yingshi\outputs\banana-pro-output
+```
+
+Reference images can be local paths, HTTPS URLs, or data URLs:
+
+```bash
+banana-pro --image ./product.png --image https://example.com/scene.jpg \
+  "Use Image 1 as the product reference and Image 2 as scene mood. Generate a 16:9 commercial frame." \
+  -o ./banana-pro-output
+```
+
+Dry-run payload inspection:
+
+```bash
+banana-pro --dry-run "Generate a clean 16:9 storyboard first frame..."
+```
+
+Windows dry-run:
+
+```powershell
+H:\yingshi\skills\banana-pro\bin\banana-pro.cmd --dry-run "Generate a clean 16:9 storyboard first frame..."
+```
+
+Configuration lookup order:
+
+```text
+OPENROUTER_API_KEY environment variable
+~/.config/banana-pro/openrouter.env
+```
+
+The env file should contain:
+
+```bash
+OPENROUTER_API_KEY=...
+```
+
 ## Source Links
 
-- OpenRouter model page: https://openrouter.ai/google/gemini-3.1-flash-image-preview
+- OpenRouter model page: https://openrouter.ai/google/gemini-3-pro-image-preview
 - OpenRouter image generation docs: https://openrouter.ai/docs/guides/overview/multimodal/image-generation

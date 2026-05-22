@@ -1,23 +1,21 @@
 ---
 name: image-review-board
-description: Build a visual image review board for Banana/OpenAI generated film keyframes. Use when the user wants to see generation results with prompts and images side by side, compare images, pick usable frames, review Banana/OpenAI output, or modify one image prompt by shot/version.
+description: Build a visual image review board for generated film keyframes from Banana, built-in imagegen saved outputs, Midjourney, or other local image runs. Use when the user wants to see generation results with prompts and images side by side, compare images, pick usable frames, review output, or modify one image prompt by shot/version.
 ---
 
 # Image Review Board
 
-## Core role
+## Core Role
 
-Create a review board where every generated image is paired with its exact prompt. The goal is selection and revision: the user should be able to see the picture, read the prompt that made it, and say which shot/version to change.
+Create a review board where every generated image is paired with its exact prompt.
 
-Use this after `$banana-image-generator` or `$openai-image-generator`, or when the user provides a generation task folder or `generation-log.json`.
+The goal is selection and revision: the user should be able to see the picture, read the prompt that made it, and say which shot/version to change.
 
-## Input
+Use this after generated images are saved locally, or when the user provides:
 
-Accept any of:
-
-- A task folder containing `logs/generation-log.json`
-- A direct path to `generation-log.json`
-- A list of image paths plus prompt paths
+- A task folder containing `logs/generation-log.json`.
+- A direct path to `generation-log.json`.
+- A list of image paths plus prompt paths.
 
 ## Output
 
@@ -30,7 +28,7 @@ review/
 
 The Markdown must use absolute image paths so Codex can render the images.
 
-## Review board structure
+## Review Board Structure
 
 For each image:
 
@@ -44,6 +42,7 @@ For each image:
 **修改入口**：改 `S01_banana_v01`
 **提示词文件**：/absolute/path/to/prompt.txt
 **提示词JSON**：/absolute/path/to/prompt.json
+**QC结论**：待质检 / 可用 / 可小修 / 建议重出 / 提示词需重写
 
 **修改建议**
 - 保留：
@@ -61,3 +60,4 @@ For each image:
 - Keep one board per generation task folder.
 - Use the shot/version/tool id as the modification handle, such as `S01_banana_v01`.
 - In managed projects, the caller should write the board path back to `asset-index.json` through `$project-state-manager`.
+

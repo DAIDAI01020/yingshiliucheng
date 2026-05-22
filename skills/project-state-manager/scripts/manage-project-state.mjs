@@ -5,7 +5,7 @@ const DEFAULT_PROJECTS_DIR = "H:\\yingshi\\projects";
 
 function parseArgs(argv) {
   const [command, ...rest] = argv.slice(2);
-  if (!command) throw new Error("Missing command: init, create-job, ingest, or find-asset.");
+  if (!command) throw new Error("Missing command: init, create-job, ingest, ingest-video, or find-asset.");
   const args = { command };
   for (let i = 0; i < rest.length; i += 1) {
     const arg = rest[i];
@@ -61,8 +61,12 @@ function projectPaths(projectRoot) {
     assetIndexPath: path.join(projectRoot, "asset-index.json"),
     jobsDir: path.join(projectRoot, "generation-jobs"),
     generationRunsDir: path.join(projectRoot, "generation-runs"),
+    videoRunsDir: path.join(projectRoot, "video-runs"),
     reviewDir: path.join(projectRoot, "review"),
     revisionLogsDir: path.join(projectRoot, "revision-logs"),
+    briefsDir: path.join(projectRoot, "briefs"),
+    promptsDir: path.join(projectRoot, "prompts"),
+    referencesDir: path.join(projectRoot, "references"),
   };
 }
 
@@ -74,8 +78,12 @@ async function ensureProject({ projectName, projectRoot }) {
 
   await fs.mkdir(paths.jobsDir, { recursive: true });
   await fs.mkdir(paths.generationRunsDir, { recursive: true });
+  await fs.mkdir(paths.videoRunsDir, { recursive: true });
   await fs.mkdir(paths.reviewDir, { recursive: true });
   await fs.mkdir(paths.revisionLogsDir, { recursive: true });
+  await fs.mkdir(paths.briefsDir, { recursive: true });
+  await fs.mkdir(paths.promptsDir, { recursive: true });
+  await fs.mkdir(paths.referencesDir, { recursive: true });
 
   const manifest = await readJson(paths.manifestPath, {
     schemaVersion: 1,
@@ -87,6 +95,7 @@ async function ensureProject({ projectName, projectRoot }) {
     current: {},
     stages: {},
     generationRuns: [],
+    videoRuns: [],
   });
   manifest.projectName ||= name;
   manifest.projectRoot = paths.projectRoot;
@@ -111,7 +120,7 @@ async function ensureProject({ projectName, projectRoot }) {
 
 function normalizeTool(tool) {
   const value = String(tool || "").toLowerCase();
-  if (!["banana", "openai"].includes(value)) throw new Error("Tool must be banana or openai.");
+  if (value !== "banana") throw new Error("Tool must be banana.");
   return value;
 }
 
@@ -247,6 +256,76 @@ async function ingestGeneration({ projectRoot, generationLog, reviewBoard, gener
   };
 }
 
+async function ingestVideo({ projectRoot, runManifest, videoJob }) {
+  if (!projectRoot) throw new Error("ingest-video requires --project-root.");
+  if (!runManifest) throw new Error("ingest-video requires --run-manifest.");
+  const state = await ensureProject({ projectRoot });
+  const manifestPath = path.resolve(runManifest);
+  const run = await readJson(manifestPath, null);
+  if (!run) throw new Error(`Could not read run manifest: ${manifestPath}`);
+  const now = new Date().toISOString();
+  const videoPath = run.outputs?.video || "";
+  const taskId = run.task?.id || "";
+  const runId = runIdFromOutputDir(path.dirname(manifestPath));
+  const source = run.source_images?.[0] || {};
+  const shot = run.shot || run.shotNumber || source.shot || "VIDEO";
+  const version = run.version || "v01";
+  const handle = `${shot}_seedance_${version}`;
+  const asset = {
+    assetId: `${handle}_${runId}`,
+    handle,
+    shot,
+    version,
+    type: "video",
+    tool: "seedance",
+    model: run.model || run.request?.model || "",
+    filePath: videoPath,
+    promptPath: run.prompt?.source || "",
+    runManifest: manifestPath,
+    videoJob: videoJob ? path.resolve(videoJob) : "",
+    outputDir: path.dirname(manifestPath),
+    sourceImages: run.source_images || [],
+    taskId,
+    assetState: run.task?.status === "succeeded" ? "候选" : "待检查",
+    status: run.task?.status || "",
+    createdAt: now,
+    updatedAt: now,
+  };
+  const existing = state.assetIndex.assets || [];
+  const index = existing.findIndex((item) => item.assetId === asset.assetId);
+  if (index >= 0) existing[index] = { ...existing[index], ...asset };
+  else existing.push(asset);
+  state.assetIndex.assets = existing;
+  state.assetIndex.updatedAt = now;
+  await writeJson(state.assetIndexPath, state.assetIndex);
+
+  state.manifest.current.latestVideoRunManifest = manifestPath;
+  state.manifest.current.latestVideo = videoPath;
+  if (videoJob) state.manifest.current.latestVideoJob = path.resolve(videoJob);
+  state.manifest.stages.videoGeneration = run.task?.status === "succeeded" ? "已生成" : "待检查";
+  state.manifest.videoRuns ||= [];
+  state.manifest.videoRuns.push({
+    runId,
+    tool: "seedance",
+    outputDir: path.dirname(manifestPath),
+    runManifest: manifestPath,
+    videoJob: videoJob ? path.resolve(videoJob) : "",
+    video: videoPath,
+    taskId,
+    status: run.task?.status || "",
+    createdAt: now,
+  });
+  state.manifest.updatedAt = now;
+  await writeJson(state.manifestPath, state.manifest);
+
+  return {
+    projectRoot: state.projectRoot,
+    manifestPath: state.manifestPath,
+    assetIndexPath: state.assetIndexPath,
+    asset,
+  };
+}
+
 async function findAsset(args) {
   if (!args.projectRoot) throw new Error("find-asset requires --project-root.");
   if (!args.handle) throw new Error("find-asset requires --handle.");
@@ -269,8 +348,12 @@ async function main() {
       assetIndexPath: result.assetIndexPath,
       jobsDir: result.jobsDir,
       generationRunsDir: result.generationRunsDir,
+      videoRunsDir: result.videoRunsDir,
       reviewDir: result.reviewDir,
       revisionLogsDir: result.revisionLogsDir,
+      briefsDir: result.briefsDir,
+      promptsDir: result.promptsDir,
+      referencesDir: result.referencesDir,
     };
   } else if (args.command === "create-job") {
     result = await createJob(args);
@@ -280,6 +363,12 @@ async function main() {
       generationLog: args.generationLog,
       reviewBoard: args.reviewBoard,
       generationJob: args.generationJob,
+    });
+  } else if (args.command === "ingest-video") {
+    result = await ingestVideo({
+      projectRoot: args.projectRoot,
+      runManifest: args.runManifest,
+      videoJob: args.videoJob,
     });
   } else if (args.command === "find-asset") {
     result = await findAsset(args);
