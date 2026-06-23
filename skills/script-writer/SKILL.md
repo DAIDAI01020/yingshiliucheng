@@ -12,6 +12,25 @@ description: 撰写影视化文稿。用于广告片、品牌片、电视节目�
 3. Write in time-coded sections.
 4. Keep narration speakable and subtitle copy screen-friendly.
 
+## P1 No Lazy Handoff
+
+For formal projects, `$script-writer` writes approved timed content only. It does not choose visual references, create style locks, or send prompts to generation.
+
+Before downstream storyboard or prompt work, preserve:
+
+```text
+upstream_source
+approved_concept_or_brief
+timecoded_sections
+voiceover_or_subtitle_intent
+music_sound_intent
+visual_requirements
+missing_fields
+route_back_to
+```
+
+If concept, length, platform, or required product/brand/story information is missing, route back before storyboard or prompt writing.
+
 ## Output
 
 | 时间段 | 画面段落 | 旁白 | 字幕 | 音乐/音效 | 节奏备注 |

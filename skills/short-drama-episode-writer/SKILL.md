@@ -39,9 +39,26 @@ When the user gives a finished script:
 | 结尾是否有追看 |  |  |
 | AI执行难点 |  |  |
 
+## Formal Hook Gate
+
+For managed formal short-drama projects, output or update `references/hook-audit.md` before visual execution:
+
+```text
+status: approved / passed
+hook_audit_packet
+opening_hook
+audience_question
+information_gap
+conflict_entry
+character_relation_clarity
+payoff_or_cliffhanger
+ai_execution_risk
+```
+
+The hook check is not a rewrite request by default. If the script already exists, diagnose whether the first 3-8 seconds are strong enough and suggest targeted fixes only where the hook, information gap, or conflict entry is weak.
+
 ## Rules
 
 - Do not rewrite a finished script unless the user asks.
 - First diagnose structure, then suggest targeted edits.
 - Keep each episode shootable and AI-generatable.
-

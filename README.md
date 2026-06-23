@@ -27,6 +27,7 @@ $yingshisheji
 ```text
 $zongkong
 -> 项目分级 / 工作模式 / 文件夹
+-> $project-state-manager 项目状态层
 -> $yingshisheji 导演判断
 -> $reference-aesthetic-director 顶级参考审美转译
 -> $style-bible-director 统一风格圣经
@@ -79,17 +80,40 @@ projects/
   {projectSlug}/
     project-manifest.json
     asset-index.json
+    project-intake.json
+    style-lock.json
     generation-jobs/
+      generation-ready.json
     generation-runs/
     video-runs/
     review/
     revision-logs/
+      qc-feedback.md
     briefs/
     prompts/
+      prompt-audit.md
     references/
+      scene-map.md
+      shot-audit.md
   _misc/
     临时测试、模型验证、随手出图、生视频小样
 ```
+
+## 通用短剧状态层
+
+正式短剧项目不再依赖某一个项目的专项提示词文件。默认先初始化通用状态层：
+
+```powershell
+node .\skills\project-state-manager\scripts\manage-project-state.mjs init --project-name "项目名" --workflow short-drama --route storyboard-execution
+```
+
+正式批量出图或出视频前检查：
+
+```powershell
+node .\skills\project-state-manager\scripts\manage-project-state.mjs check --project-root H:\yingshi\projects\project --stage generation
+```
+
+`check` 返回 `ready / missingFields / routeBackTo / currentState`。未通过时先回到对应 skill 补状态，不直接生成。
 
 ## 出图路线
 
@@ -99,6 +123,8 @@ projects/
 - OpenAI API 出图路线已移除，不再使用 `OPENAI_API_KEY` 做图片生成。
 
 出图前必须先有完整提示词。正式项目没有提示词时，先经过 `$yingshisheji` / `$reference-aesthetic-director` / `$style-bible-director` / `$frame-vision-director` 补齐。
+
+正式短剧项目还必须通过 `project-intake / style-lock / scene-map / shot-audit / prompt-audit / generation-ready` 状态门槛。
 
 ## 视频路线
 

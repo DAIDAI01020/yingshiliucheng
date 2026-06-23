@@ -1,0 +1,4 @@
+interface:
+  display_name: "Poster Director"
+  short_description: "Poster and key-art direction for film AI workflows"
+  default_prompt: "Use poster-director to plan a professional poster/key visual route, layout-safe AI image prompts, and handoff for post typography."

@@ -1,0 +1,3 @@
+display_name: "视频QC导演"
+short_description: "检查AI视频动作、首帧保真、平台味和修订归因"
+default_prompt: "Use $video-qc-director to review this generated AI video and return a qc_feedback_packet with the next route."

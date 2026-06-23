@@ -1,0 +1,3 @@
+display_name: "失踪的丈夫Banana提示词"
+short_description: "按项目分镜和人物设定写Banana Pro 9:16提示词"
+default_prompt: "Use $shizong-zhangfu-banana-prompter to write or revise a Banana Pro prompt for the specified shot in this project."

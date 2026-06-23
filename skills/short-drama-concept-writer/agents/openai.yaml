@@ -1,0 +1,3 @@
+display_name: "短剧概念策划"
+short_description: "开发短剧类型、钩子、爽点、受众和核心冲突"
+default_prompt: "Use $short-drama-concept-writer to create or refine the short-drama concept, hook, selling points, and conflict promise."

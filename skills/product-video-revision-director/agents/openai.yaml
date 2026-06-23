@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Video Revision Director"
+  short_description: "Product video feedback into precise revisions"
+  default_prompt: "Use product-video-revision-director to translate product, vehicle, weather, camera, and action feedback into executable revision instructions before video prompt writing."

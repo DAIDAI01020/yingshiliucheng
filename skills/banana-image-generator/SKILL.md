@@ -1,4 +1,4 @@
-﻿---
+---
 name: banana-image-generator
 description: Generate and save Banana Pro / Nano Banana 2 images through OpenRouter for film and screen visual projects. Use when the user explicitly asks to directly generate Banana images, batch-generate Banana Pro images, regenerate selected storyboard shots, or turn Banana/Jimeng prompts into saved image files. Reads OPENROUTER_API_KEY from the local environment and never stores secrets.
 ---
@@ -97,7 +97,7 @@ After generation, report:
 
 If any shot fails, keep generating the rest and record the error in `generation-log.json`.
 
-The log uses shared fields with ChatGPT Image generation: shot, version, tool, model, promptSummary, fullPrompt, negativePrompt, finalPrompt, promptPath, promptJsonPath, filePath, status, error, and retrySuggestion.
+The log uses shared fields with OpenAI generation: shot, version, tool, model, promptSummary, fullPrompt, negativePrompt, finalPrompt, promptPath, promptJsonPath, filePath, status, error, and retrySuggestion.
 `outputDir` is the task root. `imageDir` points to `images\`. `promptDir` points to `prompts\`. `logDir` points to `logs\`.
 
 For Banana 2K token-saving generation, `fullPrompt` is the actual compact request prompt. If a longer source prompt exists, it is saved as `sourcePrompt` in the log and prompt JSON. This saves request tokens without lowering `image_size`.
@@ -118,4 +118,3 @@ For Banana 2K token-saving generation, `fullPrompt` is the actual compact reques
 - Use `2K` for normal storyboard/keyframe drafts. Do not reduce to `1K` for token saving unless the user explicitly asks.
 - Prefer compact Banana prompts for execution: keep subject, composition, camera, light, material, ratio, and core negatives; remove proposal explanations and repeated client-facing rationale.
 - Keep generation records by shot number so revisions can target a single shot.
-

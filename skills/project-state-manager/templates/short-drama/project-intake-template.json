@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "project_intake_packet": {
+    "status": "draft",
+    "project_name": "__PROJECT_NAME__",
+    "project_slug": "__PROJECT_SLUG__",
+    "project_root": "__PROJECT_ROOT__",
+    "project_tier": "__PROJECT_TIER__",
+    "workflow_mode": "short_drama",
+    "route": "__ROUTE__",
+    "deliverable_type": "storyboard_execution",
+    "main_line": "short_drama_story",
+    "reference_source": "none",
+    "mother_library_route": "short-drama-story-library.md + shared-elite-cinematography.md",
+    "platform_target": {
+      "image": ["built_in_image", "Banana", "Banana Pro"],
+      "video": ["Jimeng", "Seedance", "Ark", "Kling", "Kling O1", "Kling VIDEO 3.0 Omni"]
+    },
+    "required_upstream": [
+      "hook-audit",
+      "character-continuity",
+      "mother-library-application",
+      "style-lock",
+      "scene-map",
+      "shot-audit",
+      "prompt-audit",
+      "generation-ready"
+    ],
+    "available_upstream": [],
+    "missing_fields": [
+      "hook-audit",
+      "character-continuity",
+      "mother-library-application",
+      "style-lock",
+      "scene-map",
+      "shot-audit",
+      "prompt-audit",
+      "generation-ready"
+    ],
+    "next_skill": "short-drama-scene-director",
+    "quick_test_flag": false,
+    "created_at": "__CREATED_AT__",
+    "notes": "Fill missing_fields as upstream packets are approved. Formal generation is blocked until missing_fields is empty."
+  }
+}

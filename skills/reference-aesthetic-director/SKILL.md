@@ -11,6 +11,18 @@ This skill is the team's reference-film and aesthetic research advisor.
 
 It does not generate images, videos, or final prompts. It gives `$yingshisheji` and `$style-bible-director` a professional reference basis before style decisions are locked.
 
+For formal projects, use `$style-reference-director` first when available. `$style-reference-director` makes the task-facing reference decision, then `$reference-visual-library` supplies the curated source track. This skill translates the chosen project reference, scene/chapter reference, and cinematography anchor into executable visual principles.
+
+Mandatory rule for the user's workflow:
+
+```text
+Formal image/video work must always include a top-tier cinematography layer.
+Do not treat shared-elite-cinematography.md as optional.
+Every final style translation must include: style-reference-director decision + reference family + cinematography anchor + executable visual mechanism.
+```
+
+For formal projects, every translation must preserve or create a `mother_library_application_packet`. The packet is the bridge between reference taste and production execution.
+
 It answers:
 
 - What top-level film/advertising/stage references are relevant?
@@ -34,6 +46,8 @@ Default:
 - Misc test: do not use unless the user asks for reference style.
 
 ## Reference Families
+
+Do not use one generic reference family for all projects. Separate commercial/promo work from short-drama/story work.
 
 | 参考家族 | 适合项目 | 可借鉴原则 |
 | --- | --- | --- |
@@ -86,10 +100,40 @@ Do not copy these works. Use them only as aesthetic anchors.
 ## Translation Rules
 
 - Translate references into principles, not replicas.
+- Translate mother-library decisions into active mechanisms for project DNA, scene function, shot execution, and platform risk control.
 - Do not copy exact frames, protected compositions, brand assets, logos, slogans, UI layouts, or distinctive character/product designs.
 - Avoid saying only `高级`, `电影感`, or `大片感`; explain the visual mechanism.
 - Always include AI transfer risk: what the model may overdo, distort, or confuse.
 - For formal projects, pass the final style translation to `$style-bible-director`.
+
+## Mother Library Application Output
+
+When translating a selected reference system, output:
+
+```text
+mother_library_application_packet
+visual_discipline: realism level / stylization level / camera restraint
+project_dna: what stays stable across the whole project
+scene_function_rules: how each scene type should borrow light, space, lens, blocking, texture, rhythm, and performance
+shot_execution_rules: what a single prompt must visibly contain
+platform_risk_controls: what AI/video/image platforms tend to exaggerate or corrupt
+do_not_copy: protected frames, actor likeness, exact composition, logos, slogans, production design
+forbidden_drift: cheap filters, generic drama look, fake HDR, over-beauty, platform taste
+handoff_to_style_bible: fields that must become style bible / project-style-lock variables
+```
+
+For formal projects, also output:
+
+```text
+director_contribution_packet
+owner_skill: reference-aesthetic-director
+decision_owned: elite reference translation and cinematography anchor
+visual_controls_contributed: camera distance, lens psychology, motivated light, space relationship, composition, color range, material texture, performance restraint, AI risk controls
+downstream_must_preserve: mother_library_application_packet, mother_library_translation, cinematography_anchor, do_not_copy, forbidden_drift
+must_not_be_overwritten_by: generic cinematic adjectives, platform defaults, single-shot style drift, unrelated reference images
+```
+
+Do not pass only broad principles to `$style-bible-director`; pass fields that can become checks.
 
 ## When To Use
 

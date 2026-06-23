@@ -14,6 +14,26 @@ description: LED大屏与舞美视觉专项导演。用于发布会大屏、晚�
 
 ## Output addition
 
+## P1 No Lazy Handoff
+
+For formal LED/stage work, `$led-screen-director` must hand off screen constraints before prompt writing:
+
+```text
+upstream_handoff_packet
+upstream_source: event brief / venue / screen drawing / stage relation / KV
+screen_ratio_and_shape:
+viewing_distance:
+center_safe_area:
+stage_relation:
+motion_risk:
+content_scale_rule:
+handoff_to: storyboard-planner / frame-vision-director / prompt-platform-auditor
+missing_fields:
+route_back_to:
+```
+
+If screen ratio, safe area, viewing distance, stage relation, or content scale is missing, output `missing_fields` before final prompts.
+
 | 大屏判断 | 建议 |
 | --- | --- |
 | 屏幕形态 |  |

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "style_lock_packet": {
+    "status": "draft",
+    "style_id": "",
+    "project_name": "__PROJECT_NAME__",
+    "project_type": "short drama",
+    "route": "__ROUTE__",
+    "primary_reference_family": "",
+    "secondary_reference_family": [],
+    "cinematography_anchor": "",
+    "mother_library_application_packet": {
+      "library_route": "",
+      "project_function": "",
+      "borrowed_mechanisms": {},
+      "scene_function_rules": [],
+      "do_not_copy": [],
+      "forbidden_drift": [],
+      "prompt_inheritance": {}
+    },
+    "director_contribution_packet": {
+      "owner_chain": [],
+      "decision_owned": {},
+      "visual_controls_contributed": [],
+      "downstream_must_preserve": [],
+      "route_back_to_if_missing": ""
+    },
+    "visual_helpfulness_targets": [],
+    "mother_library_translation": {
+      "light_direction": "",
+      "space_relationship": "",
+      "lens_psychology": "",
+      "composition_blocking": "",
+      "material_touch": "",
+      "performance_state": "",
+      "ai_risk_control": ""
+    },
+    "platform_language_strategy": {
+      "image": "built-in imagegen or Banana/Banana Pro",
+      "video": "first-frame/reference driven Jimeng, Seedance/Ark, Kling, Kling O1, or Kling VIDEO 3.0 Omni"
+    },
+    "anti_ai_realism_rule": "",
+    "image_tool_boundary": "Formal still-image route defaults to built-in imagegen or Banana/Banana Pro. Jimeng is not the default still-image route.",
+    "jimeng_seedance_motion_rule": "First frame controls image style; text controls one subject action, one camera movement, one subtle environment/light change, and one clear ending frame.",
+    "breath_tail_rule": "Every short-drama shot has a light breath tail; segment/scene/emotional-beat endings have a heavier 1-2 second breath tail unless hard cut is requested.",
+    "master_style_sentence": "",
+    "camera_system": "",
+    "lens_family": "",
+    "aperture_depth_rule": "",
+    "lighting_rule": "",
+    "color_rule": "",
+    "material_rule": "",
+    "composition_rule": "",
+    "grain_texture_rule": "",
+    "reference_image_rule": "",
+    "short_drama_hook_packet_source": "",
+    "character_continuity_source": "",
+    "scene_variation_rule": "",
+    "forbidden_drift": [],
+    "negative_prompt_base": "",
+    "prompt_schema": "",
+    "upstream_source": "",
+    "created_at": "__CREATED_AT__"
+  }
+}

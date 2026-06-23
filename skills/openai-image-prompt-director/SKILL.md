@@ -19,6 +19,53 @@ OpenAI prompts should be more explicit about:
 - 参考图约束：what the reference image controls and what it must not control.
 - 画面逻辑：what should be visible, what should be avoided, and what must remain consistent across the whole group.
 
+## Fielded Storyboard Rule
+
+When the source is a structured storyboard with fields such as `Visual Baseline`, `Continuity Lock`, `Shot Size`, `Camera Lens`, `Content`, `Composition`, and `Image Style Prompt`, treat those fields as the accuracy contract for image generation.
+
+Do not paste a full storyboard file, a full scene block, or many shot prompts into one OpenAI image request. For each image, extract only:
+
+- Global style lock: camera system, lens family, light logic, color boundary, material texture, realism level, aspect ratio.
+- Global continuity locks: character, prop, wardrobe, era, location, text/logo, and forbidden inheritance rules.
+- Current shot fields: shot id, shot size, camera position, lens/focal length, content, composition, visible action/state, scene lighting, local material details.
+- Current shot risk controls: the 3-8 failures most likely to ruin this exact frame.
+
+Build every final prompt as a compact but self-contained execution brief:
+
+```text
+visible frame first + subject/space/action + shot size/camera/lens/composition + local accuracy locks + compressed style lock + targeted negatives + aspect ratio
+```
+
+Accuracy is more important than shortness. Preserve the exact visible anchors from the storyboard, especially prop shape, object position, material, era rules, character relation, and foreground/midground/background layout. Shorten by removing repeated style adjectives, explanation, mood essays, and duplicate negatives, not by deleting the locks that keep the frame correct.
+
+For multi-shot batches, keep the master style lock outside as a planning layer, but each copyable OpenAI prompt must still include the condensed style lock needed for that one image. Never use `same as above`, `continue previous style`, or a bare reference name.
+
+## Visual Helpfulness Rule
+
+OpenAI image prompts must be direct visual briefs. Every kept phrase must help the model render or preserve:
+
+```text
+subject identity / object shape / costume / product structure
+foreground, midground, background, spatial layout, or composition
+camera position, lens feeling, shot size, depth of field
+light source, light direction, color boundary, material texture
+reference-image role and do-not-inherit boundary
+text/logo/title-space control
+specific negative risk that protects the frame
+```
+
+If a phrase only sounds impressive but does not affect visible pixels, remove it or translate it into concrete visual instructions.
+
+For formal work, inherit and preserve:
+
+```text
+director_contribution_packet
+mother_library_application_packet
+visual_helpfulness_check
+```
+
+Do not let the OpenAI rewrite discard the mother-library mechanism, scene function, shot-language logic, reference roles, or character/product continuity locks.
+
 ## Process
 
 1. Read the storyboard, script, visual style, Banana/Jimeng prompts, or existing `全片统一风格包`.

@@ -1,0 +1,3 @@
+display_name: "短剧分集编剧"
+short_description: "设计分集结构、开场钩子、反转和集尾悬念"
+default_prompt: "Use $short-drama-episode-writer to outline episode beats, reversals, cliffhangers, and next-episode hooks."

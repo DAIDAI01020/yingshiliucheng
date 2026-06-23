@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "generation_ready_packet": {
+    "status": "draft",
+    "target_tool": "",
+    "target_platform": "",
+    "target_model": "",
+    "task_type": "",
+    "prompt_direction": "",
+    "project_root": "__PROJECT_ROOT__",
+    "shot_or_asset_id": "",
+    "final_prompt": "",
+    "negative_or_forbidden": "",
+    "audit_status": "",
+    "audited_prompt_packet": "",
+    "source_lock": "style-lock.json",
+    "short_drama_hook_packet": {},
+    "character_continuity_lock": {},
+    "mother_library_application_packet": {},
+    "director_contribution_packet": {},
+    "visual_helpfulness_check": {},
+    "reference_roles": [],
+    "first_frame_or_image_refs": [],
+    "requires_same_scene_coverage": false,
+    "scene_continuity_lock": {},
+    "background_continuity_lock": {},
+    "continuity_reference_board": {},
+    "duration": "",
+    "ratio": "9:16",
+    "audio_policy": "不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。",
+    "video_platform_prompt_packet": {},
+    "kling_omni_reference_role_map": {},
+    "manual_execution": {
+      "external_platform": "",
+      "upload_roles": [],
+      "copyable_prompt": "",
+      "expected_output_path": "",
+      "status": "draft"
+    },
+    "output_path_rule": "",
+    "state_writeback": {
+      "asset_index": "asset-index.json",
+      "manifest": "project-manifest.json"
+    },
+    "created_at": "__CREATED_AT__"
+  }
+}

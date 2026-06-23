@@ -44,6 +44,20 @@ Constraints: [no text/logos/watermarks/unwanted artifacts].
 Aspect ratio: [16:9 / 9:16 / 1:1 / other].
 ```
 
+## Fielded Storyboard Execution
+
+For accurate storyboard image generation, prefer a fielded source structure over a long prose prompt. If the source includes `Visual Baseline`, `Continuity Lock`, `Shot Size`, `Camera Lens`, `Content`, `Composition`, or `Image Style Prompt`, convert it into one compact prompt per shot instead of sending the whole file to imagegen.
+
+Use this execution order:
+
+```text
+[visible frame and main subject] + [scene space and foreground/midground/background] + [shot size, camera position, lens/focal length, composition] + [shot-specific continuity locks] + [compressed global style lock: light, color, material, realism] + [targeted avoid list] + [aspect ratio]
+```
+
+The first sentence must describe the actual frame to render, not a generic style label. Keep global style details concrete and short; include only the continuity locks that affect the current frame. For repeated shots, do not rely on chat memory alone: every generated image prompt must be self-contained enough to preserve the approved look, prop rules, character state, and spatial layout.
+
+When optimizing for both speed and accuracy, remove repeated style essays and long negative lists, but keep exact object shape, era/material rules, composition, light source/direction, and text/logo controls.
+
 ## Output Behavior
 
 - For real generation requests, keep chat output short and show the generated image result.

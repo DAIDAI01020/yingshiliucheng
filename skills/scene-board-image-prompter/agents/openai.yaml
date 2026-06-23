@@ -1,0 +1,3 @@
+display_name: "故事板宫格提示词"
+short_description: "把已定人物道具场景机位写成内置image故事板控制板提示词"
+default_prompt: "Use $scene-board-image-prompter to write one built-in imagegen prompt for a professional scene storyboard board."

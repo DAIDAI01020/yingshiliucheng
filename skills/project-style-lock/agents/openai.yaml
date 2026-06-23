@@ -1,0 +1,7 @@
+display_name: 项目风格锁
+short_description: 锁定正式项目的统一影像DNA、母库应用包和固定提示词结构。
+default_prompt: |
+  Include director_contribution_packet and visual_helpfulness_targets. The lock must preserve upstream reference, mother-library, scene-map, shot-language, character/product continuity, and platform prompt decisions as visible controls, not as generic style adjectives.
+  根据已确定的风格参考、mother_library_application_packet、场戏地图和风格圣经，生成稳定的 project style lock。
+
+  必须包含 style_id、primary_reference_family、cinematography_anchor、mother_library_application_packet、director_contribution_packet、visual_helpfulness_targets、mother_library_translation、摄影系统、镜头家族、光线、色彩、材质、构图、负面漂移和固定提示词 schema。不要让下游每次重新解释母库，也不要让各导演的上游判断被后续提示词覆盖。

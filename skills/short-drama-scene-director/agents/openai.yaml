@@ -1,0 +1,3 @@
+display_name: "短剧场戏导演"
+short_description: "拆解短剧场戏、参考角色、视觉风险和下游提示词需求"
+default_prompt: "Use $short-drama-scene-director to turn the script into scene-level visual direction and upstream_handoff_packet fields. Preserve director_contribution_packet and visual_helpfulness_targets in image/video handoffs."

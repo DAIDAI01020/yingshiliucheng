@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE Daping"
+  short_description: "Calculate AE comp sizes, anchor points, and positions for LED/video-wall splitting."
+  default_prompt: "Use $aedaping to calculate the After Effects comp sizes, Anchor Point, Position, and Scale for this video-wall split."
+policy:
+  allow_implicit_invocation: true

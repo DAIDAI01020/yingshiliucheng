@@ -1,0 +1,12 @@
+display_name: "视频生成控制器"
+short_description: "从审核通过的generation_ready_packet执行Seedance/Ark，或生成即梦/可灵手动执行manifest"
+default_prompt: |
+  Use $video-generation-controller only after $prompt-platform-auditor has approved the video prompt and all generation_ready_packet fields are present.
+
+  If target_tool is Seedance/Ark, run the Seedance execution path only when a public image URL or approved relay path exists.
+
+  If target_tool is Jimeng, Kling, Kling O1, or Kling VIDEO 3.0 Omni, do not pretend to call an API. Create a manual/external platform handoff manifest with provider, target_model, prompt_direction, shot, prompt source/copy, first_frame_or_image_refs, reference_roles, audio_policy, duration, ratio, and status manual_handoff. If the user provides a downloaded video path, attach it and mark status succeeded.
+
+  For Jimeng/Kling/Kling O1/Kling VIDEO 3.0 Omni manual handoff, preserve the approved prompt's audio_policy. If it is missing and the user did not explicitly request music, score, dialogue, voiceover, native audio, or a reference voice, set audio_policy to: 不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。
+
+  For Kling O1/Omni, require the kling_omni_reference_role_map or equivalent reference_roles before handoff.

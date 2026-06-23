@@ -22,6 +22,26 @@ description: 活动开场片专项导演。用于发布会、颁奖礼、盛典�
 
 ## Output addition
 
+## P1 No Lazy Handoff
+
+For formal event opener work, `$event-opener-director` must hand off ceremony logic before prompt writing:
+
+```text
+upstream_handoff_packet
+upstream_source: event brief / theme / venue / KV / stage relation
+ceremony_source:
+theme_reveal_logic:
+stage_or_host_handoff:
+ending_landing:
+required_reference_route:
+screen_or_stage_risks:
+handoff_to: style-reference-director / led-screen-director / storyboard-planner / frame-vision-director
+missing_fields:
+route_back_to:
+```
+
+If theme, venue/stage relation, KV role, or ending landing is missing, output `missing_fields` instead of final prompts.
+
 | 开场片判断 | 建议 |
 | --- | --- |
 | 仪式感来源 |  |

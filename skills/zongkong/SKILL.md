@@ -75,7 +75,7 @@ Quality floor:
 ```text
 prompt_only must still include subject action, camera movement, ending frame, key forbidden items, and audio policy.
 quick_test must still protect reference-image roles, subject/product structure, first-frame fidelity, and platform-specific failure risks.
-formal_managed must pass project-intake / style-lock / scene-map / shot-audit / prompt-audit / generation-ready.
+formal_managed must pass project-intake / hook-audit / character-continuity / style-lock / scene-map / shot-audit / prompt-audit / generation-ready.
 ```
 
 ## Route Output Contract
@@ -242,6 +242,7 @@ short-drama-director
 -> short-drama-character-bible
 -> short-drama-episode-writer
 -> short-drama-dialogue-doctor
+-> hook-audit / character-continuity gate
 -> short-drama-scene-director
 -> style-reference-director（先定全剧/场戏参考风格）
 -> reference-visual-library（电影/精品剧母库）
@@ -275,6 +276,13 @@ If the user gives no reference images, formal short-drama projects must still re
 mother-library translation: light direction + space relation + lens psychology + composition blocking + material touch + performance state + AI risk control
 ```
 
+Formal short-drama projects must also pass two production gates before visual execution:
+
+```text
+hook-audit: the first 3-8 seconds must contain conflict, suspense, reversal, emotional shock, or a high-value question; it must name the information gap, audience question, conflict entry, payoff/cliffhanger, and AI execution risk.
+character-continuity: every recurring character must have face, hair, age/body, costume, performance, relationship state, reference-image roles, generation anchor, allowed scene variation, and forbidden drift.
+```
+
 ## Short Drama Speed Routes
 
 Do not run the full short-drama pipeline every time. Choose one of three routes by input state.
@@ -284,6 +292,14 @@ Do not run the full short-drama pipeline every time. Choose one of three routes 
 | 完整开发模式 | 用户要从概念/人物/分集/剧本开始开发，或正式项目尚无角色/风格/场戏结构 | `short-drama-director -> concept/character/episode/dialogue -> short-drama-scene-director -> reference/style/scene map -> shot-language-auditor -> style-bible -> project-style-lock -> prompts` |
 | 已有分镜执行模式 | 用户已经给剧本、分镜、视觉方案、人物参考，目标是出提示词/出图/出视频 | `short-drama-scene-director -> reference-image-style-matcher(if refs) -> scene-style-map-director -> shot-language-auditor -> project-style-lock(reuse or create) -> frame/video prompt -> platform audit` |
 | 快速测试模式 | 用户只想测一张图、一个镜头、一个人物动起来，或明确说先试效果 | `reuse project-style-lock if available -> lightweight reference-image-style-matcher(if refs) -> frame/video prompt -> optional lightweight platform check -> generation/prompt` |
+
+Formal route upgrade:
+
+```text
+full-development -> add hook-audit and character-continuity before scene visual execution.
+storyboard-execution -> if hook-audit or character-continuity is missing, route back before scene-map / shot-audit / prompt writing.
+quick-test -> keep lightweight, but preserve any existing character continuity and do not promote test outputs into formal batch style without the formal gates.
+```
 
 Routing rules:
 
@@ -326,6 +342,7 @@ AI角色一致性可控
 | Mode | Trigger | Main route |
 | --- | --- | --- |
 | 方案模式 | 方案、创意、PPT、客户提案 | commercial/promo line or short-drama concept line |
+| 方案转KV模式 | 已有方案、已有PPT、创意已通过，下一步做主KV/大屏KV | preserve approved proposal -> `$kv-director` proposal_to_kv_packet -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 短剧完整开发模式 | 从0开发短剧、人物、分集、对白 | full short-drama development route |
 | 短剧执行模式 | 已有稿子/分镜/视觉方案，要求提示词、出图、出视频 | compressed short-drama execution route |
 | 短剧快速测试模式 | 单张图、单镜头、人物动起来、先试效果 | lightweight style-lock route |
@@ -420,6 +437,35 @@ Image/video generators are execution tools. They do not decide the aesthetic.
 
 Generation is an execution validation step, not the creative exploration center.
 
+## Director Contribution Integrity Gate
+
+Each director must contribute the decision it owns. Downstream prompt agents translate those decisions; they do not replace them.
+
+For formal_managed image/video work, preserve a compact `director_contribution_packet` through the chain:
+
+```text
+director_contribution_packet
+zongkong: speed_mode, workflow_mode, main_line, platform_target
+style-reference-director / reference-visual-library: mother_library_application_packet, cinematography_anchor, prompt_inheritance
+reference-image-style-matcher: reference-image roles and do_not_inherit boundaries when images exist
+scene-style-map-director: scene function, mother_library_translation, light/lens/color/material/performance rules
+shot-language-auditor: shot function, shot-size logic, edit motivation, camera-axis/continuity rules
+short-drama-character-bible / character-continuity: identity, costume, performance, relationship-state locks
+project-style-lock: stable master style variables and forbidden drift
+frame-vision-director / ai-video-prompt-director: platform-safe visual execution wording
+prompt-platform-auditor: visual_helpfulness_check and platform-safe compression without erasing upstream intent
+```
+
+Hard rule:
+
+```text
+Final prompts must show what each relevant upstream director contributed, either in packet fields or in a compact inherited source line.
+If a prompt has no mother-library mechanism, no scene function, no shot function, or no continuity owner in a formal workflow, route back to the owning director.
+Do not let `frame-vision-director`, `ai-video-prompt-director`, or `prompt-platform-auditor` invent missing mother-library, scene, shot, or character decisions.
+```
+
+Quick tests can use a lightweight `director_contribution_packet`, but they must still preserve any existing project-style-lock, reference roles, and visible risk controls.
+
 ## No Lazy Routing Rule
 
 Do not let any formal project jump directly from brief, script, storyboard, reference image, or user taste words to final prompts or generation.
@@ -438,6 +484,7 @@ Before routing formal_managed prompt writing or generation, `$zongkong` must che
 
 ```text
 project-state-manager check result for managed formal short-drama projects
+hook-audit and character-continuity state for formal short-drama projects
 reference / mother-library decision
 reference-image-style-matcher result when reference images are used
 scene-style-map-director scene map for multi-scene work
@@ -492,6 +539,10 @@ Commercial KV, poster, and key-art work are not ordinary keyframe generation.
 `$poster-director` is a specialist director under `$zongkong`, not a top-level orchestrator.
 `$zongkong` must decide project tier, main line, upstream style/reference requirements, and whether commercial KV or poster/key-art mode is needed before calling either skill.
 Route commercial, brand, launch, product, program, event, conference, gala, LED, stage-screen, campaign, key visual, main visual, and banner system requests through `$kv-director` before `$kv-image-prompt-director`.
+When an approved proposal/PPT/concept already exists and the next step is KV, preserve it as `proposal_to_kv_packet`; do not rerun concept development or let `$kv-director` invent a second claim.
+`$kv-director` must decide the KV composition system before prompt writing: `kv_composition_mode`, `composition_reference_source`, `reference_mechanism_translation`, `master_kv_layout_spec`, `led_screen_layout_spec` for big-screen/LED work, `safe_area_map`, and `extension_crop_map`.
+For LED/stage/big-screen KV, `$kv-director` must read its large-screen experience library and output `large_screen_experience_packet`. `$led-screen-director` may validate physical screen and stage constraints, but `$kv-director` remains the owner of KV concept, composition, style selection, and master-to-screen translation.
+Main KV and big-screen KV are separate layout decisions. Do not let downstream image prompt skills treat `主KV` as a generic poster or let `大屏KV` ignore center safe zone, presenter/performance safety, side extension, and far-distance readability.
 Route narrative posters, short-drama character posters, 短剧人物海报, film posters, suspense case posters, covers, thumbnails, social covers, and poster-like key art through `$poster-director` before `$frame-vision-director`.
 KV/poster generation should usually create no-text base art, character/product/background/object assets, and title-safe or logo-safe layouts; final readable title, slogan, logo, cast names, sponsor marks, QR code, and legal text are added in post layout.
 If the user asks to generate stylized title text, 3D type, lettering inspired by a font, or transparent PNG text assets, route that typography asset request to `$type-png-director`; do not ask KV/poster image prompts to generate production text inside the base art.
@@ -501,6 +552,7 @@ Formal generation gate:
 
 ```text
 project-style-lock exists
+short-drama hook audit and character continuity lock exist for formal short-drama work
 shot has function / shot size / camera angle / focal length / composition / light / color / material / negative prompt
 mother-library translation mechanism is present
 anti-AI photographic realism is present: real skin texture / fabric wrinkles / life traces / dust or worn objects / real light source / original light ratio / no over-sharpening / no beauty smoothing / no fake HDR
@@ -561,6 +613,7 @@ Hard rule:
 | --- | --- |
 | 新建工程 / 继续工程 / 项目根目录 / 输出路径 / 文件散落 / 目录混乱 / 不要放总文件夹 / 整理工程但先不移动 | `$project-folder-director` -> `$project-state-manager` / `$asset-librarian` |
 | 品牌KV / 活动KV / 发布会KV / 产品KV / 产品主视觉 / 节目主视觉 / LED主视觉 / key visual / 主视觉 / banner system | `$kv-director` -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
+| 已有方案/PPT/创意方向，下一步做KV或大屏KV | preserve approved proposal -> `$kv-director` proposal_to_kv_packet -> large-screen experience packet when needed -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 海报 / 人物海报 / 短剧人物海报 / 短剧封面 / 电影海报 / film key art / 社媒封面 / 缩略图 / poster-like narrative cover | `$poster-director` -> `$frame-vision-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 参考字体 / 仿照字体 / 3D字体 / 艺术字 / 标题字 / 立体字 / 透明PNG文字 / type PNG / title treatment | `$type-png-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | image / image-2 / ChatGPT Image / 内置最新模型 / 直接生成一张 | `$builtin-imagegen-director` + built-in imagegen |

@@ -1,0 +1,3 @@
+display_name: "短剧人物圣经"
+short_description: "建立短剧角色、关系、视觉锚点和连续性规则"
+default_prompt: "Use $short-drama-character-bible to define character continuity, relationship anchors, costume anchors, and performance keywords. Output director_contribution_packet and visual_helpfulness_targets so downstream prompts protect face, hair, costume silhouette, body anchor, relationship state, and performance continuity."

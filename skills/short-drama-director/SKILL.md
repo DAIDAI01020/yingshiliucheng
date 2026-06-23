@@ -11,6 +11,12 @@ description: Short drama and vertical micro-series director for AI film workflow
 
 It coordinates story, performance, scene visual direction, character continuity, image prompts, video prompts, and generation risk control. It is not a generic prompt writer. For formal short-drama projects, it must first establish drama logic and scene-level visual direction before any image or video generation.
 
+Professional short-drama execution has two gates before visual execution:
+
+```text
+hook-audit -> character-continuity -> scene visual direction -> shot audit -> prompts
+```
+
 Use it when the user says:
 
 ```text
@@ -39,6 +45,15 @@ Use it when the user says:
 
 When the user provides a script, finished draft, storyboard, or reference images, do not jump directly to image prompts.
 
+For managed formal projects, first locate or create the reusable short-drama state layer through `$project-state-manager`:
+
+```powershell
+node .\scripts\manage-project-state.mjs init --project-name "项目名" --workflow short-drama --route storyboard-execution
+node .\scripts\manage-project-state.mjs check --project-root H:\yingshi\projects\project --stage generation
+```
+
+Use the `check` result as the routing source. If `ready` is false, continue with the owner skill named in `routeBackTo` and update the corresponding state packet. Do not restart concept, episode, or dialogue work when the project route is `storyboard-execution`.
+
 Formal default order:
 
 1. 判断输入材料：稿子、分镜、参考图、角色设定、影视风格参考是否齐全。
@@ -48,6 +63,15 @@ Formal default order:
 5. 先输出“每场戏风格参考/视觉导演设定”。
 6. 再输出静态关键帧提示词。
 7. 最后输出视频提示词或一镜到底拆段建议。
+
+Optimized formal gate:
+
+```text
+hook-audit: prove the first 3-8 seconds have a hook, an audience question, an information gap, conflict entry, payoff/cliffhanger, and AI execution risk control.
+character-continuity: lock recurring character face, hair, age/body, costume, performance, relationship state, reference-image roles, generation anchor, allowed scene changes, and forbidden drift.
+```
+
+Do not move a formal short-drama project into scene visual mapping or batch generation if either gate is missing. For existing scripts/storyboards, diagnose the hook and character continuity without rewriting the whole script unless the user asks.
 
 ## Scene-Level Visual Direction Is Required
 
@@ -101,6 +125,7 @@ Example principle:
 
 ## Key Checks Before Image Generation
 
+- 是否已经通过 `$project-state-manager check --stage generation`，或明确属于 quick-test？
 - 是否已经有全剧统一风格 DNA？
 - 是否已经有每场戏视觉参考？
 - 是否每张图继承了对应场戏的光线、焦段、材质和情绪？

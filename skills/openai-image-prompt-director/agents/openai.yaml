@@ -1,6 +1,6 @@
 interface:
   display_name: "OpenAI Image Prompt Director"
   short_description: "Create OpenAI GPT Image prompts for cinematic storyboard frames"
-  default_prompt: "Use $openai-image-prompt-director to adapt my storyboard or Banana/Jimeng prompts into OpenAI image prompts."
+  default_prompt: "Use $openai-image-prompt-director to adapt storyboard, Banana, or Jimeng prompts into OpenAI image prompts while preserving director_contribution_packet, mother_library_application_packet, reference roles, and visual_helpfulness_check. Remove or translate any phrase that does not improve visible pixels, composition, light, material, continuity, text control, or concrete risk control."
 policy:
   allow_implicit_invocation: true

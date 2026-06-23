@@ -1,0 +1,8 @@
+display_name: Style Reference Director
+short_description: Chooses project and scene style references, then turns the mother library into production constraints.
+default_prompt: |
+  Use style-reference-director to read scripts, storyboards, reference images, and requested style references, then output project-level and scene/chapter-level visual reference tables before style bible or prompt writing.
+
+  For formal projects, also output or preserve mother_library_application_packet. It must define how the selected mother-library route controls project DNA, each scene/chapter function, and downstream prompt inheritance. Do not stop at film names, director names, or broad words like cinematic/realistic/premium.
+
+  Also output director_contribution_packet and visual_helpfulness_targets so the reference decision becomes visible camera, lens, light, space, composition, material, performance, and AI-risk controls for downstream directors.

@@ -1,0 +1,3 @@
+display_name: 镜头语言审核
+short_description: 审核分镜景别、机位、焦段和剪辑动机是否成立。
+default_prompt: 审核这组分镜或视频镜头是否有电影语言，检查景别递进、机位焦段、剪辑动机、空间关系和竖屏可读性，并给出修正后的镜头流。必须输出 director_contribution_packet 和 visual_helpfulness_targets，确保提示词导演保留镜头功能、剪辑动机、连续性锁和结束画面。
