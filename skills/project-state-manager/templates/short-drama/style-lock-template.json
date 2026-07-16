@@ -1,14 +1,15 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "style_lock_packet": {
     "status": "draft",
     "style_id": "",
+    "version": 1,
     "project_name": "__PROJECT_NAME__",
     "project_type": "short drama",
     "route": "__ROUTE__",
-    "primary_reference_family": "",
-    "secondary_reference_family": [],
-    "cinematography_anchor": "",
+    "deliverable_profile": "live_action_people",
+    "platform_target": "",
+    "upstream_source": "",
     "mother_library_application_packet": {
       "library_route": "",
       "project_function": "",
@@ -18,48 +19,27 @@
       "forbidden_drift": [],
       "prompt_inheritance": {}
     },
-    "director_contribution_packet": {
-      "owner_chain": [],
-      "decision_owned": {},
-      "visual_controls_contributed": [],
-      "downstream_must_preserve": [],
-      "route_back_to_if_missing": ""
-    },
-    "visual_helpfulness_targets": [],
-    "mother_library_translation": {
-      "light_direction": "",
-      "space_relationship": "",
-      "lens_psychology": "",
-      "composition_blocking": "",
-      "material_touch": "",
-      "performance_state": "",
-      "ai_risk_control": ""
-    },
-    "platform_language_strategy": {
-      "image": "built-in imagegen or Banana/Banana Pro",
-      "video": "first-frame/reference driven Jimeng, Seedance/Ark, Kling, Kling O1, or Kling VIDEO 3.0 Omni"
-    },
-    "anti_ai_realism_rule": "",
-    "image_tool_boundary": "Formal still-image route defaults to built-in imagegen or Banana/Banana Pro. Jimeng is not the default still-image route.",
-    "jimeng_seedance_motion_rule": "First frame controls image style; text controls one subject action, one camera movement, one subtle environment/light change, and one clear ending frame.",
-    "breath_tail_rule": "Every short-drama shot has a light breath tail; segment/scene/emotional-beat endings have a heavier 1-2 second breath tail unless hard cut is requested.",
     "master_style_sentence": "",
-    "camera_system": "",
-    "lens_family": "",
-    "aperture_depth_rule": "",
-    "lighting_rule": "",
-    "color_rule": "",
-    "material_rule": "",
-    "composition_rule": "",
-    "grain_texture_rule": "",
-    "reference_image_rule": "",
-    "short_drama_hook_packet_source": "",
-    "character_continuity_source": "",
-    "scene_variation_rule": "",
+    "palette_and_contrast": "",
+    "composition_or_layout_rule": "",
+    "material_or_surface_rule": "",
+    "reference_roles": [],
+    "do_not_inherit": [],
+    "allowed_variation": [],
     "forbidden_drift": [],
-    "negative_prompt_base": "",
-    "prompt_schema": "",
-    "upstream_source": "",
+    "profile_extension": {
+      "camera_language": "",
+      "lens_or_depth_rule": "",
+      "motivated_light_rule": "",
+      "skin_fabric_environment_realism": "",
+      "character_continuity": "",
+      "source_authority": "",
+      "identity_scene_material_lock": "",
+      "motion_style_compact": "",
+      "ending_behavior_default": "",
+      "audio_mode_default": "unsupported",
+      "platform_drift_risks": []
+    },
     "created_at": "__CREATED_AT__"
   }
 }

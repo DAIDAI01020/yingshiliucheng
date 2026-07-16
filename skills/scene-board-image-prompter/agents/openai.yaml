@@ -1,3 +1,6 @@
-display_name: "故事板宫格提示词"
-short_description: "把已定人物道具场景机位写成内置image故事板控制板提示词"
-default_prompt: "Use $scene-board-image-prompter to write one built-in imagegen prompt for a professional scene storyboard board."
+interface:
+  display_name: "故事板宫格提示词"
+  short_description: "把已批准导演设定与连续性锁转换为逐板内置Image提示词源包"
+  default_prompt: "Use $scene-board-image-prompter to turn this approved board unit into one preflighted board-prompt source packet, preserve all production locks, and compile it for built-in imagegen."
+policy:
+  allow_implicit_invocation: true

@@ -1,3 +1,6 @@
-display_name: Built-in Imagegen Director
-short_description: Use Codex built-in imagegen for fast film visual previews and edits.
-default_prompt: 用内置 imagegen 快速出一张影视概念图
+interface:
+  display_name: "内置Image出图"
+  short_description: "以内置Image快速生成或编辑图片并控制多变体与失败重试"
+  default_prompt: "Use $builtin-imagegen-director to preflight and directly generate or edit built-in images with profile-specific locks, bounded retries, and concise output."
+policy:
+  allow_implicit_invocation: true

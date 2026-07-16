@@ -1,3 +1,6 @@
-display_name: "总控"
-short_description: "判断项目等级、路由技能、检查上游缺口和生成卡口"
-default_prompt: "Use $zongkong to first classify speed_mode, project_tier, workflow_mode, main_line, platform_target, and next_skill in a zongkong_route_packet. For prompt_only or quick_test, route lightly without project_intake_packet, audit, manifest, QC, or state gates unless explicitly requested, but preserve any existing style lock, reference roles, and visible risk controls. For formal_managed, create/check project_intake_packet, mother_library_application_packet, director_contribution_packet, visual_helpfulness_check, and required upstream state before routing."
+interface:
+  display_name: "总控"
+  short_description: "选择影视AI任务的交付画像、流程、平台、输出与质检模式"
+  default_prompt: "Use $zongkong to classify this film/visual request by deliverable profile, preserve the explicit or current platform, keep internal packets hidden, and route only through applicable gates."
+policy:
+  allow_implicit_invocation: true

@@ -1,4 +1,4 @@
-﻿---
+---
 name: project-state-manager
 description: Manage project-level state for film AI workflows, including project-manifest.json, asset-index.json, and generation-job.json. Use when creating a new project workspace, tracking generation runs, locating image/prompt versions, or keeping Banana, built-in imagegen, Midjourney, Jimeng, Kling, and Seedance outputs connected to review boards and revisions.
 ---
@@ -11,32 +11,41 @@ Keep the workflow state in one project-level source of truth. This skill manages
 
 - `project-manifest.json`: current project status, latest jobs, latest generation runs, and review-board links.
 - `asset-index.json`: image, prompt, log, review-board, version, and asset-state records.
-- `generation-job.json`: one unified job format that `$image-generation-controller` can use for logged Banana generation.
+- `generation-job.json`: Banana-specific executable job format used by `$banana-image-generator`.
+- `generation-ready.json`: generic approved execution record for built-in imagegen, Banana, Midjourney, Jimeng, Kling, Seedance/Ark, and manual handoffs.
 - `style-lock.json`: current approved project style variables used by prompt directors.
-- `project-intake.json`, `hook-audit.md`, `character-continuity.md`, `scene-map.md`, `shot-audit.md`, `prompt-audit.md`, and `generation-ready.json`: reusable formal short-drama state gates.
+- `project-intake.json`, `scene-map.md`, `shot-audit.md`, `prompt-audit.md`, and `generation-ready.json`: reusable formal short-drama state gates.
+- Same-scene continuity locks and continuity reference boards for short-drama coverage work.
+- `generation-observations.jsonl`: QC evidence tied to source assets/prompts for targeted future fixes.
 
 ## P0 Core State Layer
 
 For formal projects, `$project-state-manager` is the state and traceability layer. It does not make creative decisions, write prompts, audit prompts, or choose references. It stores or locates the approved outputs from the owning skills.
 
+## Route Authority Boundary
+
+Inherit `$zongkong` route decisions when a `zongkong_route_packet` is present.
+
+This skill owns state persistence and lookup. It does not choose project tier, change `speed_mode`, invent creative decisions, approve prompts, generate media, or downgrade formal gates.
+
+If an owning packet is missing, return `missing_fields` and `route_back_to` instead of creating creative content to fill the state. Store approved outputs from the owning skills; do not become the owner of those decisions.
+
 Track these packets when present:
 
 ```text
 project_intake_packet -> project-manifest.json
-short_drama_hook_packet -> references/hook-audit.md / generation-ready.json metadata
-character_continuity_packet -> references/character-continuity.md / style-lock.json / generation-ready.json metadata
 upstream_handoff_packet -> project-manifest.json / references / prompts metadata
 mother_library_application_packet -> style-lock.json / scene-map.md / generation-ready.json metadata
-director_contribution_packet -> character-continuity.md / style-lock.json / scene-map.md / shot-audit.md / prompt-audit.md / generation-ready.json metadata
-visual_helpfulness_targets -> character-continuity.md / style-lock.json / scene-map.md / shot-audit.md metadata
-visual_helpfulness_check -> prompt-audit.md / generation-ready.json metadata
 scene_continuity_lock / background_continuity_lock / dialogue_coverage_packet -> references/scene-map.md / references/shot-audit.md
 short_drama_scene_continuity_board -> asset-index.json / references/scene-map.md metadata
 style_lock_packet -> style-lock.json
 audited_prompt_packet -> prompts / generation-jobs metadata
 generation_ready_packet -> generation-jobs / video-runs metadata
 qc_feedback_packet -> asset-index.json / revision-logs
+generation_observation -> generation-observations.jsonl / asset-index.json metadata
 ```
+
+Normalize skill packet fields to snake_case. Convert script responses such as `missingFields` and `routeBackTo` at this boundary into `missing_fields` and `route_back_to`; do not pass mixed naming downstream.
 
 Required state lookups before revision or regeneration:
 
@@ -75,16 +84,6 @@ Formal short-drama projects use a strong generation gate:
 project-intake -> mother-library-application -> style-lock -> scene-map -> shot-audit -> prompt-audit -> generation-ready
 ```
 
-Optimized formal short-drama projects use this stronger gate:
-
-```text
-project-intake -> hook-audit -> character-continuity -> mother-library-application -> director-contribution -> visual-helpfulness -> style-lock -> scene-map -> shot-audit -> prompt-audit -> generation-ready
-```
-
-`hook-audit` protects the first 3-8 seconds, conflict entry, information gap, payoff/cliffhanger, and AI execution risk. `character-continuity` protects recurring character face, hair, costume, age/body, performance state, relationship state, reference roles, generation anchor, and forbidden drift.
-
-`director-contribution` preserves what each upstream director added: mother-library route, scene function, shot-language logic, character/product continuity, and prompt director translation. `visual-helpfulness` proves the final prompt's kept words protect or improve visible subject, composition, camera, light, material, motion, continuity, or concrete platform risks.
-
 For formal same-scene coverage, `scene-map.md` must preserve:
 
 ```text
@@ -98,12 +97,12 @@ prop_anchor
 continuity_reference_board asset id/path when generated
 ```
 
-If a scene contains master wide, reverse angles, over-shoulder, eye contact, reaction shots, interrogation, confrontation, or table/office/living-room dialogue and these fields are missing, the project is not generation-ready for batch same-scene image/video work.
+If a scene contains 大景/全景、正反打、过肩、对视、反应镜头 and these fields are missing, the project is not generation-ready for batch same-scene image/video work.
 
 Use this before formal batch generation:
 
 ```powershell
-node .\scripts\manage-project-state.mjs check --project-root H:\yingshi\projects\project --stage generation
+node .\scripts\manage-project-state.mjs check --project-root {project_root} --stage generation
 ```
 
 The check returns:
@@ -117,12 +116,14 @@ currentState
 
 If `ready` is false, route back to the named owner skill. Do not let prompt or generation skills fill missing state decisions from memory.
 
-## Default project root
+## Project Root Authority
+
+Use `project_folder_contract.project_root` and `output_path_rule` as the authority. If a new project root, output path, or messy folder needs to be decided, route to `$project-folder-director` first. Do not impose a drive from this skill.
 
 Use this structure for new managed projects:
 
 ```text
-H:\yingshi\projects\{projectSlug}\
+{project_root}\
   project-manifest.json
   asset-index.json
   project-intake.json
@@ -134,20 +135,19 @@ H:\yingshi\projects\{projectSlug}\
   review\
   revision-logs\
     qc-feedback.md
+    generation-observations.jsonl
   briefs\
   prompts\
     prompt-audit.md
   references\
-    hook-audit.md
-    character-continuity.md
     scene-map.md
     shot-audit.md
     continuity-boards\
 ```
 
-Generator task folders live under `generation-runs\{timestamp}_{tool}\` when a `generation-job.json` has `projectRoot`, or under legacy `H:\yingshi\outputs\...` when using old inputs.
+Generator task folders live under `{project_root}\generation-runs\{timestamp}_{tool}\` when a managed job has a project root. Preserve legacy paths for existing jobs; do not force migration.
 
-## Unified generation job
+## Banana Execution Job
 
 Use this shape:
 
@@ -157,7 +157,7 @@ Use this shape:
   "projectRoot": "",
   "tool": "banana",
   "mode": "dry-run",
-  "promptMode": "compact",
+  "promptMode": "quality",
   "outputDir": "",
   "shots": [
     {
@@ -173,18 +173,39 @@ Use this shape:
 
 `tool` must be `banana`. `mode` must be `dry-run` or `real-generation`.
 
-For Banana jobs, default `promptMode` is `compact` so the generator can use `compactPrompt` / `bananaCompactPrompt` while keeping `image_size: 2K`.
+This restriction applies only to `generation-job.json` consumed by the current Banana script. It is not the generic cross-platform execution schema.
+
+For all tools, preserve the generic record:
+
+```text
+generation_ready_packet
+asset_or_shot_id:
+platform_target:
+deliverable_profile:
+execution_mode: built_in / api / external_manual
+approved_prompt_source:
+reference_roles:
+output_path_rule:
+response_mode:
+qc_mode:
+music_policy: no_music_allow_sfx / music_requested / full_silence（video only）
+manual_execution:
+```
+
+For legacy video packets without `music_policy`, normalize to `no_music_allow_sfx` unless the approved prompt or user instruction explicitly requests music or full silence. Preserve the selected policy through prompt audit, generation-ready state, run manifest, asset ingest, and QC.
+
+For Banana jobs, default `promptMode` is `quality` so every storyboard shot uses its full self-contained prompt. Use `compact` only when the user explicitly asks for `省 token`, a fast test, or compact execution; keep `image_size: 2K` unless the user requests otherwise.
 
 ## Script usage
 
 ```powershell
 node .\scripts\manage-project-state.mjs init --project-name "项目名"
 node .\scripts\manage-project-state.mjs init --project-name "短剧项目名" --workflow short-drama --route storyboard-execution
-node .\scripts\manage-project-state.mjs check --project-root H:\yingshi\projects\project --stage generation
-node .\scripts\manage-project-state.mjs create-job --project-root H:\yingshi\projects\project --tool banana --input H:\yingshi\input.json --mode dry-run
-node .\scripts\manage-project-state.mjs ingest --project-root H:\yingshi\projects\project --generation-log H:\...\logs\generation-log.json --review-board H:\...\review\review-board.md
-node .\scripts\manage-project-state.mjs ingest-video --project-root H:\yingshi\projects\project --run-manifest H:\...\run_manifest.json
-node .\scripts\manage-project-state.mjs find-asset --project-root H:\yingshi\projects\project --handle S01_banana_v01
+node .\scripts\manage-project-state.mjs check --project-root {project_root} --stage generation
+node .\scripts\manage-project-state.mjs create-job --project-root {project_root} --tool banana --input {input_json} --mode dry-run
+node .\scripts\manage-project-state.mjs ingest --project-root {project_root} --generation-log {generation_log} --review-board {review_board}
+node .\scripts\manage-project-state.mjs ingest-video --project-root {project_root} --run-manifest {run_manifest}
+node .\scripts\manage-project-state.mjs find-asset --project-root {project_root} --handle S01_banana_v01
 ```
 
 For manual or external Jimeng / Kling / Kling O1 / Kling VIDEO 3.0 Omni runs, `ingest-video` may ingest a handoff `run_manifest.json` with:
@@ -196,6 +217,7 @@ prompt.source
 reference_roles
 first_frame_or_image_refs
 audio_policy
+music_policy
 outputs.video（optional before manual execution）
 task.status: manual_handoff / succeeded / failed
 ```
@@ -209,6 +231,7 @@ When `outputs.video` is empty and status is `manual_handoff`, the asset state is
 - Store prompt audit status as metadata only; do not change the audited prompt text inside project-state-manager.
 - Store first-frame/public relay provenance without storing private upload tokens.
 - Keep QC and revision decisions tied to the source generated asset and source prompt.
+- Keep generation observations tied to source asset, source prompt, platform, deliverable profile, and attempted fix. Promote repeated evidence deliberately; never let state storage invent a new global rule.
 - Do not delete old asset records. Mark old or unused outputs as `废稿` only when instructed.
 - `asset-index.json` is the first place to locate an existing generated image or prompt for revision.
 - For short-drama same-scene work, `asset-index.json` should record any `short_drama_scene_continuity_board` as a reusable reference asset linked to its `scene_id`.

@@ -17,8 +17,6 @@
       "video": ["Jimeng", "Seedance", "Ark", "Kling", "Kling O1", "Kling VIDEO 3.0 Omni"]
     },
     "required_upstream": [
-      "hook-audit",
-      "character-continuity",
       "mother-library-application",
       "style-lock",
       "scene-map",
@@ -28,8 +26,6 @@
     ],
     "available_upstream": [],
     "missing_fields": [
-      "hook-audit",
-      "character-continuity",
       "mother-library-application",
       "style-lock",
       "scene-map",

@@ -1,3 +1,6 @@
-display_name: "视频QC导演"
-short_description: "检查AI视频动作、首帧保真、平台味和修订归因"
-default_prompt: "Use $video-qc-director to review this generated AI video and return a qc_feedback_packet with the next route."
+interface:
+  display_name: "视频QC导演"
+  short_description: "检查视频保真、动作、运镜、连续性、结束方式、音频与平台问题"
+  default_prompt: "Use $video-qc-director to review this generated video against its approved source, ending behavior, audio mode, continuity, and platform constraints."
+policy:
+  allow_implicit_invocation: true

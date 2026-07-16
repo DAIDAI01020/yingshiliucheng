@@ -11,6 +11,16 @@ Use the built-in `imagegen` capability for fast preview images and edits inside 
 
 This skill is not an API wrapper. It does not manage external keys, model selection, generation logs, project folders, or Excel execution records unless another workflow captures the result afterward.
 
+## Route Authority And Independent Tool Boundary
+
+Inherit `speed_mode`, `deliverable_profile`, `platform_target`, `response_mode`, and `qc_mode` from `$zongkong` when a route packet is present.
+
+This skill owns built-in imagegen preflight, prompt shaping, and direct generation. It does not choose project tier, change `speed_mode`, skip formal gates, replace `$frame-vision-director`, replace `$prompt-platform-auditor` for formal work, or replace `$image-qc-director` for managed QC.
+
+Built-in imagegen and Banana are separate tools and separate skills. Never use this skill for Banana, Banana Pro, Nano Banana, or OpenRouter image generation; those requests belong to `$banana-image-generator`. Never silently fall back from built-in imagegen to Banana, and never describe a Banana result as built-in imagegen.
+
+For `formal_managed`, route missing style, scene, shot, prompt-audit, output path, or QC requirements back to the owning skill instead of silently treating the request as a casual image test.
+
 ## When to Use
 
 - The user asks for `imagegen`, `内置出图`, `直接生成一张图`, `快速出图`, or `先看个效果`.
@@ -21,46 +31,110 @@ Do not use this skill when the user explicitly says Banana, MJ/Midjourney, OpenA
 
 ## Workflow
 
-1. Convert the user's request into a concise image-generation prompt.
-2. Preserve the current project's unified style if the request is part of an existing film/visual project.
-3. For storyboards, include subject, scene, camera angle, lens feeling, lighting, color, material, mood, aspect ratio, and avoid items.
-4. If the user says `直接出图`, call the built-in image generation tool without printing the full prompt first.
-5. If the user says `给提示词`, output only the prompt and do not generate.
-6. For edits, preserve the user's stated invariants and change only the requested elements.
-7. After generation, respond briefly with what was generated. Do not claim a model name because the built-in tool does not expose one.
+1. Determine whether the request is direct generation or prompt-only output.
+2. Run `direct_image_preflight_check` before generation.
+3. Preserve the current project's approved style, profile-specific locks, and reference roles.
+4. For narrative storyboards or multi-shot keyframes, prepare one concise self-contained prompt per shot. Repeat only the compact stable controls needed by that shot; never use `同上`.
+5. If the user says `直接出图`, call the built-in image generation tool after preflight without printing the full prompt first.
+6. If the user says `给提示词`, output only the prompt and do not generate.
+7. For edits, preserve the user's stated invariants and change only the requested elements.
+8. If generation fails, return `imagegen_execution_result` with the real failure type. Never claim success when no image artifact was returned.
+9. If generation succeeds, end with the generated image result and do not append a QC line or other text in the same response. Run QC only in a later user turn or separate review workflow.
 
-## Film Prompt Shape
+## Direct Image Preflight Check
 
-Use this compact shape when preparing built-in imagegen prompts:
+Before calling built-in imagegen, check these fields internally and preserve the important ones in the prompt:
+
+```text
+direct_image_preflight_check
+execution_mode: direct_generation / prompt_only
+requested_image_count:
+deliverable_profile:
+intent_or_shot_function:
+style_source_or_lock:
+must_preserve:
+must_change:
+subject_or_product_or_character_constraints:
+scene_and_action:
+camera_composition_light_color_material:
+aspect_ratio_and_usage:
+reference_image_roles:
+text_logo_watermark_risk:
+video_first_frame_potential:
+response_mode:
+qc_mode:
+missing_fields:
+```
+
+If `missing_fields` would break the image, ask or route back. If the request is a quick test and the missing field is not blocking, make a clear assumption inside the prompt.
+
+## Quick Multi-Variant Generation
+
+When a `quick_test` requests two to four separate images from the same reference, space, subject, or style, treat them as one direct-generation job rather than several workflow decisions.
+
+Create internally:
+
+```text
+shared_invariant_lock:
+  reference role, space geometry, architecture/set, subject identity, materials, lighting continuity, palette, aspect ratio, text/logo constraints
+variant_deltas:
+  variant_id, requested camera/crop/pose/element change, framing, camera height/angle, focal behavior
+```
+
+Run `direct_image_preflight_check` once for the whole set. Then execute the requested variants in one orchestration turn, using the minimum number of built-in imagegen calls needed to return separate image artifacts. Sequential internal calls are acceptable when they improve reliability, but do not post new routing commentary, repeat the preflight, or describe each call as a new task.
+
+Each variant prompt must repeat the shared invariant lock and change only its declared delta. Do not merge multiple requested camera views into one composite image unless the user explicitly asks for a comparison board or contact sheet. Do not create project state or a project folder only because `requested_image_count` is greater than one.
+
+## Live-Action / Story-Frame Prompt Shape
+
+Use this shape only for `live_action_people` or photographic `storyboard_frame` when camera language improves the result. Omit inapplicable fields:
 
 ```text
 Create a cinematic key visual / storyboard frame for [project type].
 Subject: [main subject and action].
 Scene: [environment and time].
-Camera: [shot size, angle, lens feeling, composition].
+Camera/composition: [shot size, camera position, spatial layout, and useful focal/depth behavior].
 Lighting/color: [lighting plan and palette].
 Texture/style: [film look, materials, finish].
+Continuity: [character, wardrobe, prop, geography, screen-direction, and scene-state locks that apply to this shot].
 Constraints: [no text/logos/watermarks/unwanted artifacts].
 Aspect ratio: [16:9 / 9:16 / 1:1 / other].
 ```
 
 ## Fielded Storyboard Execution
 
-For accurate storyboard image generation, prefer a fielded source structure over a long prose prompt. If the source includes `Visual Baseline`, `Continuity Lock`, `Shot Size`, `Camera Lens`, `Content`, `Composition`, or `Image Style Prompt`, convert it into one compact prompt per shot instead of sending the whole file to imagegen.
+For accurate storyboard image generation, prefer a fielded source structure over a long prose prompt. If the source includes `Visual Baseline`, `Continuity Lock`, `Shot Size`, `Camera Lens`, `Content`, `Composition`, or `Image Style Prompt`, convert it into one complete prompt per shot instead of sending the whole file to imagegen.
 
-Use this execution order:
+Use this execution order, selecting fields by `deliverable_profile`:
 
 ```text
-[visible frame and main subject] + [scene space and foreground/midground/background] + [shot size, camera position, lens/focal length, composition] + [shot-specific continuity locks] + [compressed global style lock: light, color, material, realism] + [targeted avoid list] + [aspect ratio]
+[visible frame] + [must-preserve lock] + [requested delta] + [composition/layout or useful camera language] + [profile-relevant light/color/material/style] + [reference roles] + [targeted avoid list] + [aspect ratio]
 ```
 
-The first sentence must describe the actual frame to render, not a generic style label. Keep global style details concrete and short; include only the continuity locks that affect the current frame. For repeated shots, do not rely on chat memory alone: every generated image prompt must be self-contained enough to preserve the approved look, prop rules, character state, and spatial layout.
+The first sentence must describe the actual frame to render, not a generic style label. Every independently executed shot must carry its compact visible locks, but do not require camera, photographic realism, mother-library, or skin/hand controls for product, graphic, typography, LED/stage, or local-edit work unless relevant.
 
-When optimizing for both speed and accuracy, remove repeated style essays and long negative lists, but keep exact object shape, era/material rules, composition, light source/direction, and text/logo controls.
+Always remove rationale that does not change the visible result. Keep exact structure, era/material, composition/layout, continuity, ratio, and text/logo controls when the task needs them.
+
+## Generation Failure Handling
+
+When the built-in tool does not return an image, output:
+
+```text
+imagegen_execution_result
+status: failed
+failure_type: tool_unavailable / missing_reference / invalid_reference / policy_restriction / transient_service / empty_result / invalid_request / unknown
+attempt_count:
+retry_allowed:
+next_action:
+```
+
+Retry once only for `transient_service` or `empty_result`. For multi-variant generation, retry only the failed variant, preserve every successful image artifact, and stop after that variant's single retry. Do not restart the full set or enter an open-ended retry loop. Do not retry missing/invalid references, policy restrictions, invalid requests, or unavailable tools without first fixing the cause. Keep the request on the built-in image route unless the user explicitly chooses Banana.
 
 ## Output Behavior
 
 - For real generation requests, keep chat output short and show the generated image result.
+- After a successful built-in image generation call, do not append a QC line, summary, or follow-up question in the same response.
+- `qc_mode:none` stops after the generated image. `qc_mode:light_deferred` or `formal` runs only in a separate review turn/workflow.
 - For prompt-only requests, provide a clean copyable prompt.
 - For workflow comparisons, describe it as `内置 imagegen 快速预览`, not as OpenAI API, Banana, or Midjourney.
 - If the image needs tracked files, version names, review boards, or prompt logs, recommend the existing Banana/OpenAI/Midjourney workflow instead.
@@ -71,4 +145,5 @@ When optimizing for both speed and accuracy, remove repeated style essays and lo
 - Do not ask for API keys.
 - Do not promise deterministic file paths or project logging from the built-in tool.
 - Do not silently switch to external tools.
+- Do not call Banana or OpenRouter as a fallback.
 - Do not print long prompts when the user explicitly wants direct generation.

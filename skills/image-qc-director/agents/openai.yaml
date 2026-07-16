@@ -1,6 +1,6 @@
 interface:
-  display_name: "Image QC Director"
-  short_description: "QC generated keyframes and recommend fixes or regeneration"
-  default_prompt: "Use $image-qc-director to review generated images against storyboard prompts and decide whether to keep, revise, or regenerate."
+  display_name: "图片QC导演"
+  short_description: "按交付画像判断图片可用性、失败归因、定向重出与经验回写"
+  default_prompt: "Use $image-qc-director to review this image against its deliverable profile, attribute failures, recommend a targeted next action, and preserve useful observations."
 policy:
   allow_implicit_invocation: true

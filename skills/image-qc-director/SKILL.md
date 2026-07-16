@@ -15,10 +15,45 @@ Judge against:
 - Prompt.
 - Unified style bible.
 - Reference image constraints.
+- scene_continuity_lock / background_continuity_lock / continuity reference board when present.
 - Delivery context.
 - Whether the image will be used as a video first frame.
 
 Do not judge only by whether the image looks beautiful.
+
+## Route Authority Boundary
+
+Inherit `deliverable_profile`, `response_mode`, `qc_mode`, route decisions, and project state from `$zongkong` when present.
+
+This skill owns QC diagnosis, failure attribution, and revision routing. It does not choose project tier, change `speed_mode`, rewrite the whole project style, approve missing formal gates, or generate replacement prompts as a substitute for the owning director.
+
+For formal work, locate prompt/style/reference/state inputs before judging when available. If they are missing, output `missing_fields` and `route_back_to`; do not infer managed project state from memory.
+
+## Direct Built-in Image QC
+
+When an image was created through built-in `imagegen` / `直接用 image 出图`, obey `qc_mode`:
+
+```text
+none -> do not start an automatic QC pass
+light_deferred -> review in a separate turn/workflow after the image result
+formal -> run profile-specific QC and write state
+```
+
+If the user explicitly asks for review, run QC regardless of the previous `qc_mode`.
+
+For quick direct image generation, output one compact judgment:
+
+```text
+direct_image_qc
+decision: 可用 / 可小修 / 定向重出 / 提示词需重写 / 前置导演判断错误
+reason:
+main_risk:
+next_action:
+```
+
+Check against the preflight intent, prompt, inherited style/source, subject constraints, composition, text/logo risk, artifact risk, and whether it can work as a video first frame when relevant. Do not require a full review table unless the user asks, the task is formal, or there are multiple images.
+
+Use `deliverable_profile` to select checks. Do not judge a graphic/abstract, typography, product, LED/stage, or local-edit asset against unrelated live-action camera/skin rules.
 
 ## QC Decisions
 
@@ -39,6 +74,7 @@ QC must classify the root cause before recommending regeneration:
 | 生成偶发问题 | 手、脸、局部瑕疵、轻微结构错误，提示词方向正确 | 定向重出或负面词增强 |
 | 提示词表达问题 | 主体、构图、材质、光线写得不够准 | `$frame-vision-director` |
 | 平台适配问题 | Banana/MJ/imagegen/即梦表现偏平台默认味或执行不稳 | `$prompt-platform-auditor` |
+| 背景连续性问题 | 同场戏多张图的房间、墙面、门窗、灯位、桌椅、道具、A/B背景侧或轴线漂移 | `$short-drama-scene-director` / `$shot-language-auditor` / `$frame-vision-director` |
 | 风格锁问题 | 多张图同类漂移，说明全局风格变量不够明确 | `$project-style-lock` / `$style-bible-director` |
 | 前置导演判断问题 | 镜头本身没叙事功能、场戏风格错、参考图匹配错 | `$scene-style-map-director` / `$shot-language-auditor` / `$style-reference-director` |
 
@@ -49,7 +85,7 @@ Only `风格锁问题` and `前置导演判断问题` justify upstream redesign.
 Use concise issue tags:
 
 ```text
-风格漂移 / 主体错误 / 构图不可用 / 光线不对 / 材质不对 / 文字logo风险 / 手脸异常 / 产品结构错误 / 参考图误用 / AI感过强 / 平台味过重 / 低清晰度 / 视频运动风险 / 首帧不可用 / 提示词需重写 / 前置导演判断错误
+风格漂移 / 背景漂移 / 越轴 / 视线方向错误 / 背景侧错误 / 道具跳位 / 灯位漂移 / 主体错误 / 构图不可用 / 光线不对 / 材质不对 / 文字logo风险 / 手脸异常 / 产品结构错误 / 参考图误用 / AI感过强 / 平台味过重 / 低清晰度 / 视频运动风险 / 首帧不可用 / 提示词需重写 / 前置导演判断错误
 ```
 
 ## QC Checklist
@@ -65,12 +101,68 @@ Check:
 - 生成瑕疵：水印、边框、AI感、低清、过曝、过锐、无关物体。
 - 视频首帧潜力：是否有清晰运动方向、主体是否稳定、边缘是否干净、是否方便做推拉/环绕/转场。
 
+## Same-Scene Background Continuity QC
+
+Use this when images belong to one short-drama scene coverage group: 大景/全景、two-shot、正反打、过肩、对视、反应、物件插入.
+
+Compare every image against `background_continuity_lock` or the `short_drama_scene_continuity_board`:
+
+```text
+same room or continuous space
+same wall/window/door positions
+same furniture and table layout
+same practical light positions and light direction
+same prop positions
+same A/B left-right relationship
+same background side behind each character
+same eyeline direction and no unmotivated axis flip
+```
+
+QC fail examples:
+
+```text
+A背后本应是灰绿色墙+半开木门，生成成窗帘或新窗户
+B背后本应是暖台灯+旧沙发，生成成白墙或厨房
+桌上手机/水杯位置跳到另一侧
+正反打里A/B左右关系翻转
+过肩镜头前景肩膀属于错误角色
+同一场戏灯位从左侧台灯变成右侧窗光
+```
+
+If one image has correct character but wrong background, classify as `背景连续性问题`, not broad style failure. Route targeted fixes to `$frame-vision-director` or `$prompt-platform-auditor`; route upstream only if the original `background_continuity_lock` or coverage map was missing/wrong.
+
 ## Output
+
+Preserve a learning record for formal QC or a repeated quick-test failure:
+
+```text
+generation_observation
+asset_id:
+deliverable_profile:
+platform_target:
+failure_type:
+prompt_or_source_cause:
+successful_fix:
+repeat_count:
+promotion_target: none / prompt risk profile / style lock / continuity lock
+```
+
+Do not promote a one-off generation artifact into a global rule. Promote only when the upstream decision is wrong, the same relevant failure repeats across at least two outputs, or the user approves the new rule.
 
 ### 出图质检表
 
 | 镜号 | 图片版本 | 工具 | 图片路径 | 判断 | 问题归因 | 问题标签 | 主要问题 | 可保留内容 | 修改建议 | 是否重出 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+For same-scene groups, add these fields when useful:
+
+```text
+scene_id
+coverage_role
+background_lock_match: yes / partial / no
+axis_eyeline_match: yes / partial / no
+continuity_board_match: yes / partial / no
+```
 
 ### 重出建议
 
@@ -83,7 +175,9 @@ If regeneration is needed, output only affected rows:
 
 - If only one shot fails, do not change the full style bible.
 - If multiple S/A shots drift in the same way, recommend updating the style bible.
+- If same-scene backgrounds drift but the style is correct, do not change the style bible; repair the background_continuity_lock prompt inheritance or regenerate affected shots with the continuity board as reference.
 - If text/logo is wrong, first recommend removing generated text or reserving blank title space.
 - If face/hand/product structure fails, simplify the action and strengthen reference constraints.
 - If the image is for video first frame, judge clean motion potential, not only still-frame beauty.
 - QC is not a new creative direction step. Do not recommend broad upstream changes unless the root cause is style-lock or director-logic failure.
+- For `response_mode: direct`, return only the QC decision and next action. Use the full table only for batch/formal review or `diagnostic`.

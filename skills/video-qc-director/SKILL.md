@@ -11,6 +11,14 @@ description: Quality-control AI-generated videos for film AI workflows. Use afte
 
 It classifies the failure and produces a `qc_feedback_packet` for `$revision-director`, `$product-video-revision-director`, `$ai-video-prompt-director`, `$prompt-platform-auditor`, or `$project-state-manager`.
 
+## Route Authority Boundary
+
+Inherit `deliverable_profile`, `response_mode`, `qc_mode`, route decisions, and project state from `$zongkong` when present.
+
+This skill owns video QC diagnosis, failure attribution, and revision routing. It does not choose project tier, change `speed_mode`, approve missing formal gates, rewrite creative direction, or submit regeneration.
+
+For formal work, locate prompt, first frame, audit status, run manifest, and asset-index records before judging when available. If they are missing, output `missing_fields` and `route_back_to` instead of guessing.
+
 ## Inputs
 
 Use whatever is available:
@@ -23,6 +31,7 @@ audited_prompt_packet
 generation_ready_packet
 run_manifest.json
 project asset-index record
+scene_continuity_lock / background_continuity_lock / continuity reference board
 user/client feedback
 ```
 
@@ -38,9 +47,10 @@ If a managed project has `asset-index.json`, locate the source prompt, first fra
 | product/vehicle | structure, proportions, wheel size, wheelbase, material, logo placement do not drift |
 | character | no face drift, beauty rewrite, plastic skin, body distortion, costume morph |
 | environment | no background melting, fake HDR, over-sharpening, CG clouds, light jumping |
+| same-scene continuity | same room, same wall/window/door/furniture, same prop positions, same background side, same eyeline/axis logic |
 | weather | no dissolve/fade sky swap; clouds, fog, shadow, brightness move physically |
-| short-drama breath | each shot has light breath tail; segment/scene end has heavy 1-2s breath tail unless hard cut requested |
-| audio | if prompt required it, only real environmental sound effects, no music or extra narration |
+| ending behavior | output matches the approved hold / breath_light / breath_heavy / hard_cut / action_exit / loop intent |
+| audio | output matches the approved unsupported / none / environment_only / dialogue / native_audio / reference_audio mode and the selected music policy |
 | platform look | no short-video filter, web-drama soft glow, template motion, fake depth |
 
 ## Kling O1 / VIDEO 3.0 Omni QC
@@ -107,6 +117,43 @@ shot logic wrong -> shot-language-auditor
 style/reference wrong -> style-reference-director / scene-style-map-director / project-style-lock
 ```
 
+## Same-Scene Background Continuity QC
+
+Use this for short-drama same-scene video shots: 大景/全景、正反打、过肩、对视、反应、clean single、物件插入.
+
+Compare the video to `background_continuity_lock`, the first frame, and any `short_drama_scene_continuity_board`:
+
+```text
+room does not change
+wall/window/door/furniture positions stay fixed
+practical light position and light direction stay fixed
+props do not jump or disappear
+A/B left-right relationship and eyeline direction remain valid
+background side behind each character matches the coverage map
+camera does not cross axis unless the upstream shot explicitly motivates it
+```
+
+Failure types:
+
+```text
+background_continuity_drift
+axis_flip
+eyeline_mismatch
+prop_jump
+light_position_drift
+wrong_background_side
+room_repaint
+```
+
+Route back by cause:
+
+```text
+prompt omitted background_continuity_lock -> ai-video-prompt-director / prompt-platform-auditor
+first frame already has wrong background -> frame-vision-director / image-qc-director
+coverage map or axis was missing/wrong -> short-drama-scene-director / shot-language-auditor
+video model drifts despite correct first frame and prompt -> targeted regeneration with stronger first-frame preservation
+```
+
 ## Output Contract
 
 Return this packet:
@@ -115,16 +162,25 @@ Return this packet:
 qc_feedback_packet
 asset_id:
 source_generation_ready_packet:
+deliverable_profile:
 qc_decision:
 failure_type:
+continuity_check:
+  background_lock_match:
+  axis_eyeline_match:
+  prop_light_match:
+  continuity_board_match:
 preserve:
 revise:
 route_back_to:
 revision_instruction:
 state_writeback:
+generation_observation:
 ```
 
 For quick/test work, one short judgment is enough, but still name the failure type and next owner.
+
+For formal QC or a repeated quick-test failure, write a `generation_observation` containing platform, profile, failure cause, successful fix, and repeat count. Do not promote a one-off model artifact into the global style lock. Promote only after repeated relevant evidence, a proven upstream decision error, or user approval.
 
 ## Hard Rules
 
@@ -132,4 +188,6 @@ For quick/test work, one short judgment is enough, but still name the failure ty
 - Do not route back to style/reference unless the failure proves the upstream visual decision is wrong.
 - Do not blame the prompt if the generated video only needs a targeted motion/camera/weather correction.
 - Do not approve product videos with wheel growth, body redraw, fake weather, or one-instant action completion.
-- Do not approve cinematic/short-drama videos with face drift, beauty rewrite, HDR sharpening, light jumping, or missing required breath tail.
+- Do not approve cinematic/short-drama videos with face drift, beauty rewrite, damaging sharpening, light jumping, or a mismatch with the selected ending behavior.
+- When `music_policy:no_music_allow_sfx`, do not approve unexpected background music, scoring, songs, or sung vocals; synchronized ambience and physical SFX remain allowed.
+- Use the profile-specific checks only; do not impose live-action, product, breath, or audio requirements on unrelated deliverables.

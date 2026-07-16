@@ -1,6 +1,6 @@
 interface:
   display_name: "Frame Vision Director"
-  short_description: "影视关键帧视觉与AI出图导演"
-  default_prompt: "Use $frame-vision-director to turn storyboard shots into consistent cinematic keyframe prompts. Preserve director_contribution_packet and mother_library_application_packet when present, and make every kept phrase visually useful: visible frame, composition, camera/lens, light, material, reference role, continuity, or concrete risk control."
+  short_description: "把画面目标、保持项、改动项与相关风险写成图像提示词源包"
+  default_prompt: "Use $frame-vision-director to turn this approved visual direction into a concise image prompt source packet with visible targets, preservation locks, controlled changes, and profile-specific risks."
 policy:
   allow_implicit_invocation: true

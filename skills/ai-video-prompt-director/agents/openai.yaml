@@ -1,41 +1,6 @@
 interface:
-  display_name: "AI视频提示词（即梦/可灵）"
-  short_description: "生成即梦、可灵、可灵 O1/Omni 视频执行提示词、参考角色图和平台提示包"
-  default_prompt: |
-    Use $ai-video-prompt-director to turn the user's storyboard shot, first frame, reference images, or revision request into a platform-ready video prompt.
-
-    First identify target_platform:
-    - 即梦 / Jimeng: first frame controls style; text controls only one subject action, one camera movement, one subtle environment/light change, and one ending frame.
-    - 可灵 / Kling: use for simple physically continuous motion; keep one action, one camera move, one ending frame.
-    - 可灵 O1 / Kling O1: use for heavily referenced single shots, element insertion/replacement, local edits, start/end frames, and short controlled motion.
-    - 可灵 Omni / Kling VIDEO 3.0 Omni / Omini: use for multi-reference continuity, video reference, multi-shot storyboard, native audio, and stronger character/element consistency.
-    - Seedance / Ark: use for API/logged video generation with public URL or approved relay path.
-
-    Then identify prompt_direction:
-    first_frame_motion, dialogue_coverage, product_motion, reference_continuity, local_edit, multi_shot_omni, or quick_motion_test. Do not combine several directions in one copyable prompt.
-
-    For formal or managed projects, do not invent missing upstream state. If style-lock, scene-map, shot-audit, prompt-audit, first-frame/reference roles, or generation-ready data are absent, output missing_fields and route_back_to instead of writing a final prompt.
-
-    For every video prompt, output a video_platform_prompt_packet with:
-    target_platform, task_type, prompt_direction, director_contribution_packet, visual_helpfulness_check, first_frame_or_reference, reference_roles, shot_function, subject_action, camera_movement, environment_or_light_change, ending_frame, duration, ratio, audio_policy, style_lock_compact, mother_library_video_translation, forbidden_items, missing_fields, route_back_to.
-    Unless the user explicitly asks for music, score, dialogue, voiceover, native audio, or a reference voice, set audio_policy to: 不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。
-
-    For 可灵 O1 / Omni, output kling_omni_reference_role_map before the prompt:
-    target_model, task_type, @Image role, @Element role, @Video role, audio_or_voice_reference role, do_not_inherit, must_preserve, must_change, missing_fields, route_back_to.
-    Each @Image/@Element/@Video/audio input must control only one narrow role. Motion-reference video must not silently control identity, costume, scene, color, brand elements, or lighting.
-
-    Final prompt rules:
-    - Chinese-first, copyable, no director essay.
-    - Use this order: source authority, preservation lock, main action, camera behavior, environment/light change, ending frame, breath/audio, forbidden items, duration/ratio.
-    - Every kept phrase must help the visible result: motion, camera, light, material, continuity, ending frame, reference role, or platform-risk control.
-    - Preserve mother-library, scene-map, shot-language, and character/product continuity contributions; compress them into visible mechanisms instead of deleting them.
-    - One dominant subject action, one camera movement or fixed camera, one subtle environment/light change at most.
-    - Clear ending frame, duration, ratio, and audio policy.
-    - Every copyable video prompt should include: 不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。
-    - For multi-shot Omni, list each shot with duration, framing, subject action, camera movement, transition motivation, and ending frame.
-    - If a single request changes subject, background, style, camera, weather, and audio at once, output 建议拆分 instead of forcing one prompt.
-    - For managed Jimeng/Kling handoff, include manual_execution: external_platform, upload_roles, copyable_prompt, expected_output_path, status: manual_handoff.
-
-    After writing the director prompt, route it to $prompt-platform-auditor. Do not claim generation is ready until the audit decision is 通过 or 保效精简后通过.
+  display_name: "AI视频提示词导演"
+  short_description: "定义视频来源权威、动作复杂度、运镜、结束方式与条件音频"
+  default_prompt: "Use $ai-video-prompt-director to turn this first frame, references, or storyboard beat into a motion-safe video prompt source packet before platform compilation."
 policy:
   allow_implicit_invocation: true

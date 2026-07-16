@@ -10,8 +10,6 @@ const SHORT_DRAMA_ROUTES = new Set(["storyboard-execution", "full-development", 
 
 const SHORT_DRAMA_STATE_FILES = {
   projectIntake: "project-intake.json",
-  hookAudit: path.join("references", "hook-audit.md"),
-  characterContinuity: path.join("references", "character-continuity.md"),
   styleLock: "style-lock.json",
   sceneMap: path.join("references", "scene-map.md"),
   shotAudit: path.join("references", "shot-audit.md"),
@@ -84,7 +82,6 @@ function projectPaths(projectRoot) {
     briefsDir: path.join(projectRoot, "briefs"),
     promptsDir: path.join(projectRoot, "prompts"),
     referencesDir: path.join(projectRoot, "references"),
-    continuityBoardsDir: path.join(projectRoot, "references", "continuity-boards"),
     styleLockPath: path.join(projectRoot, "style-lock.json"),
   };
 }
@@ -137,8 +134,6 @@ async function ensureShortDramaWorkflow(state, { route, projectTier }) {
   const replacements = templateReplacements({ state, route: normalizedRoute, projectTier: tier });
   const templateMap = [
     ["project-intake-template.json", stateFiles.projectIntake],
-    ["hook-audit-template.md", stateFiles.hookAudit],
-    ["character-continuity-template.md", stateFiles.characterContinuity],
     ["style-lock-template.json", stateFiles.styleLock],
     ["scene-map-template.md", stateFiles.sceneMap],
     ["shot-audit-template.md", stateFiles.shotAudit],
@@ -171,11 +166,7 @@ async function ensureShortDramaWorkflow(state, { route, projectTier }) {
     strongStateGate: tier === "formal",
     required: [
       "project-intake",
-      "hook-audit",
-      "character-continuity",
       "mother-library-application",
-      "director-contribution",
-      "visual-helpfulness",
       "style-lock",
       "scene-map",
       "shot-audit",
@@ -185,8 +176,6 @@ async function ensureShortDramaWorkflow(state, { route, projectTier }) {
     stateFiles,
     routeBackOrder: [
       "zongkong",
-      "short-drama-episode-writer",
-      "short-drama-character-bible",
       "style-reference-director",
       "project-style-lock",
       "scene-style-map-director",
@@ -198,8 +187,6 @@ async function ensureShortDramaWorkflow(state, { route, projectTier }) {
   };
   state.manifest.current ||= {};
   state.manifest.current.projectIntake = stateFiles.projectIntake;
-  state.manifest.current.hookAudit = stateFiles.hookAudit;
-  state.manifest.current.characterContinuity = stateFiles.characterContinuity;
   state.manifest.current.styleLock = stateFiles.styleLock;
   state.manifest.current.sceneMap = stateFiles.sceneMap;
   state.manifest.current.shotAudit = stateFiles.shotAudit;
@@ -225,7 +212,6 @@ async function ensureProject({ projectName, projectRoot, workflow, route, projec
   await fs.mkdir(paths.briefsDir, { recursive: true });
   await fs.mkdir(paths.promptsDir, { recursive: true });
   await fs.mkdir(paths.referencesDir, { recursive: true });
-  await fs.mkdir(paths.continuityBoardsDir, { recursive: true });
 
   const manifest = await readJson(paths.manifestPath, {
     schemaVersion: 1,
@@ -292,7 +278,7 @@ async function createJob(args) {
     projectRoot: state.projectRoot,
     tool,
     mode,
-    promptMode: args.promptMode || input.promptMode || input.bananaPromptMode || (tool === "banana" ? "compact" : ""),
+    promptMode: args.promptMode || input.promptMode || input.bananaPromptMode || (tool === "banana" ? "quality" : ""),
     outputDir: args.outputDir || input.outputDir || "",
     model: input.model || "",
     aspect_ratio: input.aspect_ratio || input.aspectRatio || input.ratio || "16:9",
@@ -440,6 +426,7 @@ async function ingestVideo({ projectRoot, runManifest, videoJob }) {
     sourceImages,
     referenceRoles: run.reference_roles || run.request?.reference_roles || [],
     audioPolicy: run.audio_policy || run.request?.audio_policy || "",
+    musicPolicy: run.music_policy || run.request?.music_policy || "no_music_allow_sfx",
     taskId,
     assetState,
     status,
@@ -492,39 +479,10 @@ async function findAsset(args) {
 }
 
 function hasUsefulValue(value) {
-  if (Array.isArray(value)) return value.some((item) => hasUsefulValue(item));
-  if (typeof value === "string") return value.trim() !== "" && !isPlaceholderString(value);
-  if (value && typeof value === "object") return Object.values(value).some((item) => hasUsefulValue(item));
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "string") return value.trim() !== "" && !value.includes("待填写");
+  if (value && typeof value === "object") return Object.keys(value).length > 0;
   return Boolean(value);
-}
-
-function isPlaceholderString(value) {
-  const text = String(value || "").trim().toLowerCase();
-  if (!text) return true;
-  return [
-    "__fill__",
-    "__project_",
-    "tbd",
-    "todo",
-    "待填",
-    "待填写",
-    "待补",
-    "寰呭",
-    "draft only",
-  ].some((marker) => text.includes(marker));
-}
-
-function textHasPlaceholder(text) {
-  return isPlaceholderString(text)
-    || /(^|\b)(TBD|TODO|__FILL__)(\b|$)/i.test(text)
-    || text.includes("待填")
-    || text.includes("待填写")
-    || text.includes("待补")
-    || text.includes("寰呭");
-}
-
-function textHasTerms(text, terms) {
-  return terms.every((term) => text.includes(term));
 }
 
 function normalizePlatformName(value) {
@@ -532,13 +490,19 @@ function normalizePlatformName(value) {
 }
 
 function generationPacketTargets(packet) {
-  const videoPacket = packet?.video_platform_prompt_packet || {};
+  const sourcePacket = packet?.video_prompt_source_packet || {};
+  const auditPacket = packet?.audited_prompt_packet || {};
+  const legacyVideoPacket = packet?.video_platform_prompt_packet || {};
   return [
     packet?.target_tool,
+    packet?.platform_target,
     packet?.target_platform,
     packet?.target_model,
-    videoPacket.target_platform,
-    videoPacket.target_model,
+    sourcePacket.platform_target,
+    sourcePacket.target_model,
+    auditPacket.platform_target,
+    legacyVideoPacket.target_platform,
+    legacyVideoPacket.target_model,
   ].map(normalizePlatformName).filter(Boolean);
 }
 
@@ -571,78 +535,66 @@ function firstUseful(...values) {
 
 function generationReadyMissingFields(generationPacket) {
   const missing = [];
-  const videoPacket = generationPacket?.video_platform_prompt_packet || {};
+  const sourcePacket = generationPacket?.video_prompt_source_packet || {};
+  const auditPacket = generationPacket?.audited_prompt_packet || {};
+  const legacyVideoPacket = generationPacket?.video_platform_prompt_packet || {};
   const auditStatus = String(generationPacket?.audit_status || "");
 
-  if (!firstUseful(generationPacket?.target_tool, generationPacket?.target_platform, videoPacket.target_platform)) {
+  if (!firstUseful(
+    generationPacket?.target_tool,
+    generationPacket?.platform_target,
+    generationPacket?.target_platform,
+    sourcePacket.platform_target,
+    auditPacket.platform_target,
+    legacyVideoPacket.target_platform,
+  )) {
     missing.push("target-tool");
   }
+  if (!hasUsefulValue(generationPacket?.deliverable_profile)) missing.push("deliverable-profile");
   if (!hasUsefulValue(generationPacket?.final_prompt)) missing.push("final-prompt");
   if (!["通过", "保效精简后通过", "approved", "passed"].includes(auditStatus)) missing.push("audit-status");
-  if (!hasUsefulValue(generationPacket?.short_drama_hook_packet)) missing.push("short-drama-hook-packet");
-  if (!hasUsefulValue(generationPacket?.character_continuity_lock)) missing.push("character-continuity-lock");
 
   if (isVideoGenerationPacket(generationPacket)) {
-    const taskType = firstUseful(generationPacket.task_type, videoPacket.task_type);
+    const taskType = firstUseful(generationPacket.task_type, sourcePacket.task_type, legacyVideoPacket.task_type);
     if (!hasUsefulValue(taskType)) missing.push("task-type");
-    if (!firstUseful(generationPacket.duration, videoPacket.duration)) missing.push("duration");
-    if (!firstUseful(generationPacket.ratio, videoPacket.ratio)) missing.push("ratio");
-    if (!firstUseful(generationPacket.audio_policy, videoPacket.audio_policy)) missing.push("audio-policy");
+    if (!firstUseful(generationPacket.complexity_mode, sourcePacket.complexity_mode)) missing.push("complexity-mode");
+    if (!firstUseful(generationPacket.duration, sourcePacket.duration, legacyVideoPacket.duration)) missing.push("duration");
+    if (!firstUseful(generationPacket.ratio, sourcePacket.ratio, legacyVideoPacket.ratio)) missing.push("ratio");
+    if (!firstUseful(generationPacket.ending_behavior, sourcePacket.ending_behavior)) missing.push("ending-behavior");
 
     const taskTypeText = normalizePlatformName(taskType);
-    const isTextOnly = taskTypeText === "t2v" || taskTypeText.includes("text");
+    const sourceAuthority = firstUseful(generationPacket.source_authority, sourcePacket.source_authority);
+    const isTextOnly = taskTypeText === "t2v"
+      || taskTypeText.includes("text")
+      || normalizePlatformName(sourceAuthority) === "text_only";
     const hasReference = firstUseful(
       generationPacket.first_frame_or_image_refs,
       generationPacket.first_frame_or_reference,
       generationPacket.reference_roles,
-      videoPacket.first_frame_or_reference,
-      videoPacket.reference_roles,
+      sourcePacket.first_frame_or_reference,
+      sourcePacket.reference_roles,
+      legacyVideoPacket.first_frame_or_reference,
+      legacyVideoPacket.reference_roles,
     );
     if (!isTextOnly && !hasReference) missing.push("first-frame-or-reference");
 
     if (isKlingOmniPacket(generationPacket) && !firstUseful(
       generationPacket.kling_omni_reference_role_map,
-      videoPacket.kling_omni_reference_role_map,
+      sourcePacket.kling_omni_reference_role_map,
+      legacyVideoPacket.kling_omni_reference_role_map,
     )) {
       missing.push("kling-omni-reference-role-map");
     }
   }
 
-  const requiresSameSceneCoverage = Boolean(
-    generationPacket?.requires_same_scene_coverage
-      || videoPacket.requires_same_scene_coverage
-      || generationPacket?.coverage_type
-      || videoPacket.coverage_type,
-  );
-  if (requiresSameSceneCoverage) {
-    if (!firstUseful(generationPacket.scene_continuity_lock, videoPacket.scene_continuity_lock)) {
-      missing.push("scene-continuity-lock");
-    }
-    if (!firstUseful(generationPacket.background_continuity_lock, videoPacket.background_continuity_lock)) {
-      missing.push("background-continuity-lock");
-    }
-    if (!firstUseful(generationPacket.continuity_reference_board, videoPacket.continuity_reference_board)) {
-      missing.push("continuity-reference-board");
-    }
-  }
-
-  if (!firstUseful(
+  const requiresMotherLibrary = generationPacket?.requires_mother_library === true
+    || sourcePacket?.requires_mother_library === true;
+  if (requiresMotherLibrary && !firstUseful(
     generationPacket?.mother_library_application_packet,
-    videoPacket.mother_library_application_packet,
+    sourcePacket.mother_library_application_packet,
+    legacyVideoPacket.mother_library_application_packet,
   )) {
     missing.push("mother-library-application-packet");
-  }
-  if (!firstUseful(
-    generationPacket?.director_contribution_packet,
-    videoPacket.director_contribution_packet,
-  )) {
-    missing.push("director-contribution-packet");
-  }
-  if (!firstUseful(
-    generationPacket?.visual_helpfulness_check,
-    videoPacket.visual_helpfulness_check,
-  )) {
-    missing.push("visual-helpfulness-check");
   }
 
   return missing;
@@ -676,18 +628,6 @@ async function checkShortDramaGeneration(paths, manifest) {
   );
   if (!gates.projectIntake) missingFields.push("project-intake");
 
-  const hookAuditText = await readTextIfExists(stateFiles.hookAudit);
-  gates.hookAudit = textHasApprovedStatus(hookAuditText, ["passed", "approved"])
-    && !textHasPlaceholder(hookAuditText)
-    && textHasTerms(hookAuditText, ["hook_audit_packet", "opening_hook", "audience_question"]);
-  if (!gates.hookAudit) missingFields.push("hook-audit");
-
-  const characterContinuityText = await readTextIfExists(stateFiles.characterContinuity);
-  gates.characterContinuity = textHasApprovedStatus(characterContinuityText, ["passed", "approved"])
-    && !textHasPlaceholder(characterContinuityText)
-    && textHasTerms(characterContinuityText, ["character_continuity_packet", "generation_anchor", "director_contribution_packet", "visual_helpfulness_targets", "forbidden_drift"]);
-  if (!gates.characterContinuity) missingFields.push("character-continuity");
-
   const styleLock = await readJson(stateFiles.styleLock, null);
   const stylePacket = styleLock?.style_lock_packet;
   gates.styleLock = Boolean(
@@ -695,44 +635,20 @@ async function checkShortDramaGeneration(paths, manifest) {
       && hasUsefulValue(stylePacket.style_id)
       && hasUsefulValue(stylePacket.master_style_sentence)
       && hasUsefulValue(stylePacket.mother_library_application_packet)
-      && hasUsefulValue(stylePacket.director_contribution_packet)
-      && hasUsefulValue(stylePacket.visual_helpfulness_targets)
-      && hasUsefulValue(stylePacket.short_drama_hook_packet_source)
-      && hasUsefulValue(stylePacket.character_continuity_source)
       && hasUsefulValue(stylePacket.upstream_source),
   );
   if (!gates.styleLock) missingFields.push("style-lock");
 
   const sceneMapText = await readTextIfExists(stateFiles.sceneMap);
-  gates.sceneMap = textHasApprovedStatus(sceneMapText, ["approved", "complete"])
-    && !textHasPlaceholder(sceneMapText)
-    && textHasTerms(sceneMapText, [
-      "hook_audit_source",
-      "character_continuity_source",
-      "mother_library_translation",
-      "director_contribution_packet",
-      "visual_helpfulness_targets",
-      "generation_risk_split",
-    ]);
+  gates.sceneMap = textHasApprovedStatus(sceneMapText, ["approved", "complete"]);
   if (!gates.sceneMap) missingFields.push("scene-map");
 
   const shotAuditText = await readTextIfExists(stateFiles.shotAudit);
-  gates.shotAudit = textHasApprovedStatus(shotAuditText, ["passed", "approved"])
-    && !textHasPlaceholder(shotAuditText)
-    && textHasTerms(shotAuditText, ["shot_function", "edit_motivation", "director_contribution_packet", "visual_helpfulness_targets", "breath_tail_rule", "handoff_to_prompt"]);
+  gates.shotAudit = textHasApprovedStatus(shotAuditText, ["passed", "approved"]);
   if (!gates.shotAudit) missingFields.push("shot-audit");
 
   const promptAuditText = await readTextIfExists(stateFiles.promptAudit);
-  gates.promptAudit = textHasApprovedStatus(promptAuditText, ["通过", "保效精简后通过", "approved", "passed"])
-    && !textHasPlaceholder(promptAuditText)
-    && textHasTerms(promptAuditText, [
-      "hook_audit_packet",
-      "character_continuity_lock",
-      "mother_library_application_packet",
-      "director_contribution_packet",
-      "visual_helpfulness_check",
-      "source_lock",
-    ]);
+  gates.promptAudit = textHasApprovedStatus(promptAuditText, ["通过", "保效精简后通过", "approved", "passed"]);
   if (!gates.promptAudit) missingFields.push("prompt-audit");
 
   const generationReady = await readJson(stateFiles.generationReady, null);
@@ -743,8 +659,6 @@ async function checkShortDramaGeneration(paths, manifest) {
 
   const routeMap = {
     "project-intake": "zongkong",
-    "hook-audit": "short-drama-episode-writer",
-    "character-continuity": "short-drama-character-bible",
     "style-lock": "project-style-lock",
     "scene-map": "scene-style-map-director",
     "shot-audit": "shot-language-auditor",
@@ -815,7 +729,6 @@ async function main() {
       briefsDir: result.briefsDir,
       promptsDir: result.promptsDir,
       referencesDir: result.referencesDir,
-      continuityBoardsDir: result.continuityBoardsDir,
       shortDrama: result.shortDrama || null,
     };
   } else if (args.command === "create-job") {

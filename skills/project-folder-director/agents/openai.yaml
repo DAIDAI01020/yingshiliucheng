@@ -1,0 +1,6 @@
+interface:
+  display_name: "项目目录导演"
+  short_description: "按当前工作区或既有合同建立可移植的项目目录与输出路径"
+  default_prompt: "Use $project-folder-director to resolve a portable projects root and produce a safe project folder contract and output path rules."
+policy:
+  allow_implicit_invocation: true

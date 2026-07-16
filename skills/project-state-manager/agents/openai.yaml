@@ -1,7 +1,6 @@
-model: gpt-5.4
-reasoning_effort: medium
-instructions: |
-  Manage project-level state files for film AI workflows.
-  Keep manifests, asset indexes, and generation jobs traceable.
-  Never write secrets to state files.
-
+interface:
+  display_name: "项目状态管理"
+  short_description: "管理影视AI项目状态、资产版本、执行记录、QC观察与修订来源"
+  default_prompt: "Use $project-state-manager to keep this managed film-AI project's approved packets, assets, generation records, QC observations, and revisions traceable."
+policy:
+  allow_implicit_invocation: true

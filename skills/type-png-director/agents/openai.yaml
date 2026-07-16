@@ -1,0 +1,6 @@
+interface:
+  display_name: "Type PNG Director"
+  short_description: "创建准确文字、参考字形、3D材质与透明边缘受控的字体资产提示词"
+  default_prompt: "Use $type-png-director to define an exact-text typography asset with controlled lettering, 3D treatment, transparency, references, and production risks before platform compilation."
+policy:
+  allow_implicit_invocation: true

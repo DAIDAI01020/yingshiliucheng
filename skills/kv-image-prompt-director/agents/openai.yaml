@@ -1,4 +1,6 @@
 interface:
   display_name: "KV Image Prompt Director"
-  short_description: "商业KV主视觉无字底图、分层资产与延展比例出图提示词"
-  default_prompt: "Use $kv-image-prompt-director to turn an approved kv_direction_packet into copyable image prompts. Require and visibly translate kv_composition_style_packet for every KV: first-read, hierarchy, gaze path, negative space, typography relationship, composition, style, palette, material, light, graphic/photo balance, density, and forbidden drift. Preserve proposal_to_kv_packet. For big-screen/LED KV, additionally translate large_screen_experience_packet as a physical-screen adaptation; route missing creative decisions back to $kv-director."
+  short_description: "把已批准KV方向转换为无字底图、分层资产与比例变体提示词源包"
+  default_prompt: "Use $kv-image-prompt-director to turn this approved KV direction into concise image-prompt source packets while preserving hierarchy, safe zones, asset roles, and post-typography intent."
+policy:
+  allow_implicit_invocation: true
