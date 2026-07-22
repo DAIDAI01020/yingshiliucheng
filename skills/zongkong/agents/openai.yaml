@@ -1,6 +1,6 @@
 interface:
   display_name: "总控"
-  short_description: "选择影视AI任务的交付画像、流程、平台、输出与质检模式"
-  default_prompt: "Use $zongkong to classify this film/visual request by deliverable profile, preserve the explicit or current platform, keep internal packets hidden, and route only through applicable gates."
+  short_description: "统筹影视AI任务的路由、项目、多聊天隔离、平台与质量门槛"
+  default_prompt: "Use $zongkong to classify this film/visual request, preserve its platform and quality gates, and route context-isolated multi-part work through one managed project when needed."
 policy:
   allow_implicit_invocation: true

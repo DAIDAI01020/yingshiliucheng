@@ -13,6 +13,14 @@ Do not use it when the user only asks for prompts. For prompt writing, use `$fra
 
 This skill calls OpenRouter's Chat Completions endpoint for `google/gemini-3.1-flash-image-preview` and saves returned images locally. It does not store API keys in files, logs, skill docs, GitHub, or output records.
 
+## Independent Tool Boundary
+
+This is the only user-facing Banana execution skill. It owns Banana API preflight, direct generation, batch generation, per-shot continuation after failures, saved images, saved prompts, and generation logs.
+
+Do not use this skill for `image`, `image-2`, `ChatGPT Image`, `内置 image`, or `内置 imagegen`. Those requests belong to `$builtin-imagegen-director` and the built-in imagegen tool. Never silently fall back from Banana to built-in imagegen, and never describe a built-in image result as Banana.
+
+`$image-generation-controller` is only a legacy internal compatibility wrapper. New Banana requests route directly to this skill; it is not a separate user-facing image-generation route.
+
 ## Requirements
 
 - `OPENROUTER_API_KEY` must exist in the local environment for real generation.
@@ -24,7 +32,8 @@ This skill calls OpenRouter's Chat Completions endpoint for `google/gemini-3.1-f
 - Logs are saved in `logs\generation-log.json`.
 - Default aspect ratio: `16:9`.
 - Default image size: `2K`.
-- Default Banana prompt mode: `compact`, which keeps `2K` but uses `compactPrompt` / `bananaCompactPrompt` for the API request when available.
+- Default Banana prompt mode: `quality`, which uses the full per-shot prompt for the API request.
+- Use `compact` mode only when the user explicitly asks for speed, low token use, or `省 token`; compact mode keeps `2K` but uses `compactPrompt` / `bananaCompactPrompt` when available.
 - Output files use versioned names, such as `S01_banana_v01.png`, `S01_banana_v02.png`.
 
 ## Input JSON
@@ -97,10 +106,27 @@ After generation, report:
 
 If any shot fails, keep generating the rest and record the error in `generation-log.json`.
 
+Return an overall execution result in addition to the per-shot table:
+
+```text
+banana_execution_result
+status: completed / partial / failed / preflight_failed
+failure_type: none / missing_api_key / invalid_input / missing_reference / api_rejected / network_or_service / empty_image_response / save_error / unknown
+attempted_shots:
+completed_shots:
+failed_shots:
+retry_allowed:
+next_action:
+```
+
+Retry only failed shots. A transient network/service error or empty image response may be retried once automatically. Missing keys, invalid input, missing references, API rejection, and save-path errors must be fixed before retrying. Never report success unless an image file was actually saved.
+
 The log uses shared fields with OpenAI generation: shot, version, tool, model, promptSummary, fullPrompt, negativePrompt, finalPrompt, promptPath, promptJsonPath, filePath, status, error, and retrySuggestion.
 `outputDir` is the task root. `imageDir` points to `images\`. `promptDir` points to `prompts\`. `logDir` points to `logs\`.
 
 For Banana 2K token-saving generation, `fullPrompt` is the actual compact request prompt. If a longer source prompt exists, it is saved as `sourcePrompt` in the log and prompt JSON. This saves request tokens without lowering `image_size`.
+
+For story-driven storyboard batches, short-drama keyframes, TVC narrative shots, or any request where the user asks for detailed per-shot style/camera data, use `quality` mode by default. Do not let compact mode remove per-shot unified style DNA, camera system, focal length, aperture/depth, lighting, composition, continuity, material texture, ratio, or negative controls.
 
 ## Workflow
 
@@ -116,5 +142,7 @@ For Banana 2K token-saving generation, `fullPrompt` is the actual compact reques
 - Never write the API key into JSON input, logs, skill files, repo files, or final answers.
 - Do not call the API unless the user explicitly asked for real Banana image generation.
 - Use `2K` for normal storyboard/keyframe drafts. Do not reduce to `1K` for token saving unless the user explicitly asks.
-- Prefer compact Banana prompts for execution: keep subject, composition, camera, light, material, ratio, and core negatives; remove proposal explanations and repeated client-facing rationale.
+- Prefer full detailed Banana prompts for storyboards and narrative keyframes unless the user explicitly asks for compact execution. Each shot prompt must be self-contained and include subject, composition, camera, lens, aperture/depth, light, material, continuity anchors, ratio, and core negatives.
+- Compact Banana prompts may remove proposal explanations and client-facing rationale, but they must not remove the per-shot camera, light, material, continuity, ratio, or negative-control details needed for execution.
 - Keep generation records by shot number so revisions can target a single shot.
+- Never call built-in imagegen as a Banana fallback. If Banana execution fails, return the Banana failure reason and remain on the Banana route until the user explicitly changes tools.

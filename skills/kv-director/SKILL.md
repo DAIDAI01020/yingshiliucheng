@@ -101,6 +101,18 @@ Do not output only `做一个KV`. First decide the KV job.
 
 Before writing any KV prompt handoff, `$kv-director` must decide both the composition system and the style system. A KV is not "one nice poster"; it is a visual system that must control attention, material, light, color, title relationship, crop behavior, and extensions.
 
+For formal KV research, first use the mother library's [KV and key-art case mechanisms](../reference-visual-library/references/kv-key-art-case-library.md) when available. It supplies verified studio/case mechanisms and source traces. It does not decide the final layout.
+
+Authority split:
+
+```text
+kv-key-art-case-library = case mechanism, why it fits, source trace, do_not_copy
+kv-composition-style-library = composition and style archetype authority
+kv-director = final hierarchy, safe area, crop, extension, asset split, and handoff
+```
+
+Select one primary case mechanism and at most two supporting mechanisms. Each supporting mechanism must solve a named problem such as product truth, event ritual, multi-screen extension, title safety, or multi-format consistency. Do not put studio names or campaign names into the final generation prompt.
+
 Reading `references/kv-composition-style-library.md` is mandatory for every KV. It is the primary visual judgment library. `references/kv-reference-library.md` supplies category/reference mechanisms, while `references/large-screen-kv-experience-library.md` only adapts the approved visual system to physical screens.
 
 When the user asks for a formal KV, event KV, launch KV, main visual, LED main visual, stage screen, or banner system, use references from `references/kv-reference-library.md` and, when browsing is available or the user requests it, inspect public inspiration sources such as Pinterest ideas, Behance project searches, Dribbble searches, official campaign pages, event/stage design references, and brand design case sites. Do not copy exact designs, logos, typography, or campaign layouts. Translate them into composition mechanisms.

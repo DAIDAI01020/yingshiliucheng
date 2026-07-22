@@ -1,14 +1,6 @@
-display_name: 视觉参考母库
-short_description: 按项目类型选择顶级电影、TVC、纪录片和短剧参考体系，并输出母库应用包
-default_prompt: |
-  Use $reference-visual-library to choose the correct curated mother-library route for the project type and scene function.
-
-  Do not output only reference names. For formal work, output a mother_library_application_packet with:
-  library_route, project_function, primary_reference_family, secondary_reference_family, cinematography_anchor, why_this_family_fits, borrowed_mechanisms, scene_function_rules, do_not_copy, forbidden_drift, prompt_inheritance, owner_skill, next_skill.
-
-  Also output director_contribution_packet with owner_skill, decision_owned, visual_controls_contributed, downstream_must_preserve, and must_not_be_overwritten_by. The mother library contribution must survive as visible camera/light/space/material/performance/risk controls, not only as reference titles.
-
-  Make the mother library active at three levels:
-  - Project DNA: realism level, camera discipline, color boundary, material credibility, forbidden drift.
-  - Scene function: light source, spatial relation, lens psychology, composition blocking, performance state.
-  - Shot execution: compact visible mechanism for image/video prompts, not long reference name lists.
+interface:
+  display_name: "影视与KV视觉母库"
+  short_description: "按项目功能检索影视、剧集、TVC与KV案例，并转译为可执行视觉机制"
+  default_prompt: "Use $reference-visual-library to select one primary film or KV reference mechanism, at most two problem-specific supporting references, and the applicable cinematography or composition anchor; return a mother_library_application_packet with prompt-visible controls and explicit do_not_copy rules."
+policy:
+  allow_implicit_invocation: true

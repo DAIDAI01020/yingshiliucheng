@@ -1,6 +1,6 @@
 interface:
-  display_name: "Production Manager"
-  short_description: "Track stages, tasks, blockers, and next steps for film AI projects"
-  default_prompt: "Use $production-manager to create a project progress board and next-step task list."
+  display_name: "影视项目制作控制台"
+  short_description: "汇总项目阶段、分任务、资产、生成运行、反馈证据、阻塞与下一步"
+  default_prompt: "Use $production-manager to build a persisted project progress dashboard with thread, asset, generation-ledger, QC-feedback, blocker, and next-action summaries."
 policy:
   allow_implicit_invocation: true

@@ -1,6 +1,6 @@
 ---
 name: zongkong
-description: Top-level orchestrator for AI film and visual-production work. Use when starting or continuing a film, commercial, short-drama, storyboard, KV, poster, image, video, review, archive, or project-management task that needs project setup, speed-mode classification, cross-skill routing, platform selection, formal production gates, QC, or next-action decisions. Also use when the creative request is ambiguous and the correct downstream skill is unclear. Do not trigger merely because a conversation is new or for unrelated coding and general tasks.
+description: Top-level orchestrator for AI film and visual-production work. Use when starting or continuing a film, commercial, short-drama, storyboard, KV, poster, image, video, review, archive, or project-management task that needs project setup, speed-mode classification, cross-skill routing, context-isolated child threads, platform selection, formal production gates, QC, or next-action decisions. Also use when the creative request is ambiguous and the correct downstream skill is unclear. Do not trigger merely because a conversation is new or for unrelated coding and general tasks.
 ---
 
 # Zongkong
@@ -13,6 +13,7 @@ Decide only what the orchestration layer owns:
 
 - whether this request belongs to the AI film/visual workflow;
 - whether to create or reuse a project folder;
+- whether one hub chat should isolate several bounded tasks in child threads;
 - `speed_mode`, `project_tier`, `workflow_mode`, and `main_line`;
 - the next owning skill and platform target;
 - which formal gates apply to this deliverable;
@@ -29,24 +30,28 @@ Load only the reference needed for the current decision:
 - Formal packets, applicable gates, owners, `missing_fields`, or `route_back_to`: read [references/packets-and-gate-ownership.md](references/packets-and-gate-ownership.md).
 - Deliverable-specific prompt fields, response visibility, QC mode, or quality-profile selection: read [references/deliverable-profiles-and-response-modes.md](references/deliverable-profiles-and-response-modes.md).
 - Formal project/scene references, mother-library logic, or style inheritance: read [references/reference-library-rules.md](references/reference-library-rules.md).
+- Skill ownership conflicts, route simplification, or whole-agent optimization: read [references/capability-registry.json](references/capability-registry.json) and preserve its single-owner rule.
 - After editing this skill or changing a route boundary: read and run [references/regression-checklist.md](references/regression-checklist.md).
 
 Do not copy detailed reference tables back into this file. Each rule must have one source of truth.
+
+After a whole-agent change, run `scripts/run_e2e_workflow_tests.py` in addition to the static contract validator. The E2E suite must use a disposable temporary project and may audit a named real project only through read-only commands.
 
 ## Decision Order
 
 Use this order. Earlier decisions take precedence over later generic triggers.
 
 1. **Scope**: confirm the request belongs to the AI film/visual workflow. If not, do not force `$zongkong` routing.
-2. **Explicit platform**: an explicitly named platform outranks generic words such as “出图” or “出视频” and overrides an inherited platform only when the user clearly requests the change. Never silently fall back to another platform.
-3. **Continuation state**: if the user says continue, regenerate, revise, or references an existing managed project and does not name a new platform, preserve its current platform, route, approved proposal, references, and style lock.
-4. **Execution intent**: distinguish direct generation, prompt-only delivery, planning/direction, review, revision, and archive.
-5. **Speed mode**: classify `prompt_only`, `quick_test`, or `formal_managed`.
-6. **Deliverable profile**: choose the smallest profile that describes what must be accurate in the result.
-7. **Response and QC modes**: decide how much workflow detail the user should see and whether QC is absent, deferred/light, or formal.
-8. **Workflow mode and main line**: choose the specialist route.
-9. **Applicable gates**: require only the gates relevant to the deliverable profile.
-10. **Next action**: name one next owning skill or execute the in-scope next step.
+2. **Thread topology**: decide whether the work stays in one chat or needs one project-scoped hub with context-isolated child tasks.
+3. **Explicit platform**: an explicitly named platform outranks generic words such as “出图” or “出视频” and overrides an inherited platform only when the user clearly requests the change. Never silently fall back to another platform.
+4. **Continuation state**: if the user says continue, regenerate, revise, or references an existing managed project and does not name a new platform, preserve its current platform, route, approved proposal, references, and style lock.
+5. **Execution intent**: distinguish direct generation, prompt-only delivery, planning/direction, review, revision, and archive.
+6. **Speed mode**: classify `prompt_only`, `quick_test`, or `formal_managed`.
+7. **Deliverable profile**: choose the smallest profile that describes what must be accurate in the result.
+8. **Response and QC modes**: decide how much workflow detail the user should see and whether QC is absent, deferred/light, or formal.
+9. **Workflow mode and main line**: choose the specialist route.
+10. **Applicable gates**: require only the gates relevant to the deliverable profile.
+11. **Next action**: name one next owning skill or execute the in-scope next step.
 
 When a conflict remains, use this precedence:
 
@@ -130,6 +135,26 @@ Do not hard-code a drive or project root here. `$project-folder-director` owns `
 
 Ask about project tier or storage only when it materially blocks execution. Do not ask merely to complete a packet.
 
+## Multi-Thread Project Routing
+
+Route to `$project-thread-orchestrator` when the user explicitly wants separate chats or when a managed manuscript/production contains several independently revisable modules whose references, approvals, platforms, or specialist owners should not share context.
+
+Do not route a single short task, a small same-source variant set, or a long but coherent deliverable into multiple chats. Let the applicable director decide semantic split boundaries; `$zongkong` decides only that context isolation is warranted.
+
+Before any child creation, require all of these:
+
+```text
+saved Codex project ID and exact project path
+one shared project_root from project_folder_contract
+user-visible thread_split_plan
+one user confirmation
+parallel_limit <= 4
+```
+
+Every child must use the same project target with a local environment and a clean task packet. Never use a fork, projectless thread, different project, or worktree for this route. Keep queued tasks file-backed but do not create their chats until dependencies and slots allow.
+
+Thread orchestration is orthogonal to `speed_mode`: splitting a manuscript does not by itself make every child `formal_managed`. Preserve each child deliverable's applicable route and quality floor.
+
 ## Route Packet
 
 Create or preserve this compact internal packet before handing off to another skill:
@@ -144,6 +169,9 @@ deliverable_profile: live_action_people / product_structure / commercial_kv / gr
 platform_target: built_in_image / banana / banana_pro / jimeng / kling / kling_o1 / kling_video_3_omni / seedance_ark / midjourney / layout / none
 response_mode: direct / compact / diagnostic
 qc_mode: none / light_deferred / formal
+thread_orchestration: none / proposed / active
+thread_registry:
+context_version:
 next_skill:
 missing_fields:
 route_reason:
@@ -183,6 +211,7 @@ For packet schemas and exact owners, read [references/packets-and-gate-ownership
 - `$prompt-platform-auditor` audits platform execution; it does not replace creative direction.
 - Generation tools execute approved prompts; they do not discover or decide the formal project style.
 - QC skills diagnose results and route targeted revisions; they do not rewrite the entire project style for an isolated generation failure.
+- Every reusable capability has one decision owner in `capability-registry.json`. Supporters contribute bounded inputs and never become a second owner. Internal compatibility skills must not be selected for new user-facing work.
 
 If a formal upstream decision is missing, return `missing_fields` and the owning `route_back_to`. Do not send the gap downstream.
 
@@ -253,4 +282,5 @@ Use standard QC decisions:
 - Do not commit, push, sync, move, or delete project/workflow files unless the user authorizes that action.
 - Before changing global workflow contracts, state gates, templates, or scripts, explain the scope, affected files, formal-vs-quick impact, complexity risk, and rollback path unless the user explicitly requested that implementation in the current turn.
 - Preserve the boundary between quick tests and formal managed production.
+- For hub/child projects, preserve same-project and same-root containment, require confirmation before creation/broadcast, and never copy hub history with a fork.
 - Prefer execution when the user asks for action; ask only when a missing decision materially changes the result or external state.

@@ -175,32 +175,71 @@ brief-analyzer
 -> image-qc-director / asset-librarian
 ```
 
-TVC广告大段故事板测试路线：
+Image故事板独立工作流路线：
 
 ```text
-已有导演/提示词输出
--> storyboard-planner 轻整理大段 beat
--> scene-board-image-prompter
--> 内置 imagegen
+用户提出 image故事板 / 直接给 image 出故事板 / 整张喂即梦或Seedance / 人物道具环境机位板
+-> image-storyboard-workflow 产出 image_storyboard_workflow_packet
+-> image-storyboard-director 先产出 image_storyboard_design_packet
+-> scene-board-image-prompter 做 pre_generation_check
+-> pre_generation_check: passed 后才允许内置 imagegen
 ```
 
 使用场景：
 
 ```text
-TVC广告故事板测试
-剧情包装广告故事板
-每一大段故事板
+image故事板
 直接给 image 出故事板
+整张喂即梦/Seedance/Kling
+人物道具场景设定板
+人物动线机位图
+production design storyboard board
 ```
 
 规则：
 
 ```text
 默认 quick_test，不强制状态门、母库包、平台审核或 QC。
-人物形象、服装、道具、产品、场景、风格和小分镜提示词优先继承已有上游导演 skill 或提示词 skill 输出。
-当前任务只把已定内容整理成每个大段/章节的 storyboard board 提示词，不重新设计人物、道具、产品和场景。
-一段一张横版 storyboard board；只有用户明确要求“逐镜”时，才切到 frame-vision-director 输出逐镜 image 提示词。
-如果用户要求“每个小分镜提示词 / 单独小分镜出图 / 逐镜出图提示词”，storyboard-planner 先输出 tvc_shot_prompt_handoff，frame-vision-director 再继承人物、道具、产品、场景、风格和 board_type 输出逐镜自包含 image prompt。
+image-storyboard-workflow 先判断 workflow_variant、source_type、board_type、是否整张喂即梦/Seedance/Kling，以及 video_reference_inherit / video_reference_do_not_inherit。
+image故事板覆盖 TVC广告、产品广告、品牌广告、节目宣传、活动开场、品牌片、商业剧情和短剧同场连续性板；不要因为是广告/产品就绕出这个 workflow。
+默认 board_type 是 production_design_storyboard_board，不是普通分镜预览。
+image-storyboard-director 必须先按真实导演逻辑主动拆场戏/段落/节拍单元，再想清楚人物、服装、道具、场景、人物动线、视线、俯视机位图、节拍执行流、关键帧预览和灯光材质参考。
+拆分不按固定秒数硬切，时长只是辅助判断；优先按场景功能、空间地理、机位轴线、人物调度、道具互动和情绪转折拆。
+一张板只服务一个可执行场戏或短节拍单元；不能把完整剧情、多个转折或多个空间轴线都塞进一张图。
+如果 director_scene_breakdown 产生多个 board_unit，默认输出 multi_board_series：每个 board_unit 单独 image_storyboard_design_packet、单独 pre_generation_check、单独内置 image prompt、单独一张图。只有用户明确要“总览板/只要一张 master board”时，才允许单张 overview，并且不能替代分段叙事板。
+scene-board-image-prompter 只把 image_storyboard_design_packet 翻译成内置 imagegen 提示词，不重新设计人物道具场景。
+出图前必须通过 pre_generation_check：必须有 director_scene_breakdown、image_storyboard_design_packet、明确 board_unit、九个板块、连续性控制和视频参考继承边界。检查不通过就打回对应 skill，不允许直接出图。
+整张板必须能防止多角色视频生成中的位置不对、视线不对、人物消失、道具消失和空间漂移。
+如果用户要求“每个小分镜提示词 / 单独小分镜出图 / 逐镜出图提示词”，再从 image_storyboard_design_packet 的 shot_preview_list 切到 frame-vision-director 输出逐镜自包含 image prompt。
+```
+
+TVC / 产品广告 / 商业宣传 image故事板路线：
+
+```text
+已有导演/提示词输出
+-> image-storyboard-workflow 判断 source_type: tvc / product_demo / program_promo / event_opener / brand_film / other_commercial
+-> 可选 storyboard-planner 轻整理大段 beat（仅当用户明确要大段/章节 beat 整理）
+-> image-storyboard-director 按真实导演逻辑拆 board_unit，并补齐人物/道具/产品/场景/动线/机位设定包
+-> scene-board-image-prompter 为每个 board_unit 单独 precheck 和提示词
+-> 内置 imagegen 为每个通过 precheck 的 board_unit 单独出图
+```
+
+使用场景：
+
+```text
+TVC广告故事板测试
+产品广告故事板
+品牌广告故事板
+剧情包装广告故事板
+每一大段故事板
+```
+
+规则：
+
+```text
+只有用户明确要 TVC大段、每一大段、章节 beat 整理或剧情包装广告故事板时，才走 storyboard-planner。
+TVC大段板也必须保留人物、道具、产品、场景、人物动线、机位图和关键节拍，不再只做普通分镜预览。
+多段广告/产品流程默认多张板，不能把产品揭示、使用证明、情绪反应和品牌落点全部压进一张图。
 ```
 
 专项导演选择：
@@ -547,6 +586,9 @@ director_contribution_check：母库、场戏、镜头语言、角色/产品连�
 
 ```text
 每条图片提示词都必须自带完整风格，不写“同上”
+Banana / Banana Pro 故事分镜默认用完整详细提示词：每个分镜单独写清统一风格DNA、摄影机/影像系统、镜头焦段、光圈/景深、景别、机位、构图、光线、色彩、材质、连续性、比例和负面项
+只有用户明确说省token、快速测试或 compact，Banana 才使用 compactPrompt；compact 也不能删掉本镜头的相机、光线、构图和连续性
+Banana 与内置 image 是两条独立 skill 路线，互不代办、互不自动回退；泛称“出图/重出/继续出”时继承当前项目已锁定的平台，未锁定且会影响执行方式时先由总控确定平台
 视频提示词必须单主体动作、单镜头运动
 即梦视频优先短执行版
 Banana局部替换必须先锁定原图
@@ -558,8 +600,8 @@ Banana局部替换必须先锁定原图
 
 | 工具 | 使用场景 |
 | --- | --- |
-| 内置 imagegen | 快速看效果、单张概念图、内置最新模型 |
-| Banana / Banana Pro | 批量关键帧、省token、重出、局部替换 |
+| 内置 imagegen | `$builtin-imagegen-director`；会话内快速看效果、单张概念图、内置最新模型，不使用 Banana API，也不承诺 Banana 日志 |
+| Banana / Banana Pro | `$banana-image-generator`；OpenRouter 直出、批量关键帧、逐镜重出、文件与失败日志，默认完整质量提示词 |
 | Midjourney | MJ/Legnext 独立路线，风格探索或高质视觉方向 |
 | Seedance/Ark | 直接视频生成，优先公网图URL |
 | 即梦/可灵 | 视频提示词执行或外部平台手动执行 |

@@ -56,11 +56,24 @@ When the user has not named a style, proactively recommend:
 
 ```text
 1 primary mother-library reference family
-1 supporting reference only if it solves a concrete scene problem
+0-2 supporting references, each only if it solves a named scene, communication, or deliverable problem
 1 top cinematography anchor
 ```
 
+Use the expanded mother-library routes deliberately:
+
+| Need | Preferred route |
+| --- | --- |
+| 电影化品牌片、正式叙事、历史、人文、城市、类型氛围 | `reference-visual-library/references/film-prestige-visual-library.md` |
+| 商业KV、产品KV、发布会/活动主视觉、节目KV | `reference-visual-library/references/kv-key-art-case-library.md` -> `$kv-director` |
+| 竖屏剧情、短剧冲突、连续场戏 | `reference-visual-library/references/short-drama-story-library.md` |
+| 正式电影化实拍/生成 | add `reference-visual-library/references/shared-elite-cinematography.md` |
+
+For graphic-only KV, pure typography, or abstract LED, use the applicable composition, material, typography, or stage/space anchor; do not force a cinematography reference. For a cinematic KV base image, combine one KV case mechanism with one film-world mechanism, then let `$kv-director` retain composition and safe-area authority.
+
 When the user names a film, director, TVC, photographer, or visual style, validate whether it fits the project. If it fits, translate it. If it does not fit, say why and recommend a closer mother-library route.
+
+For film/prestige research, presence on ShotDeck, awards, popularity, or a famous cinematographer is not enough. Apply `$reference-visual-library`'s ShotDeck-first quality gate, start with the `Core A` pool, and select at shot-mechanism level. Use `Specialist B` only when it solves a named gap. If the authenticated ShotDeck session was not actually inspected, return a search recipe instead of claiming a deck or shot match.
 
 When the user provides reference images, inherit `$reference-image-style-matcher` first. Do not skip the mother-library recommendation just because a reference image exists.
 
@@ -68,7 +81,7 @@ Every recommendation must output two layers:
 
 ```text
 母库推荐层：
-主参考体系 / 辅助参考 / 摄影锚点 / 适用原因 / 不适用部分
+主参考体系 / 0-2个有明确任务的辅助参考 / 适用锚点 / 适用原因 / 不适用部分
 
 提示词转译层：
 光线 / 空间 / 构图 / 焦段 / 色彩 / 材质 / 表演 / AI风险

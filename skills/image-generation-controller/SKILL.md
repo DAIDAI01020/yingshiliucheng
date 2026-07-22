@@ -1,9 +1,11 @@
-﻿---
+---
 name: image-generation-controller
-description: Orchestrate logged Banana generation and review-board creation for film visual workflows. Use when the user explicitly chooses Banana and wants one command to run preflight or generation, save images/prompts/logs, and build a side-by-side image review board.
+description: Legacy internal compatibility wrapper for managed Banana generation jobs and review-board creation. New user-facing Banana requests must route to banana-image-generator; built-in image requests must route to builtin-imagegen-director. Use this wrapper only when an existing managed job explicitly requires the legacy combined generation, review-board, and state-ingest sequence.
 ---
 
 # Image Generation Controller
+
+This is not a third user-facing image-generation skill. The two user-facing routes are `$banana-image-generator` for Banana and `$builtin-imagegen-director` for built-in imagegen. Keep this wrapper only for legacy managed jobs that require its combined review/state sequence.
 
 ## Core Role
 
@@ -36,6 +38,8 @@ If the user says `image / ChatGPT Image / image-2`, do not use this controller; 
 5. Build the review board with `$image-review-board`.
 6. If the job has `projectRoot`, write generation results back to `$project-state-manager`.
 7. Return the task folder, generation log, review board, image paths, prompt paths, and failed-shot retry suggestions.
+
+For managed real generation, compute an idempotency key from tool, prompt, references, model, size, and shot set. Refuse a duplicate succeeded/in-flight run, require `generation_confirmation`, and write `revision-logs/generation-run-ledger.jsonl`. `--resume` retries only the failed shot IDs from a prior partial run; it never discards successful outputs. Use `--force-new-run` only after an explicit user request for a genuinely new paid attempt.
 
 ## No Lazy Execution Rule
 
@@ -88,7 +92,7 @@ When the user says `出图`, `用 Banana 出`, `继续出`, `重出`, or `给我
 
 1. Do not restate a long plan.
 2. Use Banana unless the user explicitly names another generator.
-3. Use `prompt-mode compact`.
+3. Use `prompt-mode quality` unless the user explicitly asks for `省 token`, fast testing, or compact execution.
 4. Keep `image_size: 2K`.
 5. Generate only the requested shots or failed shots.
 6. Build the review board.
@@ -105,7 +109,9 @@ node .\scripts\run-image-generation.mjs --tool banana --input H:\yingshi\input.j
 node .\scripts\run-image-generation.mjs --tool banana --input H:\yingshi\input.json
 node .\scripts\run-image-generation.mjs --job H:\yingshi\projects\project\generation-jobs\job.json
 node .\scripts\run-image-generation.mjs --job H:\yingshi\projects\project\generation-jobs\job.json --dry-run
-node .\scripts\run-image-generation.mjs --tool banana --input H:\yingshi\input.json --prompt-mode compact
+node .\scripts\run-image-generation.mjs --tool banana --input H:\yingshi\input.json --prompt-mode quality
+node .\scripts\run-image-generation.mjs --job H:\yingshi\projects\project\generation-jobs\job.json --generation-confirmation approved
+node .\scripts\run-image-generation.mjs --job H:\yingshi\projects\project\generation-jobs\job.json --generation-confirmation approved --resume
 ```
 
 ## Output
@@ -129,7 +135,7 @@ The controller returns a JSON summary:
 ## Rules
 
 - Default concurrency is `1`; do not parallelize API calls in v1.
-- Banana defaults to `2K` and `prompt-mode compact` when compact prompts are available.
+- Banana defaults to `2K` and `prompt-mode quality`; use compact prompts only when explicitly requested.
 - Only run real generation from an audited prompt; dry-run may inspect job shape but must still report missing audit state.
 - Do not call real APIs in dry-run mode.
 - Do not store or print API keys.
@@ -137,5 +143,8 @@ The controller returns a JSON summary:
 - Always build a review board after the generator creates `generation-log.json`, including dry-run tasks.
 - When using `--job` with `projectRoot`, always update `project-manifest.json` and `asset-index.json`.
 - If generation partly fails, still build the review board from the log and report failed shots.
+- Preserve successful shots and retry only failed items on `--resume`; default to at most two explicitly confirmed attempts.
+- When available, compare `available_credits` with `estimated_cost` before submission and stop before a paid request when insufficient.
+- Repeated invocation with the same idempotency key must reuse/block the existing result instead of submitting again.
 - For prompt-only requests, do not use this skill. Use prompt director skills instead.
 

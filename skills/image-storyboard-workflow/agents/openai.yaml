@@ -1,0 +1,6 @@
+interface:
+  display_name: "Image故事板工作流"
+  short_description: "统筹独立image故事板导演、板型和视频边界"
+  default_prompt: "Use $image-storyboard-workflow to route standalone image storyboard boards through image-storyboard-director, then scene-board-image-prompter, with direct video reference boundaries when needed."
+policy:
+  allow_implicit_invocation: true

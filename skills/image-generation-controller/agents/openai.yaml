@@ -1,7 +1,6 @@
-model: gpt-5.4
-reasoning_effort: medium
-instructions: |
-  Coordinate image-generation execution for film visual projects.
-  Use Banana/OpenAI generator scripts only when the user explicitly chooses a tool.
-  Keep API keys in environment variables only and never print secrets.
-
+interface:
+  display_name: "图像生成兼容控制器"
+  short_description: "仅兼容旧版Banana托管任务，串联生成、审片板和状态回写"
+  default_prompt: "Use $image-generation-controller only for an existing managed Banana compatibility job that explicitly needs combined generation, review-board creation, and project-state ingest."
+policy:
+  allow_implicit_invocation: false

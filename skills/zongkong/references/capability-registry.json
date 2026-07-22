@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "ownership_rule": "Every capability has exactly one decision owner. Supporting skills may contribute but must not replace or contradict the owner.",
+  "capabilities": [
+    {"capability_id": "top_level_routing", "owner": "zongkong", "supporters": [], "user_facing": true},
+    {"capability_id": "project_folder_contract", "owner": "project-folder-director", "supporters": ["asset-librarian"], "user_facing": true},
+    {"capability_id": "project_state_persistence", "owner": "project-state-manager", "supporters": ["production-manager"], "user_facing": true},
+    {"capability_id": "project_thread_orchestration", "owner": "project-thread-orchestrator", "supporters": ["project-state-manager", "production-manager"], "user_facing": true},
+    {"capability_id": "project_dashboard", "owner": "production-manager", "supporters": ["project-state-manager", "project-thread-orchestrator"], "user_facing": true},
+    {"capability_id": "mother_library_selection", "owner": "reference-visual-library", "supporters": ["style-reference-director", "reference-aesthetic-director"], "user_facing": true},
+    {"capability_id": "project_style_lock", "owner": "project-style-lock", "supporters": ["style-bible-director", "scene-style-map-director"], "user_facing": true},
+    {"capability_id": "image_prompt_semantics", "owner": "frame-vision-director", "supporters": ["kv-image-prompt-director", "scene-board-image-prompter", "type-png-director"], "user_facing": true},
+    {"capability_id": "video_prompt_semantics", "owner": "ai-video-prompt-director", "supporters": ["shot-language-auditor"], "user_facing": true},
+    {"capability_id": "platform_prompt_compilation", "owner": "prompt-platform-auditor", "supporters": [], "user_facing": true},
+    {"capability_id": "banana_image_execution", "owner": "banana-image-generator", "supporters": ["project-state-manager", "image-review-board"], "user_facing": true},
+    {"capability_id": "builtin_image_execution", "owner": "builtin-imagegen-director", "supporters": ["image-qc-director"], "user_facing": true},
+    {"capability_id": "midjourney_execution", "owner": "midjourney", "supporters": ["project-state-manager"], "user_facing": true},
+    {"capability_id": "video_execution_handoff", "owner": "video-generation-controller", "supporters": ["dreamina-cli", "seedance-2-video", "project-state-manager"], "user_facing": true},
+    {"capability_id": "image_quality_control", "owner": "image-qc-director", "supporters": ["revision-director"], "user_facing": true},
+    {"capability_id": "video_quality_control", "owner": "video-qc-director", "supporters": ["revision-director"], "user_facing": true},
+    {"capability_id": "commercial_kv_direction", "owner": "kv-director", "supporters": ["kv-image-prompt-director", "led-screen-director"], "user_facing": true},
+    {"capability_id": "narrative_poster_direction", "owner": "poster-director", "supporters": ["frame-vision-director"], "user_facing": true},
+    {"capability_id": "exact_typography_asset", "owner": "type-png-director", "supporters": ["prompt-platform-auditor"], "user_facing": true},
+    {"capability_id": "workflow_source_sync", "owner": "workflow-sync-manager", "supporters": [], "user_facing": true}
+  ],
+  "internal_compatibility_skills": [
+    {
+      "skill": "image-generation-controller",
+      "replacement_owner": "banana-image-generator",
+      "allowed_use": "Existing managed Banana jobs that explicitly require the legacy combined generation, review-board, and state-ingest sequence.",
+      "implicit_invocation": false
+    }
+  ]
+}

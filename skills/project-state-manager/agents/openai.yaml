@@ -1,6 +1,6 @@
 interface:
   display_name: "项目状态管理"
-  short_description: "管理影视AI项目状态、资产版本、执行记录、QC观察与修订来源"
-  default_prompt: "Use $project-state-manager to keep this managed film-AI project's approved packets, assets, generation records, QC observations, and revisions traceable."
+  short_description: "管理影视AI项目状态、资产版本、生成记录、多聊天任务与交接追踪"
+  default_prompt: "Use $project-state-manager to keep this managed film-AI project's approved packets, assets, generation records, thread registry, handoffs, QC observations, and revisions traceable."
 policy:
   allow_implicit_invocation: true

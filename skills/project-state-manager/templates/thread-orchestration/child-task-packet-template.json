@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "project_id": "__PROJECT_ID__",
+  "project_root": "__PROJECT_ROOT__",
+  "task_id": "P01",
+  "thread_title": "[__PROJECT_NAME__][P01][任务名称]",
+  "goal": "",
+  "scope_boundary": "",
+  "source_files": [],
+  "global_context_path": "00_project_control/project-context.md",
+  "global_context_version": 1,
+  "must_inherit": [],
+  "must_not_change": [],
+  "owning_skill": "",
+  "deliverables": [],
+  "task_workspace": "00_project_control/thread-tasks/P01/working",
+  "output_path_rule": "",
+  "handoff_path": "00_project_control/thread-tasks/P01/handoff.json"
+}

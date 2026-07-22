@@ -1,57 +1,32 @@
 ---
 name: video-generation-controller
-description: Coordinate video generation or external video-platform handoff for film AI workflows. Use when the user explicitly asks to generate video, test first-frame motion, batch Seedance shots, prepare Jimeng/Kling manual execution, or turn selected keyframes into saved video files while keeping outputs connected to project state.
+description: Coordinate approved AI video generation and external-platform handoff with project traceability. Use when the user explicitly asks to generate video, confirms a Jimeng prompt, tests first-frame motion, batches Seedance shots, prepares Kling manual execution, resumes a failed run, or attaches a downloaded video while requiring idempotency, credit preflight, run manifests, partial recovery, and state writeback.
 ---
 
 # Video Generation Controller
 
 ## Core role
 
-This is the lightweight execution controller for AI video generation and manual platform handoff. It does not replace `$ai-video-prompt-director` or `$seedance-2-video`; it connects approved prompts, references, run manifests, and project state into a repeatable production step.
+Execute or hand off an approved video job. Do not write prompts, choose visual style, invent first frames, approve audits, or change `$zongkong` route decisions.
 
-Use it when the user says:
-
-- `出视频`
-- `用 Seedance 出`
-- `即梦/Seedance 生视频`
-- `可灵出视频`
-- `可灵 O1 / Omni 手动执行`
-- `让这张图动起来`
-- `测试 5 秒视频`
-- `把 S03 做成视频`
-
-## Default policy
-
-- Default API provider: Seedance/Ark through `$seedance-2-video`.
-- Jimeng/Kling/Kling O1/Kling VIDEO 3.0 Omni are treated as external/manual platform runs unless a dedicated API runner exists.
-- Default Jimeng/Kling audio policy: `不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。`
-- Default input image mode: public URL with `--image-url`.
-- Do not use local `--image-file` unless the user explicitly asks for local relay or URL Relay is already configured for this project.
-- Do not guess old images. Resolve the first frame from the current project asset index or ask for a public URL.
-- Always write `run_manifest.json`.
-- If `projectRoot` is provided, ingest the video run into `$project-state-manager`.
-
-## No Lazy Execution Rule
-
-This controller executes video only. It does not write or repair video prompts, choose the first frame, decide style, or fix missing shot logic.
-
-Real Seedance/Ark generation may run only when all execution inputs are present:
+Execution ownership:
 
 ```text
-ai-video-prompt-director final video prompt exists
-prompt-platform-auditor decision is 通过 or 保效精简后通过
-first frame / reference image role is clear
-public http/https image URL is available, or explicit local relay approval exists
-duration and ratio are specified or inherited from the approved prompt
-project-style-lock is present for formal project batches
+semantic prompt -> ai-video-prompt-director
+platform audit -> prompt-platform-auditor
+Jimeng live CLI -> dreamina-cli
+Seedance/Ark live API -> seedance-2-video through this controller
+Kling/O1/Omni -> manual handoff unless a dedicated runner exists
+state, idempotency and observations -> project-state-manager
 ```
 
-For formal or managed work, execution must come from a `generation_ready_packet` or a managed video job containing the same fields:
+For formal work, execute only from `generation_ready_packet` or an equivalent managed job. Quick tests may stay light but still require a final prompt, explicit reference role, platform target, ratio/duration, and paid-run confirmation.
+
+## Required execution packet
 
 ```text
 generation_ready_packet
-target_tool: Seedance / Ark / Jimeng / Kling / Kling O1 / Kling VIDEO 3.0 Omni
-prompt_direction: first_frame_motion / dialogue_coverage / product_motion / reference_continuity / local_edit / multi_shot_omni / quick_motion_test
+target_tool: Jimeng / Seedance / Ark / Kling / Kling O1 / Kling VIDEO 3.0 Omni
 project_root:
 shot_or_asset_id:
 final_prompt:
@@ -61,102 +36,112 @@ audited_prompt_packet:
 source_lock:
 reference_roles:
 first_frame_or_image_refs:
+task_type:
+complexity_mode:
 duration:
 ratio:
-audio_policy: default "不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。"
+ending_behavior:
+audio_policy:
+music_policy: no_music_allow_sfx / music_requested / full_silence
+generation_confirmation: approved / direct_test
 output_path_rule:
 state_writeback:
 ```
 
-If any item is missing, stop before submission and route back:
+Default `music_policy` to `no_music_allow_sfx`: reject background music, score, songs, and sung vocals while allowing synchronized natural ambience and physical sound effects. Explicit music or full silence overrides this default.
 
-```text
-missing video prompt -> ai-video-prompt-director
-missing platform approval -> prompt-platform-auditor
-missing first frame/public URL -> project-state-manager / asset-librarian / url-relay
-missing shot logic -> shot-language-auditor
-missing generation_ready_packet fields -> project-state-manager / prompt-platform-auditor
-missing Kling O1/Omni role map -> project-state-manager / scene-style-map-director / project-style-lock
-```
+Route missing inputs back to their owners. Never use paid generation to discover a missing style, action, first frame, or shot plan.
 
-Do not submit Seedance/Ark as a way to test unclear style, unclear action, missing first frame, or unaudited prompts.
+## Run safety and recovery
 
-## Fast execution mode
+For every managed API/CLI run:
 
-When the user says `出视频`, `测试一下`, `继续出`, or `直接跑`, keep the response short:
+1. Compute one idempotency key from provider/model, prompt, reference roles, first-frame source, task type, duration, ratio, resolution, and audio policy.
+2. Require `generation_confirmation` before paid submission.
+3. Compare `available_credits` and `estimated_cost` when both are available; stop when insufficient and never guess a balance.
+4. Write `revision-logs/generation-run-ledger.jsonl` through `$project-state-manager`.
+5. Reuse or block an existing succeeded/submitted/running task with the same key.
+6. After a failure, require explicit `--resume`; default to at most two confirmed attempts.
+7. Use `--force-new-run` only after an explicit request for a genuinely new paid attempt.
+8. Preserve successful outputs and task IDs. Never auto-retry a paid video submission.
 
-1. Confirm audited prompt, shot, and image URL in one short line.
-2. Run doctor or dry-run only if the input is new or risky.
-3. Submit Seedance only if the No Lazy Execution Rule passes, or write a Jimeng/Kling manual handoff manifest when the target platform is external.
-4. Return video preview/local path if present, the handoff manifest path, and one sentence of QC or next action.
+The ledger is recovery state, not creative state. It stores no keys, tokens, private upload credentials, or payment data.
 
-## Token/cost saving
+## Provider rules
 
-- Prefer one video per run during testing.
-- Use 5 seconds for motion tests unless the user specifies another duration.
-- Use the frame's natural ratio; do not force 16:9 when the source is vertical.
-- Use public image URLs to avoid unnecessary relay calls.
-- Keep prompts focused on one main action and one main camera movement.
+### Seedance / Ark
+
+- Require `ARK_API_KEY`, an audited prompt, and a public image URL unless the user explicitly approves local relay.
+- Prefer `--image-url`; accept `--image-file` only with `--allow-image-file`.
+- Submit through `$seedance-2-video`, preserve its task ID/run manifest, ingest state, and record ledger completion/failure.
+- If an identical task is already submitted/running, return the existing task instead of resubmitting.
+
+### Jimeng / Dreamina CLI
+
+- Check command availability and current subcommand help through `$dreamina-cli`.
+- Discover whether `text2video`, `image2video`, `frames2video`, `multiframe2video`, or `multimodal2video` fits the approved reference plan.
+- Check credit when the CLI exposes it, submit only after confirmation, capture `submit_id`, query/download, write `run_manifest.json`, and ingest state.
+- Never install/update the CLI implicitly and never execute `curl | bash` from this controller.
+- If CLI availability/help fails, preserve a Jimeng manual handoff; do not pretend execution succeeded.
+
+### Kling / O1 / Omni
+
+- Keep manual unless a dedicated runner exists.
+- Require `reference_roles`; O1/Omni also require role-map provenance.
+- Write the approved prompt copy and `run_manifest.json` with status `manual_handoff`.
+- When the user provides a downloaded video, attach the path, mark `succeeded`, and ingest it without creating another handoff.
+
+## Fast mode
+
+When the user says `出视频`, `测试一下`, `继续出`, or `直接跑`:
+
+1. Confirm shot, audited prompt, reference source, and paid confirmation in one short line.
+2. Run only the necessary availability/credit/idempotency checks.
+3. Execute or create the manual handoff.
+4. Return the video/path, run manifest, reused/resumed state, and one next action.
+
+Prefer one five-second video per motion test unless the user specifies otherwise. Preserve the source ratio.
 
 ## Script usage
 
-```powershell
-node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider seedance --prompt-file H:\yingshi\prompt.txt --image-url https://example.com/frame.png --duration 5 --ratio 3:4 --output-dir H:\yingshi\outputs\seedance-test
-```
-
-Project-managed run:
+Seedance managed run:
 
 ```powershell
-node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider seedance --project-root H:\yingshi\projects\project --shot S03 --prompt-file H:\yingshi\projects\project\prompts\S03_video.txt --image-url https://example.com/frame.png --duration 5 --ratio 16:9
+node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider seedance --project-root H:\project --shot S03 --prompt-file H:\project\prompts\S03.txt --image-url https://example.com/frame.png --duration 5 --ratio 16:9 --generation-confirmation approved
 ```
 
-Kling / O1 / Omni manual handoff:
+Resume a failed Seedance run:
 
 ```powershell
-node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider kling-omni --project-root H:\yingshi\projects\project --shot S03 --prompt-file H:\yingshi\projects\project\prompts\S03_kling_omni.txt --image-file H:\yingshi\projects\project\references\S03_first_frame.png --reference-roles H:\yingshi\projects\project\prompts\S03_kling_roles.json --task-type multi_shot_storyboard --duration 10 --ratio 9:16 --audio-policy "不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。"
+node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider seedance --project-root H:\project --shot S03 --prompt-file H:\project\prompts\S03.txt --image-url https://example.com/frame.png --duration 5 --ratio 16:9 --generation-confirmation approved --resume
 ```
 
-If the video has already been downloaded from Kling, add:
+Kling/O1/Omni handoff:
 
 ```powershell
---output-video H:\yingshi\projects\project\video-runs\S03_kling_omni_v01.mp4 --status succeeded
+node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider kling-omni --project-root H:\project --shot S03 --prompt-file H:\project\prompts\S03.txt --image-file H:\project\references\S03.png --reference-roles H:\project\prompts\S03_roles.json --task-type multi_shot_storyboard --duration 10 --ratio 9:16 --audio-policy "不要背景音乐；允许同步环境声和物理音效"
 ```
 
-## Output
+Attach an externally downloaded result with `--output-video ... --status succeeded`.
 
-For Seedance, the controller prints JSON:
+## Output contract
 
-```json
-{
-  "provider": "seedance",
-  "outputDir": "H:\\...",
-  "video": "H:\\...\\final.mp4",
-  "runManifest": "H:\\...\\run_manifest.json",
-  "projectState": {}
-}
+Return:
+
+```text
+provider / shot / output_dir / video / run_manifest / project_state
+idempotency_key / reused / resumed / ledger_event
+task_id or submit_id when available
 ```
 
-For Jimeng/Kling manual handoff, the controller writes:
-
-```json
-{
-  "provider": "kling-omni",
-  "outputDir": "H:\\...",
-  "runManifest": "H:\\...\\run_manifest.json",
-  "promptCopy": "H:\\...\\approved_prompt.txt",
-  "video": "",
-  "projectState": {}
-}
-```
+Every run manifest preserves `music_policy`, reference provenance, task status, idempotency key, elapsed time, and credit/cost metrics when available.
 
 ## Guardrails
 
-- Never print or store API keys.
-- Stop before generation if `ARK_API_KEY` is missing.
-- Stop before generation if the prompt has not passed `$prompt-platform-auditor`.
-- Stop before generation if no public first-frame URL or explicit local relay approval exists.
-- Prefer `--image-url`; only use local relay on explicit request.
-- For Jimeng/Kling manual handoff, do not pretend the platform has been executed. Use `task.status: manual_handoff` until a downloaded video path is attached.
-- For Jimeng/Kling manual handoff, preserve or default `audio_policy` to `不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。` unless the user explicitly requested music, score, dialogue, voiceover, native audio, or a reference voice.
-- For Kling O1 / VIDEO 3.0 Omni, require `reference_roles` / role-map provenance before handoff.
-- Do not create a large video studio framework. This is a thin controller around Seedance plus manual platform state logging.
+- Never print or store API keys or tokens.
+- Never submit without prompt audit and paid-generation confirmation.
+- Never silently switch platform or reference source.
+- Never auto-retry a paid task.
+- Never discard a successful artifact because another batch item failed.
+- Never claim manual handoff or an existing task was newly executed.
+- Keep this controller thin; provider-specific request compilation remains with the provider skill.

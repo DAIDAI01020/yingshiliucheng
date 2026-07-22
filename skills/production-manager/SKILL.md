@@ -1,6 +1,6 @@
 ---
 name: production-manager
-description: Project production manager for film AI workflows. Use when a TVC, brand film, program promo, event opener, LED visual, or AI image/video project needs stage tracking, task breakdown, next-step planning, pending confirmations, batch image-generation status, QC status, regeneration status, or multi-round revision coordination.
+description: Project production manager for film AI workflows. Use when a TVC, brand film, program promo, event opener, LED visual, or AI image/video project needs stage tracking, task breakdown, next-step planning, pending confirmations, multi-thread task status, batch image-generation status, QC status, regeneration status, or multi-round revision coordination.
 ---
 
 # Production Manager
@@ -11,7 +11,16 @@ Act like the project manager / producer of the small film AI team. Do not create
 
 Use this skill when the project has multiple stages, multiple shots, generated-image versions, client revisions, or handoff tasks.
 
-For managed projects, use `project-manifest.json` from `$project-state-manager` as the source of truth for project stage, latest generation job, latest review board, and generation run status.
+For managed projects, use `project-manifest.json` from `$project-state-manager` as the source of truth for project stage, latest generation job, latest review board, and generation run status. When `current.thread_registry` exists, use that registered file as the source of truth for child-thread task status; never infer it from chat memory.
+
+For a persistent or visual board, run `scripts/build_project_dashboard.py`. `--check-only` performs a read-only summary for legacy projects; without it, the script writes an atomic static HTML/JSON dashboard under `00_project_control/dashboard` unless `--output-dir` is supplied.
+
+```powershell
+python scripts/build_project_dashboard.py --project-root {project_root} --check-only
+python scripts/build_project_dashboard.py --project-root {project_root}
+```
+
+The dashboard combines manifest stages, registered child tasks, asset states, image/video runs, idempotency ledger status, elapsed time/credit/cost when available, QC observations, rule-promotion proposals, warnings, and the next five actions. It must not mutate tasks, accept work, submit generation, or rewrite project state.
 
 ## Track these stages
 
@@ -31,6 +40,8 @@ For managed projects, use `project-manifest.json` from `$project-state-manager` 
 | 客户反馈修改 | 无反馈 / 待翻译 / 修改中 / 已处理 |
 | 交付整理 | 未开始 / 进行中 / 已完成 |
 
+When generation metrics exist, also show elapsed time, credits/cost, idempotency/reuse status, partial-failure count, and whether a resume is available. Never invent missing cost or credit data.
+
 ## Output
 
 ### 项目进度看板
@@ -42,6 +53,15 @@ For managed projects, use `project-manifest.json` from `$project-state-manager` 
 
 | 优先级 | 任务 | 负责人Skill | 输入材料 | 输出物 | 状态 |
 | --- | --- | --- | --- | --- | --- |
+
+### 分聊天任务看板
+
+Show this section only when `$project-thread-orchestrator` is active.
+
+| 任务ID | 分聊天 | 负责人Skill | 依赖 | 上下文版本 | 当前状态 | 等待原因/交付摘要 |
+| --- | --- | --- | --- | --- | --- | --- |
+
+Treat `active`, `waiting_user`, `blocked`, and `ready_for_review` as occupied concurrency slots. Show at most four occupied tasks and list the rest as `queued`; do not imply that queued tasks already have chats.
 
 ### 待确认清单
 
@@ -58,3 +78,7 @@ Give 3-5 concrete next actions. Prefer actions that unblock the workflow.
 - If image generation is involved, separate `只出提示词`, `dry-run检查`, and `真实出图`.
 - If multiple skills could handle the same issue, assign one primary skill and one supporting skill.
 - Do not let project management replace creative judgment; route creative decisions back to the relevant director skill.
+- Preserve the registry status vocabulary exactly: `queued / active / waiting_user / blocked / ready_for_review / accepted / stale / archived`.
+- Read child summaries from their registered `handoff.json`. If a handoff is missing or invalid, show the gap instead of declaring the task complete.
+- Only the hub thread may accept work, broadcast a global change, or archive a child. Route those mutations to `$project-thread-orchestrator`.
+- Build dashboards from persisted files, not chat memory. Keep `--check-only` strictly read-only and use atomic replacement for generated dashboard files.

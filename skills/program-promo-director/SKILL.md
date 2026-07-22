@@ -63,3 +63,5 @@ When a program promo, variety package, or episodic promo needs an image故事板
 | `spatial_continuity_board` | the promo involves multi-person blocking, table/stage positions, eyelines, competition geography, or the model may lose people |
 
 Set `jimeng_direct_reference_board: true` when the image board will be uploaded directly to Jimeng/Seedance.
+
+Then hand off to `$image-storyboard-workflow`. `$program-promo-director` recommends the board type and program-promo function; `$image-storyboard-workflow` owns the final source_type, board_type, video-reference inherit/do-not-inherit boundary, and downstream route.

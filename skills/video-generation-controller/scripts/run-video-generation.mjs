@@ -2,6 +2,13 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  completeRun,
+  computeIdempotencyKey,
+  failRun,
+  preflightRun,
+  startRun,
+} from "../../project-state-manager/scripts/generation-run-ledger.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -118,7 +125,7 @@ async function maybeReadJsonArg(value) {
   return parseMaybeJson(value, value);
 }
 
-async function ingestManualVideoRun({ args, provider, promptText }) {
+async function ingestManualVideoRun({ args, provider, promptText, idempotencyKey, startedAt }) {
   const projectRoot = args.projectRoot ? path.resolve(args.projectRoot) : "";
   const shot = safeName(args.shot || path.basename(args.promptFile, path.extname(args.promptFile)), "video");
   const version = args.version || "v01";
@@ -140,6 +147,7 @@ async function ingestManualVideoRun({ args, provider, promptText }) {
   const outputVideo = args.outputVideo ? path.resolve(args.outputVideo) : "";
   const status = args.status || (outputVideo ? "succeeded" : "manual_handoff");
   const audioPolicy = args.audioPolicy || DEFAULT_EXTERNAL_AUDIO_POLICY;
+  const musicPolicy = args.musicPolicy || "no_music_allow_sfx";
   const runManifest = path.join(outputDir, "run_manifest.json");
   const manifest = {
     schemaVersion: 1,
@@ -151,6 +159,7 @@ async function ingestManualVideoRun({ args, provider, promptText }) {
     shot,
     version,
     status,
+    idempotency_key: idempotencyKey,
     prompt: {
       source: path.resolve(args.promptFile),
       copy: promptCopyPath,
@@ -165,18 +174,25 @@ async function ingestManualVideoRun({ args, provider, promptText }) {
       duration: String(args.duration || ""),
       ratio: args.ratio || "",
       audio_policy: audioPolicy,
+      music_policy: musicPolicy,
       reference_roles: referenceRoles,
     },
     source_images: firstFrameRefs,
     first_frame_or_image_refs: firstFrameRefs,
     reference_roles: referenceRoles,
     audio_policy: audioPolicy,
+    music_policy: musicPolicy,
     task: {
       id: args.taskId || "",
       status,
     },
     outputs: {
       video: outputVideo,
+    },
+    metrics: {
+      elapsed_seconds: Number(((Date.now() - startedAt) / 1000).toFixed(3)),
+      credits_used: args.creditsUsed ? Number(args.creditsUsed) : null,
+      estimated_cost: args.estimatedCost ? Number(args.estimatedCost) : null,
     },
     notes: args.notes || "Manual/external video platform handoff. Upload references according to reference_roles before copying the approved prompt.",
     createdAt: new Date().toISOString(),
@@ -211,12 +227,72 @@ async function main() {
   if (!args.promptFile) throw new Error("Missing --prompt-file.");
   const provider = normalizeProvider(args.provider);
   const promptText = await readText(path.resolve(args.promptFile));
+  const projectRoot = args.projectRoot ? path.resolve(args.projectRoot) : "";
+  const shot = safeName(args.shot || path.basename(args.promptFile, path.extname(args.promptFile)), "video");
+  const promptFingerprint = computeIdempotencyKey(promptText);
+  const referenceFingerprint = computeIdempotencyKey({ image_url: args.imageUrl || "", image_file: args.imageFile ? path.resolve(args.imageFile) : "", reference_roles: args.referenceRoles || "" });
+  const manualProvider = provider !== "seedance";
+  const safetyPayload = {
+    provider,
+    asset_or_shot_id: shot,
+    deliverable_profile: args.deliverableProfile || "video_i2v",
+    execution_mode: manualProvider ? "external_manual" : "api",
+    prompt_fingerprint: promptFingerprint,
+    reference_fingerprint: referenceFingerprint,
+    request: {
+      target_tool: args.targetTool || provider,
+      target_model: args.targetModel || args.model || "",
+      task_type: args.taskType || "",
+      duration: String(args.duration || "5"),
+      ratio: args.ratio || "",
+      resolution: args.resolution || "720p",
+      video_mode: args.videoMode || "firstFrame",
+      audio_policy: args.audioPolicy || "",
+    },
+  };
+  const preflight = await preflightRun({
+    projectRoot,
+    payload: safetyPayload,
+    idempotencyKey: args.idempotencyKey || "",
+    generationConfirmation: args.generationConfirmation || "",
+    estimatedCost: args.estimatedCost,
+    availableCredits: args.availableCredits,
+    resume: Boolean(args.resume),
+    forceNewRun: Boolean(args.forceNewRun),
+    maxAttempts: Number(args.maxAttempts || 2),
+    paid: !manualProvider,
+  });
+  if (!preflight.allowed) {
+    if (preflight.reuse) {
+      console.log(JSON.stringify({
+        provider,
+        shot,
+        reused: true,
+        idempotencyKey: preflight.idempotency_key,
+        reason: preflight.reason,
+        existingRun: preflight.existing,
+      }, null, 2));
+      return;
+    }
+    throw new Error(`Generation safety preflight blocked: ${preflight.reason}`);
+  }
+  const startedAt = Date.now();
 
-  if (provider !== "seedance") {
+  if (manualProvider) {
     if (!isManualVideoProvider(provider)) {
       throw new Error("Only --provider seedance, jimeng-manual, kling, kling-o1, or kling-omni are supported.");
     }
-    const result = await ingestManualVideoRun({ args, provider, promptText });
+    const result = await ingestManualVideoRun({ args, provider, promptText, idempotencyKey: preflight.idempotency_key, startedAt });
+    const ledgerEvent = await completeRun({
+      projectRoot,
+      preflight,
+      payload: safetyPayload,
+      output: { output_dir: result.outputDir, run_manifest: result.runManifest, video: result.video },
+      metrics: { elapsed_seconds: Number(((Date.now() - startedAt) / 1000).toFixed(3)), estimated_cost: args.estimatedCost ? Number(args.estimatedCost) : null },
+      manualHandoff: !result.video,
+    });
+    result.idempotencyKey = preflight.idempotency_key;
+    result.ledgerEvent = ledgerEvent;
     console.log(JSON.stringify(result, null, 2));
     return;
   }
@@ -229,8 +305,6 @@ async function main() {
   }
   if (!(await exists(seedanceRunner))) throw new Error(`Seedance runner not found: ${seedanceRunner}`);
 
-  const projectRoot = args.projectRoot ? path.resolve(args.projectRoot) : "";
-  const shot = safeName(args.shot || path.basename(args.promptFile, path.extname(args.promptFile)), "video");
   const outputDir = args.outputDir
     ? path.resolve(args.outputDir)
     : projectRoot
@@ -249,30 +323,61 @@ async function main() {
   if (args.imageUrl) runArgs.push("--image-url", String(args.imageUrl));
   if (args.imageFile) runArgs.push("--image-file", path.resolve(args.imageFile));
 
-  const seedanceOutput = runNode(seedanceRunner, runArgs);
-  const runManifest = path.join(outputDir, "run_manifest.json");
-  const manifest = await readJson(runManifest);
-  let projectState = null;
-  if (projectRoot && await exists(stateManager)) {
-    const ingestOutput = runNode(stateManager, [
-      "ingest-video",
-      "--project-root", projectRoot,
-      "--run-manifest", runManifest,
-      ...(args.videoJob ? ["--video-job", path.resolve(args.videoJob)] : []),
-    ]);
-    projectState = parseJsonFromOutput(ingestOutput);
-  }
+  await startRun({ projectRoot, preflight, payload: safetyPayload });
+  try {
+    const seedanceOutput = runNode(seedanceRunner, runArgs);
+    const runManifest = path.join(outputDir, "run_manifest.json");
+    const manifest = await readJson(runManifest);
+    const elapsedSeconds = Number(((Date.now() - startedAt) / 1000).toFixed(3));
+    manifest.idempotency_key = preflight.idempotency_key;
+    manifest.metrics = {
+      ...(manifest.metrics || {}),
+      elapsed_seconds: elapsedSeconds,
+      credits_used: args.creditsUsed ? Number(args.creditsUsed) : null,
+      estimated_cost: args.estimatedCost ? Number(args.estimatedCost) : null,
+    };
+    await fs.writeFile(runManifest, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    let projectState = null;
+    if (projectRoot && await exists(stateManager)) {
+      const ingestOutput = runNode(stateManager, [
+        "ingest-video",
+        "--project-root", projectRoot,
+        "--run-manifest", runManifest,
+        ...(args.videoJob ? ["--video-job", path.resolve(args.videoJob)] : []),
+      ]);
+      projectState = parseJsonFromOutput(ingestOutput);
+    }
+    const ledgerEvent = await completeRun({
+      projectRoot,
+      preflight,
+      payload: safetyPayload,
+      output: { output_dir: outputDir, run_manifest: runManifest, video: manifest.outputs?.video || "", task_id: manifest.task?.id || "" },
+      metrics: manifest.metrics,
+    });
 
-  console.log(JSON.stringify({
-    provider: "seedance",
-    shot,
-    outputDir,
-    video: manifest.outputs?.video || "",
-    runManifest,
-    projectRoot: projectRoot || null,
-    projectState,
-    seedanceOutput: seedanceOutput.split(/\r?\n/).slice(-4).join("\n"),
-  }, null, 2));
+    console.log(JSON.stringify({
+      provider: "seedance",
+      shot,
+      outputDir,
+      video: manifest.outputs?.video || "",
+      runManifest,
+      projectRoot: projectRoot || null,
+      projectState,
+      idempotencyKey: preflight.idempotency_key,
+      ledgerEvent,
+      resumed: Boolean(args.resume),
+      seedanceOutput: seedanceOutput.split(/\r?\n/).slice(-4).join("\n"),
+    }, null, 2));
+  } catch (error) {
+    await failRun({
+      projectRoot,
+      preflight,
+      payload: safetyPayload,
+      error: error.message,
+      metrics: { elapsed_seconds: Number(((Date.now() - startedAt) / 1000).toFixed(3)) },
+    });
+    throw error;
+  }
 }
 
 main().catch((error) => {

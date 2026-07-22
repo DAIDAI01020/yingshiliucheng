@@ -1,0 +1,6 @@
+﻿interface:
+  display_name: "Image故事板导演"
+  short_description: "先设计人物、道具、场景、动线和机位"
+  default_prompt: "Use $image-storyboard-director to create the character, prop, scene, movement path, camera map, shot preview, lighting, and material design packet before an image storyboard board prompt."
+policy:
+  allow_implicit_invocation: true

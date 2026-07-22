@@ -1,0 +1,6 @@
+interface:
+  display_name: "即梦 CLI"
+  short_description: "通过Dreamina CLI安全登录、查积分、幂等提交、恢复查询并下载即梦结果"
+  default_prompt: "Use $dreamina-cli to inspect live CLI help, verify session and credit, recover existing tasks when possible, and execute only an explicitly approved Dreamina job."
+policy:
+  allow_implicit_invocation: true

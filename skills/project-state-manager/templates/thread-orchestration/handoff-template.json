@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "task_id": "P01",
+  "thread_id": "",
+  "status": "queued",
+  "summary": "",
+  "deliverables": [],
+  "decisions": [],
+  "open_issues": [],
+  "needs_main_decision": false,
+  "global_change_proposals": [],
+  "context_version": 1,
+  "updated_at": "__CREATED_AT__"
+}

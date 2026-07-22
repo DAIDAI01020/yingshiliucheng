@@ -1,6 +1,6 @@
-model: gpt-5.4
-reasoning_effort: medium
-instructions: |
-  Manage safe Git/GitLab sync for the film AI workflow repository.
-  Write update logs, commit allowed workflow files, scan for secrets, and push only when explicitly requested.
-
+interface:
+  display_name: "Workflow Sync Manager"
+  short_description: "按路径白名单安全提交、冻结版本标签并同步影视 Agent 源码"
+  default_prompt: "使用 $workflow-sync-manager 按明确路径白名单检查、记录、提交并同步影视 Agent 工作流；推送前检查远端分叉与秘密信息，不自动强推。"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "thread-orchestration.schema.json",
+  "title": "Project Thread Orchestration Contracts",
+  "$defs": {
+    "status": {
+      "enum": [
+        "queued",
+        "active",
+        "waiting_user",
+        "blocked",
+        "ready_for_review",
+        "accepted",
+        "stale",
+        "archived"
+      ]
+    },
+    "task": {
+      "type": "object",
+      "required": [
+        "task_id",
+        "title",
+        "goal",
+        "status",
+        "dependencies",
+        "task_workspace",
+        "task_packet_path",
+        "handoff_path",
+        "context_version"
+      ],
+      "properties": {
+        "task_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_-]{1,31}$" },
+        "title": { "type": "string" },
+        "thread_title": { "type": "string" },
+        "goal": { "type": "string" },
+        "status": { "$ref": "#/$defs/status" },
+        "dependencies": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "inherited_locks": { "type": "array" },
+        "owning_skill": { "type": "string" },
+        "task_workspace": { "type": "string" },
+        "task_packet_path": { "type": "string" },
+        "handoff_path": { "type": "string" },
+        "thread_id": { "type": ["string", "null"] },
+        "context_version": { "type": "integer", "minimum": 1 },
+        "stale_reason": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    }
+  },
+  "type": "object",
+  "required": [
+    "schema_version",
+    "project_id",
+    "project_path",
+    "project_root",
+    "container_mode",
+    "max_active",
+    "context",
+    "hub",
+    "tasks"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "project_id": { "type": "string", "minLength": 1 },
+    "project_path": { "type": "string", "minLength": 1 },
+    "project_root": { "type": "string", "minLength": 1 },
+    "container_mode": { "const": "shared_project_shared_root" },
+    "max_active": { "type": "integer", "minimum": 1, "maximum": 4 },
+    "context": {
+      "type": "object",
+      "required": ["path", "version"],
+      "properties": {
+        "path": { "const": "00_project_control/project-context.md" },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "hub": {
+      "type": "object",
+      "required": ["thread_id", "thread_title", "status", "pinned"],
+      "properties": {
+        "thread_id": { "type": "string" },
+        "host_id": { "type": ["string", "null"] },
+        "thread_title": { "type": "string" },
+        "status": { "enum": ["unbound", "active"] },
+        "pinned": { "type": "boolean" }
+      }
+    },
+    "tasks": { "type": "array", "items": { "$ref": "#/$defs/task" } }
+  },
+  "additionalProperties": true
+}

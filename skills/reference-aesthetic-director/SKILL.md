@@ -1,6 +1,6 @@
 ---
 name: reference-aesthetic-director
-description: Top reference aesthetic director for film AI workflows. Use before style-bible creation in formal projects, or when the user asks for premium cinematic, Oscar-level film, blockbuster, top TVC, documentary, stage/LED, brand-film, or reference-driven visual direction. Translates elite cinema, advertising, documentary, stage, and Chinese brand-film references into usable style principles without copying protected frames or brand assets.
+description: Top reference aesthetic director for film AI workflows. Use before style-bible creation in formal projects, or when the user asks for premium cinematic, prestige-series, blockbuster, top TVC, documentary, KV/key-art, stage/LED, brand-film, or reference-driven visual direction. Translates curated film, advertising, documentary, KV, stage, and Chinese brand-film references into usable style principles without copying protected frames, campaign layouts, or brand assets.
 ---
 
 # Reference Aesthetic Director
@@ -16,12 +16,15 @@ For formal projects, use `$style-reference-director` first when available. `$sty
 Mandatory rule for the user's workflow:
 
 ```text
-Formal image/video work must always include a top-tier cinematography layer.
-Do not treat shared-elite-cinematography.md as optional.
-Every final style translation must include: style-reference-director decision + reference family + cinematography anchor + executable visual mechanism.
+Formal cinematic/live-action image and video work must include a top-tier cinematography layer.
+Do not treat shared-elite-cinematography.md as optional when the deliverable is cinematic/live action.
+Every final cinematic translation must include: style-reference-director decision + reference family + cinematography anchor + executable visual mechanism.
+Pure typography, graphic-only KV, and abstract LED use the applicable composition/material/type/stage anchor instead of a forced cinematography layer.
 ```
 
 For formal projects, every translation must preserve or create a `mother_library_application_packet`. The packet is the bridge between reference taste and production execution.
+
+For film/prestige selections, inherit the ShotDeck-first curation status from `$reference-visual-library`. Do not promote a title because it is famous or merely indexed. Translate only a verified `Core A` mechanism or a function-justified `Specialist B` mechanism. Preserve `shotdeck_status`, source trace, and any actual deck/shot links; when no authenticated inspection occurred, preserve the search recipe and do not invent evidence.
 
 It answers:
 
@@ -35,9 +38,9 @@ It answers:
 
 | 模式 | 使用场景 | 输出深度 |
 | --- | --- | --- |
-| quick | 快速项目、单张图、只想更电影感 | 2-3 个参考方向，短结论 |
-| focused | 正式项目默认 | 3-5 个参考方向，转译成风格原则 |
-| deep | 重要提案、大型项目、客户要看参考体系 | 完整参考拆解、风格路线、AI 风险 |
+| quick | 快速项目、单张图、只想更电影感 | 1 个主参考，必要时 1 个辅助，短结论 |
+| focused | 正式项目默认 | 1 个主参考 + 0-2 个问题型辅助参考，转译成风格原则 |
+| deep | 重要提案、大型项目、客户要看参考体系 | 完整主路线拆解；备选路线分开展示，不混入同一提示词 |
 
 Default:
 
@@ -47,7 +50,16 @@ Default:
 
 ## Reference Families
 
-Do not use one generic reference family for all projects. Separate commercial/promo work from short-drama/story work.
+Do not use one generic reference family for all projects. Separate film/prestige, commercial/promo, KV/key-art, and short-drama/story work.
+
+Expanded source routes in `$reference-visual-library`:
+
+| Source route | Use for | Translation priority |
+| --- | --- | --- |
+| `film-prestige-visual-library.md` | 电影化品牌片、正式叙事、历史、人文、城市、类型氛围 | 项目DNA、空间、光线、表演、叙事距离 |
+| `kv-key-art-case-library.md` | 商业KV、产品KV、发布会/活动主视觉、节目KV | 案例机制、系统扩展、标题安全、静动同构；构图权归 `$kv-director` |
+| `short-drama-story-library.md` | 竖屏剧情、连续场戏、冲突与反转 | 场戏功能、人物关系、节奏、证据推进 |
+| `shared-elite-cinematography.md` | 正式电影化实拍/生成 | 摄影纪律、光源、焦段心理、运动边界 |
 
 | 参考家族 | 适合项目 | 可借鉴原则 |
 | --- | --- | --- |

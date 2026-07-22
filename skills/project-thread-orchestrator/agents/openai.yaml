@@ -1,0 +1,6 @@
+interface:
+  display_name: "项目多聊天总控"
+  short_description: "在同一总项目内拆分、调度、同步并归档多个隔离聊天任务"
+  default_prompt: "Use $project-thread-orchestrator to split this managed project into isolated child tasks under one Codex project and one project root."
+policy:
+  allow_implicit_invocation: true

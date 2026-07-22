@@ -1,6 +1,6 @@
 ---
 name: project-state-manager
-description: Manage project-level state for film AI workflows, including project-manifest.json, asset-index.json, and generation-job.json. Use when creating a new project workspace, tracking generation runs, locating image/prompt versions, or keeping Banana, built-in imagegen, Midjourney, Jimeng, Kling, and Seedance outputs connected to review boards and revisions.
+description: Manage project-level state for film AI workflows, including project-manifest.json, asset-index.json, generation jobs, and multi-thread orchestration pointers. Use when creating a project workspace, tracking generation runs, locating image/prompt versions, persisting task packets/handoffs, or keeping Banana, built-in imagegen, Midjourney, Jimeng, Kling, Seedance, and context-isolated Codex child tasks connected to review and revision state.
 ---
 
 # Project State Manager
@@ -17,6 +17,10 @@ Keep the workflow state in one project-level source of truth. This skill manages
 - `project-intake.json`, `scene-map.md`, `shot-audit.md`, `prompt-audit.md`, and `generation-ready.json`: reusable formal short-drama state gates.
 - Same-scene continuity locks and continuity reference boards for short-drama coverage work.
 - `generation-observations.jsonl`: QC evidence tied to source assets/prompts for targeted future fixes.
+- `generation-feedback-summary.json`: grouped evidence and human-confirmed rule-promotion proposals; it never edits global locks automatically.
+- `generation-run-ledger.jsonl`: idempotency, paid-run confirmation, resume, partial-success, usage, and recovery state shared by image/video execution controllers.
+- `00_project_control/thread-registry.json`: registered child-task/thread state owned by `$project-thread-orchestrator`.
+- `00_project_control/project-context.md`, task packets, and handoffs: versioned cross-thread context and bounded task results.
 
 ## P0 Core State Layer
 
@@ -43,6 +47,10 @@ audited_prompt_packet -> prompts / generation-jobs metadata
 generation_ready_packet -> generation-jobs / video-runs metadata
 qc_feedback_packet -> asset-index.json / revision-logs
 generation_observation -> generation-observations.jsonl / asset-index.json metadata
+generation_feedback_summary -> revision-logs/generation-feedback-summary.json / project-manifest.json pointer
+thread_split_plan -> project-manifest.json / 00_project_control/thread-registry.json
+child_thread_task_packet -> 00_project_control/thread-tasks/{task_id}/task-packet.json
+thread_result_packet -> 00_project_control/thread-tasks/{task_id}/handoff.json / thread-registry.json metadata
 ```
 
 Normalize skill packet fields to snake_case. Convert script responses such as `missingFields` and `routeBackTo` at this boundary into `missing_fields` and `route_back_to`; do not pass mixed naming downstream.
@@ -136,6 +144,8 @@ Use this structure for new managed projects:
   revision-logs\
     qc-feedback.md
     generation-observations.jsonl
+    generation-feedback-summary.json
+    generation-run-ledger.jsonl
   briefs\
   prompts\
     prompt-audit.md
@@ -146,6 +156,52 @@ Use this structure for new managed projects:
 ```
 
 Generator task folders live under `{project_root}\generation-runs\{timestamp}_{tool}\` when a managed job has a project root. Preserve legacy paths for existing jobs; do not force migration.
+
+For managed multi-thread work, add this structure without moving legacy files:
+
+```text
+{project_root}\
+  00_project_control\
+    project-context.md
+    thread-registry.json
+    thread-tasks\
+      P01\
+        task-packet.json
+        handoff.json
+        working\
+```
+
+Keep `project-manifest.json` pointers in snake_case:
+
+```text
+current.thread_registry: 00_project_control/thread-registry.json
+workflow.thread_orchestration.container_mode: shared_project_shared_root
+```
+
+Do not rewrite `asset-index.json` merely to enable thread orchestration.
+
+## Thread Orchestration State
+
+Use the templates in `templates/thread-orchestration/` as the public persisted contract:
+
+```text
+thread-registry-template.json
+child-task-packet-template.json
+handoff-template.json
+thread-orchestration.schema.json
+```
+
+Let `$project-thread-orchestrator` perform deterministic registry mutations through its `manage_thread_registry.py` script. This skill owns schema/storage authority but does not create, message, rename, pin, or archive Codex threads.
+
+Only the hub may write `project-context.md`, `thread-registry.json`, or project-manifest thread pointers. A child may write only its unique `working` directory and `handoff.json`; global changes must arrive as `global_change_proposals` for hub review.
+
+Preserve these statuses exactly:
+
+```text
+queued / active / waiting_user / blocked / ready_for_review / accepted / stale / archived
+```
+
+Do not store full chat histories. Store task/thread IDs, paths, versions, concise summaries, decisions, blockers, and global-change proposals.
 
 ## Banana Execution Job
 
@@ -206,7 +262,12 @@ node .\scripts\manage-project-state.mjs create-job --project-root {project_root}
 node .\scripts\manage-project-state.mjs ingest --project-root {project_root} --generation-log {generation_log} --review-board {review_board}
 node .\scripts\manage-project-state.mjs ingest-video --project-root {project_root} --run-manifest {run_manifest}
 node .\scripts\manage-project-state.mjs find-asset --project-root {project_root} --handle S01_banana_v01
+node .\scripts\manage-project-state.mjs record-observation --project-root {project_root} --input {observation_json}
+node .\scripts\manage-project-state.mjs summarize-feedback --project-root {project_root} --minimum-evidence 3
+node .\scripts\manage-project-state.mjs audit --project-root {project_root}
 ```
+
+`audit` is read-only and is the compatibility check for legacy or messy projects. `record-observation` is idempotent by `observation_id`. `summarize-feedback` may propose a reusable fix only after at least three matching observations, at least two improved outcomes, an improvement rate of at least two-thirds, and no worse outcome. Every proposal remains `needs_human_confirmation`; never edit style locks, mother-library rules, prompts, or global context automatically.
 
 For manual or external Jimeng / Kling / Kling O1 / Kling VIDEO 3.0 Omni runs, `ingest-video` may ingest a handoff `run_manifest.json` with:
 
@@ -232,9 +293,14 @@ When `outputs.video` is empty and status is `manual_handoff`, the asset state is
 - Store first-frame/public relay provenance without storing private upload tokens.
 - Keep QC and revision decisions tied to the source generated asset and source prompt.
 - Keep generation observations tied to source asset, source prompt, platform, deliverable profile, and attempted fix. Promote repeated evidence deliberately; never let state storage invent a new global rule.
+- Store elapsed time, credits/cost when available, idempotency key, partial-failure items, and retry provenance without storing payment credentials.
+- Treat repeated ingest of the same run ID as an update, not a duplicate generation run.
 - Do not delete old asset records. Mark old or unused outputs as `废稿` only when instructed.
 - `asset-index.json` is the first place to locate an existing generated image or prompt for revision.
 - For short-drama same-scene work, `asset-index.json` should record any `short_drama_scene_continuity_board` as a reusable reference asset linked to its `scene_id`.
 - For legacy runs without a project root, do not force migration; ingest them only when the user asks or when a generation job includes `projectRoot`.
 - If duplicate shot/tool/version handles exist, return the newest record first and keep all records for traceability.
+- Preserve existing manifest keys when adding thread-orchestration pointers; initialization must be additive and idempotent.
+- Reject task workspaces or handoff deliverables outside `project_folder_contract.project_root`.
+- Do not claim that a registered task has a Codex thread until a real thread ID has been returned and bound by `$project-thread-orchestrator`.
 

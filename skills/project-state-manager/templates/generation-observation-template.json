@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "asset_id": "",
+  "source_prompt": "",
+  "platform": "",
+  "model": "",
+  "deliverable_profile": "",
+  "mother_library_route": "",
+  "qc_decision": "",
+  "failure_type": "none",
+  "severity": "low",
+  "attempted_fix": "none",
+  "outcome": "not_tested",
+  "metrics": {
+    "elapsed_seconds": null,
+    "credits_used": null,
+    "estimated_cost": null
+  },
+  "notes": ""
+}

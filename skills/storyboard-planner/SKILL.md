@@ -36,11 +36,22 @@ route_back_to
 
 If shot function, edit motivation, reference route, or style source is missing, route back before `$frame-vision-director` / `$ai-video-prompt-director`.
 
-## TVC Segment Storyboard Quick Route
+## Image Storyboard Segment Lock Handoff
 
-Use this when the user asks for TVC广告故事板测试, 剧情包装广告故事板, 每一大段故事板, or 直接给 image 出故事板.
+Use this when `$image-storyboard-workflow` provides `image_storyboard_workflow_packet`, or when the user asks for TVC广告故事板测试, 剧情包装广告故事板, 每一大段故事板, or 直接给 image 出故事板 and the workflow owner has not yet been invoked.
 
 Default this route to `quick_test`. Do not rebuild the whole formal storyboard unless the user explicitly asks for 逐镜, 正式批量, 客户交付, 入项目状态, or QC.
+
+If `image_storyboard_workflow_packet` exists, inherit these fields exactly and do not re-decide them:
+
+```text
+source_type
+board_type
+jimeng_direct_reference_board
+video_reference_inherit
+video_reference_do_not_inherit
+handoff_path
+```
 
 Assume upstream director/prompt skills may already have decided:
 
@@ -61,6 +72,7 @@ Output one `tvc_segment_storyboard_lock` per large segment/chapter:
 
 ```text
 tvc_segment_storyboard_lock
+source_type: tvc / product_demo / program_promo / event_opener / brand_film / other_commercial
 board_type: ad_sequence_board / design_reference_board / spatial_continuity_board
 jimeng_direct_reference_board: true / false
 segment_name:
@@ -80,18 +92,29 @@ key_beats: 4-8 visual beats
 image_board_focus:
 ending_or_brand_landing:
 direct_video_reference_usage:
+video_reference_inherit:
+video_reference_do_not_inherit:
 do_not_generate_layout_elements:
 ai_risks:
 handoff_to: scene-board-image-prompter
 next_video_handoff: ai-video-prompt-director when the generated board will be uploaded to Jimeng/Seedance
 ```
 
-Choose `board_type` by the upstream director's `recommended_board_type` first. If it is absent, infer it from the user's target:
+Choose `board_type` by `image_storyboard_workflow_packet` first, then by the upstream director's `recommended_board_type`. Only infer it from the user's target when both are absent:
 
 ```text
-ad_sequence_board: like a TVC ad storyboard sheet, 6-12 large sequential frames, product/brand moments, character action, simple frame numbers, sparse caption zones. Use when the user wants the board itself to show the commercial story flow.
-design_reference_board: like a production design guide, character design/model sheet, props/product cells, set design, color/material swatches, and a few key frames. Use when identity, props, costume, product, and environment must be locked before video.
+ad_sequence_board: like a TVC/program promo storyboard sheet, 6-12 large sequential frames, product/brand/program moments, character action, simple frame numbers, sparse caption zones. Use when the user wants the board itself to show the commercial or promo story flow.
+design_reference_board: like a production design guide, character/model sheet, costume, props/product/program-object cells, set/stage design, color/material swatches, and 3-6 key frames. Use when identity, props, costume, product, stage, package identity, or environment must be locked before video.
 spatial_continuity_board: like a video reference control board, main scene reference, overhead camera map, fixed character positions, eyelines, shooting execution flow, storyboard preview cells, lighting/material strip. Use when the next video model tends to lose people, positions, eyelines, or spatial continuity.
+```
+
+For non-TVC commercial work, preserve the workflow owner's `source_type`. Use program-promo language for hosts, guests, contestants, stage/package identity, high-energy reveals, and broadcast landing; use event-opener language for theme reveal, stage/LED geography, ritual moment, and final title landing; use brand-film language for people, real locations, brand belief, city/company credibility, and chapter emotion.
+
+When `jimeng_direct_reference_board: true`, fill the two video-reference fields explicitly:
+
+```text
+video_reference_inherit: characters, costume, props/product/program objects, scene/set/stage, color, light, spatial relationship, key action beats
+video_reference_do_not_inherit: white board layout, grid lines, frame numbers, arrows, title band, label boxes, note areas, small text, fake logos, storyboard sheet itself
 ```
 
 Do not split into a full shot-by-shot table unless the user asks for 逐镜. If they ask for 逐镜出图提示词, route S/A shots to `$frame-vision-director` instead.
@@ -101,6 +124,7 @@ When the user asks for 每个小分镜提示词, 单独小分镜出图, or 逐�
 ```text
 tvc_shot_prompt_handoff
 source_segment_lock: tvc_segment_storyboard_lock
+source_type:
 board_type:
 jimeng_direct_reference_board:
 segment_name:
@@ -119,6 +143,8 @@ camera_and_lens:
 lighting_and_material:
 continuity_from_board:
 image_prompt_focus:
+video_reference_inherit:
+video_reference_do_not_inherit:
 ai_risks:
 handoff_to: frame-vision-director
 next_video_handoff: ai-video-prompt-director when the still frame will become Jimeng/Seedance first-frame or keyframe reference

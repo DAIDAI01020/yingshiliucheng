@@ -151,7 +151,7 @@ async function normalizeShot(raw, defaults) {
   const shot = raw.shot || raw.shotNumber || raw["镜号"];
   const sourcePrompt = raw.prompt || raw.bananaPrompt || raw["Banana完整可复制提示词"] || raw["Banana/即梦完整可复制提示词"];
   const compactPrompt = raw.compactPrompt || raw.bananaCompactPrompt || raw["Banana 2K省token提示词"] || raw["省token提示词"];
-  const promptMode = String(raw.promptMode || defaults.promptMode || defaults.bananaPromptMode || "compact").toLowerCase();
+  const promptMode = String(raw.promptMode || defaults.promptMode || defaults.bananaPromptMode || "quality").toLowerCase();
   const prompt = promptMode === "quality" ? sourcePrompt : (compactPrompt || sourcePrompt);
   const negativePrompt = raw.negativePrompt || raw.negative || raw["负面提示词"] || raw["Banana/即梦负面提示词"] || "";
   if (!shot) throw new Error("Shot is missing a shot number.");

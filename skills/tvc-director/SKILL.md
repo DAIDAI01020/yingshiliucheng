@@ -101,6 +101,8 @@ If the generated board will be uploaded directly to Jimeng/Seedance, set:
 jimeng_direct_reference_board: true
 ```
 
+Then hand off to `$image-storyboard-workflow`. `$tvc-director` recommends the board type and commercial function; `$image-storyboard-workflow` owns the final source_type, board_type, video-reference inherit/do-not-inherit boundary, and downstream route.
+
 ## Reference Direction
 
 Prefer:

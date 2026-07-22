@@ -1,25 +1,17 @@
 ---
 name: workflow-sync-manager
-description: Manage Git/GitLab synchronization for the film AI workflow repository. Use when the user wants to record update logs, commit workflow changes, push to GitLab, check sync status across desktop/Mac, or safely publish skill updates without uploading generated outputs or secrets.
+description: Manage safe, versioned Git synchronization for the film AI workflow repository. Use when recording update logs, committing an explicit workflow-source scope, checking remote divergence, freezing a release tag, or publishing skill updates to GitHub or GitLab without uploading generated assets or secrets.
 ---
 
 # Workflow Sync Manager
 
 ## Core role
 
-Keep this workflow repository clean and synchronized across machines. This skill handles update logs, git commits, and GitLab pushes for the `H:\yingshi` workflow repo.
-
-Use it when the user says:
-
-- `把这次更新同步上去`
-- `写个日志然后推到 GitLab`
-- `提交这次 skill 更新`
-- `检查同步状态`
-- `台式机和 Mac 同步一下`
+Own the source-of-truth publication step for the film/visual agent. It records the change, stages only approved workflow paths, scans the staged patch for secrets, blocks unsafe divergence, commits, optionally tags a frozen version, and pushes to the selected remote.
 
 ## Repository policy
 
-Only workflow source files should be committed:
+Allowed source scope:
 
 - `skills/`
 - `README.md`
@@ -27,46 +19,39 @@ Only workflow source files should be committed:
 - `.gitignore`
 - `sync-logs/`
 
-Do not commit:
+Never publish generated images, videos, audio, project assets, temporary prompt inputs, `.env` files, cookies, access tokens, API keys, or private keys.
 
-- `outputs/`
-- `projects/`
-- generated images, video, audio, logs, review boards
-- temporary `*_input.json`
-- `.env`, API keys, private keys, tokens, or secrets
+## Safe publication contract
 
-## Update log
+Before a push:
 
-Every sync should write or append a human-readable log in:
+1. Confirm the requested remote and branch exist and the current branch matches.
+2. Fetch the remote branch.
+3. Stop if the remote has commits missing locally; never force-push automatically.
+4. Prefer `--paths-file` for a reviewed one-path-per-line whitelist.
+5. Scan the staged diff for plaintext secrets.
+6. Write `sync-logs/YYYY-MM-DD.md` and commit it.
+7. If requested, create an annotated immutable release tag and push branch plus tag.
 
-```text
-sync-logs/YYYY-MM-DD.md
-```
+The sync script must not silently fall back from the requested GitHub remote to GitLab or vice versa.
 
-The log should include:
+## Commands
 
-- timestamp
-- summary
-- changed files
-- commit hash after commit when available
-- push target when pushed
-
-## Script usage
-
-From this skill folder:
+From the repository root with the workspace Node runtime:
 
 ```powershell
-node .\scripts\sync-workflow.mjs status
-node .\scripts\sync-workflow.mjs log --summary "更新出图审片流程"
-node .\scripts\sync-workflow.mjs sync --summary "更新项目状态层" --push
+node .\skills\workflow-sync-manager\scripts\sync-workflow.mjs status
+node .\skills\workflow-sync-manager\scripts\sync-workflow.mjs log --summary "记录本次优化"
+node .\skills\workflow-sync-manager\scripts\sync-workflow.mjs sync --summary "优化整个影视 Agent" --paths-file C:\Temp\workflow-paths.txt
+node .\skills\workflow-sync-manager\scripts\sync-workflow.mjs sync --summary "优化整个影视 Agent" --paths-file C:\Temp\workflow-paths.txt --remote github --branch main --tag agent-v2026.07.22 --push
 ```
 
-## Rules
+`--tag` requires `--push`. The tag is accepted only if absent or already points at the final local commit.
 
-- Never stage ignored generated outputs.
-- Run the secret scanner before committing.
-- If a staged diff contains a likely plaintext secret, stop and do not commit.
-- If remote has new commits, fetch first and integrate safely before pushing.
-- Do not force push unless the user explicitly asks and understands it will rewrite remote history.
-- Prefer concise commit messages derived from the summary, such as `Update workflow sync manager`.
+## Failure handling
 
+- Secret match: stop before committing.
+- Disallowed path: unstage it and stop.
+- Wrong branch or missing remote: stop before committing.
+- Remote branch ahead: stop and ask for an explicit integration decision.
+- Push rejection: keep the local commits and report them; never rewrite history.

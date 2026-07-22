@@ -29,6 +29,7 @@ explicit platform
 | User intent | Route |
 | --- | --- |
 | 新建工程 / 继续工程 / 项目根目录 / 输出路径 / 文件散落 / 目录混乱 / 不要放总文件夹 / 整理工程但先不移动 | `$project-folder-director` -> `$project-state-manager` / `$asset-librarian` |
+| 大稿件多部分 / 一个总项目拆多个聊天 / 上下文隔离 / 分聊天并行 / 总控汇总 / 同步分聊天 | `$zongkong` confirms managed project/root -> owning director creates semantic split -> `$project-thread-orchestrator` proposes tasks -> one user confirmation -> same-project local child threads (max 4) -> `$production-manager` board / `$project-state-manager` state |
 | 品牌KV / 活动KV / 发布会KV / 产品KV / 产品主视觉 / 节目主视觉 / LED主视觉 / key visual / 主视觉 / banner system | `$kv-director` -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 已有方案/PPT/创意方向，下一步做KV或大屏KV | preserve approved proposal -> `$kv-director` proposal_to_kv_packet -> large-screen experience packet when needed -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 海报 / 人物海报 / 短剧人物海报 / 短剧封面 / 电影海报 / film key art / 社媒封面 / 缩略图 / poster-like narrative cover | `$poster-director` -> `$frame-vision-director` -> `$prompt-platform-auditor` -> image/layout tool |

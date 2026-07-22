@@ -71,6 +71,31 @@ Write prompts as direct visual production instructions:
 - Avoid random text, watermarks, QR codes, subtitles, logos, or labels unless requested.
 - For commercial/product work, preserve brand, structure, color, proportions, and key details.
 - For storyboard first frames, include shot scale, subject, action, scene, lighting, composition, and consistency with referenced assets.
+- For narrative/storyboard sequences, every shot prompt must be self-contained. Repeat the unified style DNA, camera system, lens/focal length, aperture or depth of field, shot size, camera height/angle, lighting source/direction/color temperature, local material texture, continuity anchors, aspect ratio, and negative controls inside each individual shot prompt.
+- Do not rely on a separate unified style block, `同上`, `延续上条`, `统一风格见上`, or a shared camera table as the only source for a shot. The shared style block may be shown for planning, but the copyable Banana prompt for every shot must stand alone.
+- Provide compact Banana prompts only when the user asks for speed, low token use, or `省 token`. Otherwise the full detailed prompt is the execution authority.
+
+## Narrative Storyboard Detail Rule
+
+When preparing Banana Pro prompts for story-driven scenes, short drama, TVC storyboards, branded narrative sequences, or multi-shot first frames, output one full prompt per shot. Each prompt must contain these fields as visible execution language, not only as separate columns:
+
+```text
+镜号 / 画幅 / 出图用途
+可见画面目标：人物、产品、道具、场景、动作瞬间、前中后景
+统一风格 DNA：项目主风格、真实度、色彩边界、材质纪律、禁用项
+相机数据：摄影机/影像系统、镜头焦段、光圈或景深、机位高度、角度、景别、运动趋势
+光线：主光来源、方向、软硬、色温、反差、环境光
+构图：主体位置、前景遮挡、中景关系、背景信息、视觉焦点、留白
+连续性：角色脸、发型、服装、道具、背景、轴线/视线方向、参考图角色
+质感：真实皮肤、衣料褶皱、旧物磨损、灰尘、雨水、金属/玻璃/木纹等可见材料
+负面控制：乱码文字、水印、logo、脸漂、手崩、背景乱变、塑料皮肤、假HDR、廉价AI感
+```
+
+Hard rule:
+
+```text
+For a multi-shot Banana storyboard batch, no shot may be handed off as "same style as above" or with camera/lens/light only in a shared table. If exact details repeat, repeat them in the shot prompt anyway.
+```
 
 ## Image Edit / Character Replacement Mode
 

@@ -116,7 +116,7 @@ For proposal work, output only what the current stage needs. Common modules:
 
 ## Image Storyboard Board Routing
 
-When the user asks for image故事板, 广告故事板, 大段故事板, 直接给 image 出故事板, or a board to feed Jimeng/Seedance, `$yingshisheji` must route the decision to the correct specialist director and preserve the board type in handoff.
+When the user asks for image故事板, 广告故事板, 大段故事板, 直接给 image 出故事板, or a board to feed Jimeng/Seedance, `$yingshisheji` must route through `$image-storyboard-workflow`. Specialist directors may recommend board type, but `$image-storyboard-workflow` owns the final source_type, board_type, direct-video-reference boundary, and handoff path.
 
 Commercial board types:
 
@@ -129,9 +129,9 @@ spatial_continuity_board: scene geography, character positions, eyelines, camera
 Routing:
 
 ```text
-TVC / product ad / brand ad -> tvc-director decides recommended_board_type.
-program promo / variety package / episode promo -> program-promo-director decides recommended_board_type.
-brand film / corporate / city film -> brand-film-director or storyboard-planner may choose, but do not use short-drama routing.
+TVC / product ad / brand ad -> tvc-director may recommend board type -> image-storyboard-workflow finalizes.
+program promo / variety package / episode promo -> program-promo-director may recommend board type -> image-storyboard-workflow finalizes.
+brand film / corporate / city film -> brand-film-director may provide story/scene function -> image-storyboard-workflow finalizes.
 ```
 
 Handoff must include:
@@ -140,7 +140,7 @@ Handoff must include:
 recommended_board_type:
 board_type_reason:
 jimeng_direct_reference_board:
-handoff_to: storyboard-planner / scene-board-image-prompter
+handoff_to: image-storyboard-workflow
 ```
 11. `PPT页面结构`
 12. `生成与QC计划`
