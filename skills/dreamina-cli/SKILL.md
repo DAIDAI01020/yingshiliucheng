@@ -11,6 +11,8 @@ Own local Dreamina CLI execution. Connect an approved prompt and references to l
 
 Inherit route fields from `$zongkong`. Keep `platform_target:jimeng` and identify the runner as `provider:jimeng-cli`. `$ai-video-prompt-director` owns motion semantics, `$prompt-platform-auditor` owns final Dreamina wording, `$video-generation-controller` owns execution readiness/idempotency, and `$project-state-manager` owns persisted run state.
 
+For Seedance 2.5, preserve `model_target:seedance_2_5`, the audited `task_mode`, reference asset map, stage plan, edit/extension boundary, and locked parameters. Do not translate these into CLI flags until current subcommand help confirms the exact mapping.
+
 Read [references/cli-command-map.md](references/cli-command-map.md) before installation, login, generation, or task recovery.
 
 ## Availability
@@ -89,8 +91,10 @@ user_credit checked when available
 available credit >= estimated cost when both are known
 explicit generation_confirmation
 final approved prompt and negative prompt
+explicit model_target and task_mode when Seedance 2.5 is selected
 existing reference files with explicit roles
 supported duration / ratio / resolution
+no ratio/duration override forbidden by the audited locked_parameters
 approved output directory
 idempotency preflight passed
 bounded retry policy
@@ -119,6 +123,17 @@ For async work:
 
 If `AigcComplianceConfirmationRequired` appears, ask the user to complete the one-time web confirmation and resume the same task only after confirmation.
 
+Use the bundled adapter for deterministic orchestration. It reads live help before building any generation or recovery command and never invokes a shell pipeline:
+
+```powershell
+node scripts\dreamina_runner.mjs doctor
+node scripts\dreamina_runner.mjs credit
+node scripts\dreamina_runner.mjs execute --subcommand image2video --prompt-file H:\project\prompts\S03.txt --image-file H:\project\refs\S03.png --duration 5 --ratio 16:9 --output-dir H:\project\video-runs\S03 --generation-confirmation approved
+node scripts\dreamina_runner.mjs recover --submit-id {submit_id} --output-dir H:\project\video-runs\S03
+```
+
+The adapter resolves canonical fields only from options present in `dreamina <subcommand> -h`. If the live CLI does not expose a matching flag, stop and report the missing mapping instead of guessing. `--extra-args-file` may supply a reviewed JSON array of exact current CLI arguments.
+
 ## Run packet
 
 ```text
@@ -130,6 +145,8 @@ generation_confirmation / cost_scope / retry_count
 idempotency_key / credit_checked / available_credits / estimated_cost
 session_id / task_type / approved_prompt_source / reference_roles
 duration / ratio / resolution / music_policy
+model_target / task_mode / reference_asset_map / stage_plan
+edit_scope / boundary_state / locked_parameters
 submit_id / gen_status / fail_reason
 output_paths / run_manifest / project_state
 ```

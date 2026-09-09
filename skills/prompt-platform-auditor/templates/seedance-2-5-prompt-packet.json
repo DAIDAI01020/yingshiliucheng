@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "model_target": "seedance_2_5",
+  "platform_target": "jimeng",
+  "task_mode": "reference_to_video",
+  "generation_goal": "",
+  "source_authority": "",
+  "references": [
+    {
+      "id": "@图片1",
+      "kind": "image",
+      "entity": "",
+      "use": "",
+      "do_not_use": "",
+      "width": null,
+      "height": null,
+      "duration_seconds": null
+    }
+  ],
+  "stages": [
+    {
+      "label": "阶段一",
+      "time_range": "",
+      "start_state": "",
+      "main_change": "",
+      "ending_state": ""
+    }
+  ],
+  "must_preserve": [],
+  "do_not_inherit": [],
+  "edit_master": "",
+  "edit_scope": "",
+  "boundary_state": "",
+  "locked_parameters": [],
+  "parameter_overrides": {},
+  "duration": null,
+  "ratio": "",
+  "audio_mode": "environment_only",
+  "music_policy": "no_music_allow_sfx",
+  "approved_prompt": ""
+}

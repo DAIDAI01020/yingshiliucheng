@@ -11,34 +11,15 @@ description: Commercial/event KV and key visual director under zongkong for film
 
 Do not use it as a top-level orchestrator. `$zongkong` decides project tier, main line, upstream style/reference requirements, and whether commercial KV mode is needed.
 
-Use this skill for:
+Use this skill for 品牌KV / 活动KV / 发布会KV / 产品上市主视觉 / 节目主视觉 / LED主视觉 / campaign KV / key visual / banner system.
 
-```text
-品牌KV / 活动KV / 发布会KV / 产品上市主视觉 / 节目主视觉 / LED主视觉 / campaign KV / key visual / banner system
-```
-
-Do not use it for:
-
-```text
-短剧人物海报 / 电影海报 / 悬疑案件海报 / 剧集key art / 社媒缩略图 / poster-like narrative cover
-```
+Do not use it for 短剧人物海报 / 电影海报 / 悬疑案件海报 / 剧集key art / 社媒缩略图 / poster-like narrative cover.
 
 Route those to `$poster-director`.
 
 ## Workflow Position
 
-Default route:
-
-```text
-$zongkong
--> brief / brand / event / product / program / LED upstream direction
--> kv-director
--> kv-image-prompt-director
--> prompt-platform-auditor
--> image generation
--> image-qc-director
--> Canva / Photoshop / manual layout / social or screen adaptation
-```
+Default route: `$zongkong` -> brief / brand / event / product / program / LED upstream direction -> `$kv-director` -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image generation -> `$image-qc-director` -> Canva / Photoshop / manual layout / social or screen adaptation.
 
 For formal commercial/promo projects, inherit:
 
@@ -176,6 +157,7 @@ led_screen_layout_spec: screen ratio, center safe zone, performer/presenter safe
 large_screen_experience_packet: required for LED / stage / big-screen KV
 safe_area_map: top / bottom / left / right / center-safe / sponsor-safe
 extension_crop_map: how 16:9, 9:16, 4:5, 1:1, LED, and ultra-wide preserve the same visual DNA
+kv_rendition_matrix: normalized safe-area coordinates, deterministic master-image crops, overlays, previews, and manual-recomposition warnings
 director_contribution_packet: kv-director owns KV type, composition mode, subject hierarchy, layout safety, asset split, post typography plan
 visual_helpfulness_targets: what the prompt must visibly protect or improve
 ```
@@ -276,6 +258,19 @@ Important KV work should not force one generation to solve the whole design. Spl
 
 For AI prompts, ask for the base art or asset, not a finished graphic design with generated typography.
 
+## Master-To-Rendition Gate
+
+Approve one master composition before deriving delivery ratios. Do not regenerate each ratio as an unrelated new KV unless the crop matrix proves the subject cannot survive the target format.
+
+Create and validate the rendition plan with:
+
+```powershell
+python scripts\build_kv_rendition_matrix.py --input templates\kv-rendition-plan-template.json --output-dir H:\project\kv\renditions --check-only
+python scripts\build_kv_rendition_matrix.py --input H:\project\kv\kv-rendition-plan.json --output-dir H:\project\kv\renditions
+```
+
+Use normalized `x/y/w/h` boxes for title, logo, sponsor, and performer-safe zones. The script writes `kv-rendition-matrix.json`, SVG safe-area overlays, and crop previews when a master image is provided. A `subject_box_larger_than_crop_manual_recomposition_required` warning means the director must recompose that ratio; do not solve it by silently changing the KV style.
+
 ## Reference And Style Inheritance
 
 For every KV, first read `references/kv-composition-style-library.md`. Then read `references/kv-reference-library.md` when:
@@ -347,6 +342,7 @@ Use this first:
 | large_screen_experience_packet | required for LED / stage screen / big-screen KV |
 | safe_area_map |  |
 | extension_crop_map |  |
+| kv_rendition_matrix | normalized safe areas, crop coordinates, overlays, previews, manual-recomposition warnings |
 | style_inheritance |  |
 | mother_library_translation |  |
 | director_contribution_packet |  |
@@ -481,6 +477,7 @@ composition has no first-read, focal hierarchy, gaze path, negative-space logic,
 no asset_split for complex KV
 no extension ratio plan
 no safe_area_map or extension_crop_map
+formal multi-ratio delivery has no kv_rendition_matrix or approved manual-recomposition decision
 no anti-AI realism or text/logo risk control
 an approved proposal exists but the KV direction changes its claim or visual DNA without declaring the change
 ```

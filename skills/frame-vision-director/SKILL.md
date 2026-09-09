@@ -9,7 +9,7 @@ description: Turn approved film, commercial, storyboard, KV, product, graphic, t
 
 Write the semantic image brief: what must be visible, what must stay fixed, what may change, and which visual controls matter for this deliverable.
 
-Inherit `speed_mode`, `deliverable_profile`, `platform_target`, `response_mode`, and `qc_mode` from `zongkong_route_packet` when present. Do not reclassify the task.
+Inherit `speed_mode`, `deliverable_profile`, `platform_target`, `model_target`, `response_mode`, and `qc_mode` from `zongkong_route_packet` when present. Do not reclassify the task or silently change the selected model.
 
 Own image meaning and shot-specific visual wording. Do not:
 
@@ -42,6 +42,8 @@ ratio_and_usage:
 risk_profile:
 variant_set:
 platform_target:
+model_target:
+task_mode: generate / edit / combine_references / style_transfer / text_layout / transparent_asset / sketch_to_image
 response_mode:
 missing_fields:
 route_back_to:

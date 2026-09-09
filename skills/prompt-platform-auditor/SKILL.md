@@ -1,6 +1,6 @@
 ---
 name: prompt-platform-auditor
-description: Compile and audit semantic AI image/video prompts for built-in imagegen, Banana/Banana Pro, Jimeng, Seedance/Ark, Kling, Kling O1/VIDEO 3.0 Omni, and Midjourney. Use after an image/video prompt owner or when the user supplies a prompt that needs platform-ready wording, reference-role checks, complexity control, local-edit boundaries, conditional risk controls, or an execution pass/fail decision.
+description: Compile and audit semantic AI image/video prompts for ChatGPT Images/GPT Image 2.5, built-in imagegen, Banana/Banana Pro, Jimeng/Seedance 2.5, Seedance/Ark, Kling, Kling O1/VIDEO 3.0 Omni, and Midjourney. Use after an image/video prompt owner or when the user supplies a prompt that needs platform/model-ready wording, multimodal reference-role checks, precision editing, exact-text or transparent-asset controls, long-stage structure, edit/extension boundaries, locked-parameter checks, complexity control, conditional risk controls, or an execution pass/fail decision.
 ---
 
 # Prompt Platform Auditor
@@ -24,10 +24,20 @@ Do not invent concept, composition, style lock, scene geography, shot function, 
 ## Read References On Demand
 
 - Built-in imagegen, Banana/Banana Pro, Jimeng Image, or Midjourney: read [references/image-platforms.md](references/image-platforms.md).
+- Explicit ChatGPT Images/GPT Image 2.5, or a new built-in image request routed to the Images 2.5 default: also read [references/gpt-image-2-5.md](references/gpt-image-2-5.md) and audit the model boundary, task mode, reference roles, preservation locks, exact text, transparency, and parameter separation.
 - Jimeng video, Seedance/Ark, Kling, Kling O1, or Kling VIDEO 3.0 Omni: read [references/video-platforms.md](references/video-platforms.md).
+- Explicit Seedance 2.5 in Dreamina/即梦 or Ark: also read [references/seedance-2-5.md](references/seedance-2-5.md) and audit the model-specific task mode, references, stages, edit/boundary state, and locked parameters.
 - Deliverable-specific required fields and targeted risk controls: read [references/profile-risk-controls.md](references/profile-risk-controls.md).
 
 Do not copy platform tables back into this file. Each platform rule has one source of truth.
+
+For a formal or complex Seedance 2.5 packet, validate the structured packet before `通过`:
+
+```powershell
+python scripts\audit_seedance_25_packet.py --input H:\project\prompts\seedance-2.5-packet.json
+```
+
+Use [templates/seedance-2-5-prompt-packet.json](templates/seedance-2-5-prompt-packet.json) as the optional packet shape. The validator checks prompt structure and documented limits only; it does not replace live model/CLI/API capability checks.
 
 ## Input Contracts
 
@@ -147,6 +157,8 @@ Reject or rewrite when:
 - platform parameters or language are wrong;
 - task-relevant structure, layout, material, or continuity is missing.
 
+For GPT Image 2.5, apply [references/gpt-image-2-5.md](references/gpt-image-2-5.md). Require only the controls relevant to the selected task mode. For precision edits, require one explicit delta plus a concrete preservation boundary; for multi-reference work, require numbered roles and `do_not_inherit`; for exact text, require quoted copy, occurrence count, placement, hierarchy, and no-extra-text control. Keep model, quality, size, background, and output format as execution parameters rather than prompt prose.
+
 Do not require exact camera brand, focal length, aperture, or photographic realism unless they materially improve this deliverable.
 
 ## Video Audit
@@ -155,12 +167,18 @@ Check:
 
 ```text
 source_authority
+model_target and task_mode
 complexity_mode: single_beat / staged_action / multi_shot
 must_preserve
+reference_asset_map
 subject_action_or_beats
+stage_plan when one generation contains several connected events
 camera_behavior
 environment_or_light_change
 ending_behavior
+edit_master/edit_scope for local editing
+boundary_state for extension
+locked_parameters when the source controls ratio or duration
 duration_and_ratio
 audio_mode when applicable
 music_policy
@@ -184,7 +202,11 @@ Do not remove requested dialogue or synchronized sound effects. For `music_reque
 Normalize names internally:
 
 ```text
-ChatGPT Image / image / image-2 -> built_in_image
+ChatGPT Image / image / 内置 image -> built_in_image
+ChatGPT Images 2.5 / GPT Image 2.5 / Image 2.5 -> built_in_image + model_target:gpt_image_2_5
+GPT-Image-2.5 Flare -> built_in_image + model_target:gpt_image_2_5_flare
+GPT-Image-2.5 Sunburst -> built_in_image + model_target:gpt_image_2_5_sunburst
+image-2 / GPT Image 2 -> built_in_image + model_target:gpt_image_2
 Banana -> banana
 Banana Pro -> banana_pro
 即梦 -> jimeng
@@ -205,14 +227,22 @@ Preserve for formal work:
 audited_prompt_packet
 decision: 通过 / 保效精简后通过 / 打回重写 / 建议拆分
 platform_target:
+model_target:
 deliverable_profile:
 task_type:
+task_mode:
 approved_prompt:
 negative_or_forbidden:
 changed_reason:
 source_prompt_owner:
 source_lock:
 reference_roles:
+reference_asset_map:
+stage_plan:
+edit_master:
+edit_scope:
+boundary_state:
+locked_parameters:
 ending_behavior:
 audio_mode:
 music_policy:
@@ -244,4 +274,7 @@ Do not output a long audit table unless the user asks for comparison or batch re
 - Do not convert a weak concept into a new concept.
 - Do not hide missing formal decisions in generic style language.
 - Do not duplicate platform policy inside prompt-owner skills.
+- Do not apply Seedance 2.5 limits or syntax unless `model_target:seedance_2_5` or the user/current project explicitly selects that model.
+- Do not apply GPT Image 2.5 prompting or execution assumptions to a project or prompt pinned to GPT Image 2 or an older model. New generic built-in work may use `model_target:gpt_image_2_5` only when `$zongkong` has selected the migrated default.
+- Do not claim that direct ChatGPT/Codex imagegen used Flare or Sunburst unless the execution surface exposes that exact submodel.
 - Do not drop the default video no-music/allow-SFX negative unless explicit music or full silence overrides it.

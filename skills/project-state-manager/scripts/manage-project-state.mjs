@@ -551,6 +551,14 @@ function normalizeObservation(input, projectRoot) {
     model: String(input.model || "").trim(),
     deliverable_profile: String(input.deliverable_profile || "").trim(),
     mother_library_route: String(input.mother_library_route || "").trim(),
+    shot_type: String(input.shot_type || "").trim(),
+    source_authority: String(input.source_authority || "").trim(),
+    reference_count: Number(input.reference_count || 0),
+    prompt_fingerprint: String(input.prompt_fingerprint || "").trim(),
+    settings_fingerprint: String(input.settings_fingerprint || "").trim(),
+    style_lock_version: String(input.style_lock_version || "").trim(),
+    technical_qc_report: String(input.technical_qc_report || "").trim(),
+    qc_score: input.qc_score === null || input.qc_score === undefined || input.qc_score === "" ? null : Number(input.qc_score),
     qc_decision: String(input.qc_decision || "").trim(),
     failure_type: String(input.failure_type || "none").trim().toLowerCase(),
     severity: String(input.severity || "low").trim().toLowerCase(),
@@ -674,6 +682,41 @@ async function summarizeFeedback(args) {
   const observations = await readJsonLines(paths.observationsPath);
   const minimumEvidence = Math.max(2, Number(args.minimumEvidence || 3));
   const { summaries, promotionProposals } = summarizeObservationRows(observations, minimumEvidence);
+  const performanceMap = new Map();
+  for (const observation of observations) {
+    const key = [observation.platform || "unknown", observation.model || "", observation.deliverable_profile || "unknown"].join("|");
+    const row = performanceMap.get(key) || {
+      key,
+      platform: observation.platform || "unknown",
+      model: observation.model || "",
+      deliverable_profile: observation.deliverable_profile || "unknown",
+      observations: 0,
+      improved: 0,
+      worse: 0,
+      elapsed_seconds_total: 0,
+      credits_used_total: 0,
+      estimated_cost_total: 0,
+      qc_score_total: 0,
+      qc_score_count: 0,
+    };
+    row.observations += 1;
+    if (observation.outcome === "improved") row.improved += 1;
+    if (observation.outcome === "worse") row.worse += 1;
+    row.elapsed_seconds_total += Number(observation.metrics?.elapsed_seconds || 0);
+    row.credits_used_total += Number(observation.metrics?.credits_used || 0);
+    row.estimated_cost_total += Number(observation.metrics?.estimated_cost || 0);
+    if (Number.isFinite(observation.qc_score)) {
+      row.qc_score_total += observation.qc_score;
+      row.qc_score_count += 1;
+    }
+    performanceMap.set(key, row);
+  }
+  const platformPerformance = [...performanceMap.values()].map((row) => ({
+    ...row,
+    average_elapsed_seconds: row.observations ? Number((row.elapsed_seconds_total / row.observations).toFixed(3)) : null,
+    average_estimated_cost: row.observations ? Number((row.estimated_cost_total / row.observations).toFixed(4)) : null,
+    average_qc_score: row.qc_score_count ? Number((row.qc_score_total / row.qc_score_count).toFixed(3)) : null,
+  }));
   const result = {
     schema_version: 1,
     project_root: paths.projectRoot,
@@ -681,6 +724,7 @@ async function summarizeFeedback(args) {
     minimum_evidence: minimumEvidence,
     observation_count: observations.length,
     groups: summaries,
+    platform_performance: platformPerformance,
     promotion_proposals: promotionProposals,
   };
   if (!args.checkOnly) {

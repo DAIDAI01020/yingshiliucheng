@@ -1,6 +1,6 @@
 ---
 name: ai-video-prompt-director
-description: Turn approved first frames, reference images/videos, storyboard beats, dialogue coverage, product motion, local edits, or multi-shot plans into concise video-prompt source packets. Use for Jimeng, Seedance/Ark, Kling, Kling O1, or Kling VIDEO 3.0 Omni when Codex must define source authority, preservation locks, motion complexity, action beats, camera behavior, ending behavior, reference roles, duration/ratio, and conditional audio intent before platform compilation.
+description: Turn approved first frames, reference images/videos/audio, storyboard beats, dialogue coverage, product motion, local edits, video extensions, transitions, long staged sequences, or multi-shot plans into concise video-prompt source packets. Use for Jimeng/Seedance 2.5, Seedance/Ark, Kling, Kling O1, or Kling VIDEO 3.0 Omni when Codex must define model/task mode, source authority, preservation locks, motion complexity, action or stage beats, camera and ending behavior, reference roles, edit/boundary state, duration/ratio, and conditional audio intent before platform compilation.
 ---
 
 # AI Video Prompt Director
@@ -33,17 +33,25 @@ Build:
 video_prompt_source_packet
 source_authority:
 deliverable_profile: video_i2v / video_multi_shot
+model_target:
 task_type:
+task_mode:
 complexity_mode: single_beat / staged_action / multi_shot
 shot_or_sequence_function:
 must_preserve:
 must_change:
 reference_roles:
+reference_asset_map:
 do_not_inherit:
 subject_action_or_beats:
+stage_plan:
 camera_behavior:
 environment_or_light_change:
 ending_behavior: hold / breath_light / breath_heavy / hard_cut / action_exit / loop
+edit_master:
+edit_scope:
+boundary_state:
+locked_parameters:
 duration:
 ratio:
 audio_mode: unsupported / none / environment_only / dialogue / native_audio / reference_audio
@@ -72,7 +80,12 @@ scene_reference
 motion_reference_video
 camera_reference_video
 source_video_for_local_edit
+source_video_for_extension
+source_videos_for_transition
 storyboard_or_scene_board
+ordered_keyframes
+coarse_white_model
+fine_white_model
 text_only
 ```
 
@@ -185,6 +198,26 @@ Preserve same-scene geography, background side, eyeline, performance state, and 
 ### Local edit
 
 Lock the source video, camera path, timing, background, non-target subjects, light, and color. State one target region and one exact delta.
+
+### Long staged sequence
+
+When one generation contains several connected events, define stages. Give each stage one main observable state change, its start/continuation state, and its ending state. Use timestamps only as pacing budgets for critical handoffs or transitions; never promise frame-accurate edits.
+
+### Multi-asset reference work
+
+Name each person, product, prop, location, motion, and sound owner. Map every asset to what it controls and what it must not import. Select assets per scene instead of asking all uploaded references to appear at once.
+
+### Video extension
+
+For backward extension, inherit the source tail state before adding new action. For forward extension, describe the preceding action and make the new final frame reach the source first-frame state. Preserve identity, prop ownership, space, motion trend, camera, light, and audio across the boundary.
+
+### Generated transition
+
+Define the before source, after source, trigger, camera direction, visual transformation, destination composition, motion trend, and audio bridge. Do not promise pixel-identical preservation through a generative transition.
+
+### White-model guidance
+
+Classify the source first. A coarse white model controls motion paths, blocking, timing, camera, edits, or light/sound rhythm; a fine white model controls complete structure, action, layout, and camera while named appearance properties are rerendered. Never mix these authority levels.
 
 ### Reference continuity or Omni work
 

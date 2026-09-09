@@ -1,6 +1,6 @@
 ---
 name: builtin-imagegen-director
-description: Use Codex/ChatGPT built-in imagegen for fast film visual concept images, storyboard keyframes, reference exploration, image edits, and quick drafts without external API keys. Use when the user asks for built-in imagegen, 内置出图, 直接生成一张图, 快速出图, concept preview, or wants image generation/editing without Banana, OpenAI API, Midjourney, or project logging.
+description: Use Codex/ChatGPT built-in imagegen, including the current ChatGPT Images 2.5 route, for fast film visual concepts, storyboard keyframes, reference-led generation, precision edits, and quick drafts without external API keys. Use when the user asks for Image 2.5, built-in imagegen, 内置出图, 直接生成一张图, 快速出图, concept preview, or image generation/editing without Banana, OpenAI API, Midjourney, or project logging.
 ---
 
 # Built-in Imagegen Director
@@ -13,7 +13,7 @@ This skill is not an API wrapper. It does not manage external keys, model select
 
 ## Route Authority And Independent Tool Boundary
 
-Inherit `speed_mode`, `deliverable_profile`, `platform_target`, `response_mode`, and `qc_mode` from `$zongkong` when a route packet is present.
+Inherit `speed_mode`, `deliverable_profile`, `platform_target`, `model_target`, `response_mode`, and `qc_mode` from `$zongkong` when a route packet is present.
 
 This skill owns built-in imagegen preflight, prompt shaping, and direct generation. It does not choose project tier, change `speed_mode`, skip formal gates, replace `$frame-vision-director`, replace `$prompt-platform-auditor` for formal work, or replace `$image-qc-director` for managed QC.
 
@@ -23,7 +23,7 @@ For `formal_managed`, route missing style, scene, shot, prompt-audit, output pat
 
 ## When to Use
 
-- The user asks for `imagegen`, `内置出图`, `直接生成一张图`, `快速出图`, or `先看个效果`.
+- The user asks for `Image 2.5`, `ChatGPT Images 2.5`, `imagegen`, `内置出图`, `直接生成一张图`, `快速出图`, or `先看个效果`.
 - The user wants a quick visual concept, mood frame, style test, poster direction, storyboard keyframe, or image edit.
 - The user does not require Banana, Midjourney, OpenAI API, versioned files, prompt logs, or project-state writeback.
 
@@ -33,13 +33,14 @@ Do not use this skill when the user explicitly says Banana, MJ/Midjourney, OpenA
 
 1. Determine whether the request is direct generation or prompt-only output.
 2. Run `direct_image_preflight_check` before generation.
-3. Preserve the current project's approved style, profile-specific locks, and reference roles.
-4. For narrative storyboards or multi-shot keyframes, prepare one concise self-contained prompt per shot. Repeat only the compact stable controls needed by that shot; never use `同上`.
-5. If the user says `直接出图`, call the built-in image generation tool after preflight without printing the full prompt first.
-6. If the user says `给提示词`, output only the prompt and do not generate.
-7. For edits, preserve the user's stated invariants and change only the requested elements.
-8. If generation fails, return `imagegen_execution_result` with the real failure type. Never claim success when no image artifact was returned.
-9. If generation succeeds, end with the generated image result and do not append a QC line or other text in the same response. Run QC only in a later user turn or separate review workflow.
+3. For `model_target:gpt_image_2_5` or a new built-in request routed to the migrated Images 2.5 default, read [GPT Image 2.5 prompt compilation](../prompt-platform-auditor/references/gpt-image-2-5.md) and apply its lightweight prompt shape without creating a formal audit packet.
+4. Preserve the current project's approved style, profile-specific locks, reference roles, and pinned model.
+5. For narrative storyboards or multi-shot keyframes, prepare one concise self-contained prompt per shot. Repeat only the compact stable controls needed by that shot; never use `同上`.
+6. If the user says `直接出图`, call the built-in image generation tool after preflight without printing the full prompt first.
+7. If the user says `给提示词`, output only the prompt and do not generate.
+8. For edits, state one requested delta first, repeat the concrete preservation lock, and change only the requested elements. Use the latest accepted result as the next edit input.
+9. If generation fails, return `imagegen_execution_result` with the real failure type. Never claim success when no image artifact was returned.
+10. If generation succeeds, end with the generated image result and do not append a QC line or other text in the same response. Run QC only in a later user turn or separate review workflow.
 
 ## Direct Image Preflight Check
 
@@ -50,6 +51,8 @@ direct_image_preflight_check
 execution_mode: direct_generation / prompt_only
 requested_image_count:
 deliverable_profile:
+model_target:
+task_mode: generate / edit / combine_references / style_transfer / text_layout / transparent_asset / sketch_to_image
 intent_or_shot_function:
 style_source_or_lock:
 must_preserve:
@@ -67,6 +70,14 @@ missing_fields:
 ```
 
 If `missing_fields` would break the image, ask or route back. If the request is a quick test and the missing field is not blocking, make a clear assumption inside the prompt.
+
+## Images 2.5 Routing
+
+For a new generic built-in image request, preserve `$zongkong`'s migrated `model_target:gpt_image_2_5`. A continuation pinned to GPT Image 2 or an older model keeps that model unless the user explicitly asks to migrate.
+
+The built-in tool may not expose Flare/Sunburst selection or API parameters. In that case, use the generic Images 2.5 prompt rules, do not claim a submodel, and do not embed model, quality, size, background, or output-format parameters into the visual prompt. If the user explicitly asks for OpenAI API execution, this skill is not the executor.
+
+For precision edits, request one meaningful change per turn, restate identity/product/layout/light locks, and inspect each result before the next edit. Never promise pixel-identical preservation; route truly pixel-locked work to compositing or a deterministic local-edit workflow.
 
 ## Quick Multi-Variant Generation
 
@@ -141,7 +152,7 @@ Retry once only for `transient_service` or `empty_result`. For multi-variant gen
 
 ## Guardrails
 
-- Do not say the exact model name unless the environment exposes it.
+- Do not claim an exact serving submodel unless the environment exposes it. `model_target:gpt_image_2_5` identifies the requested/default prompt branch, not proof that Flare or Sunburst was selected.
 - Do not ask for API keys.
 - Do not promise deterministic file paths or project logging from the built-in tool.
 - Do not silently switch to external tools.

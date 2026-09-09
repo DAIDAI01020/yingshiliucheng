@@ -1,4 +1,4 @@
 interface:
   display_name: "KV Director"
-  short_description: "商业活动KV主视觉系统、分层出图与后期排版工作流"
+  short_description: "商业活动KV主视觉系统、多比例派生与后期排版工作流"
   default_prompt: "Use $kv-director to plan a commercial/event KV system. Preserve an approved proposal as proposal_to_kv_packet. For every KV, read the composition/style library and output kv_composition_style_packet with first-read, focal hierarchy, gaze path, negative space, typography relationship, primary composition, primary style, palette, material, light, graphic/photo balance, density, anti-template rule, and forbidden drift. Then output kv_direction_packet with layout, safe areas, extensions, assets, and post layout. Apply large-screen experience only as an adaptation layer when LED/stage delivery exists."

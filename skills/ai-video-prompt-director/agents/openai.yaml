@@ -1,6 +1,6 @@
 interface:
   display_name: "AI视频提示词导演"
-  short_description: "定义视频来源权威、动作复杂度、运镜、结束方式与条件音频"
-  default_prompt: "Use $ai-video-prompt-director to turn this first frame, references, or storyboard beat into a motion-safe video prompt source packet before platform compilation."
+  short_description: "定义视频来源、阶段动作、编辑边界、多素材职责、运镜与声音策略"
+  default_prompt: "Use $ai-video-prompt-director to turn these frames, multimodal references, edit or extension boundaries, and story beats into a motion-safe video prompt source packet before platform compilation."
 policy:
   allow_implicit_invocation: true

@@ -3,4 +3,4 @@ interface:
   short_description: "把图像语义提示编译为内置Image可复制提示词的兼容入口"
   default_prompt: "Use $openai-image-prompt-director to adapt this image brief through frame direction and built-in image platform compilation without duplicating prompt rules."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

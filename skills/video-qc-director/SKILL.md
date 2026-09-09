@@ -39,6 +39,14 @@ If a managed project has `asset-index.json`, locate the source prompt, first fra
 
 ## QC Checks
 
+For a saved video, first create bounded technical evidence when FFmpeg is available:
+
+```powershell
+python scripts\technical_video_qc.py --video H:\project\video-runs\S03.mp4 --reference-first-frame H:\project\references\S03.png --output-dir H:\project\review\S03
+```
+
+Use the resulting JSON, sample frames, and contact sheet to inspect duration, codec, resolution, FPS, audio-stream presence/level, black intervals, freezes, and first-frame hash distance. Treat black/freeze findings as review flags because an intentional hold or cut may be valid. Audio presence does not prove music; music versus ambience/SFX remains a semantic listening decision.
+
 | Area | Check |
 | --- | --- |
 | first-frame preservation | face, product, costume, scene, material, color, light ratio stay stable |

@@ -52,7 +52,9 @@ For managed short-drama work, use `$project-state-manager` to initialize/check s
 | scene-level style differences | multi-scene or location-specific visual treatment | `$scene-style-map-director` |
 | scene/background continuity lock | same-scene multi-shot coverage | `$short-drama-scene-director` or relevant scene owner |
 | shot function / edit motivation / axis | dramatic or multi-shot work | `$shot-language-auditor` |
+| shot production state / dependency / legal transition | formal multi-shot or episodic execution | `$project-state-manager`, with shot decisions supplied by `$short-drama-director` and scene/shot owners |
 | stable batch visual variables | approved style must persist across a batch | `$project-style-lock` |
+| KV master-to-rendition matrix / safe areas | one approved KV must ship in multiple ratios | `$kv-director` |
 | image execution wording | approved image/keyframe direction exists | `$frame-vision-director` or the applicable image prompt owner |
 | video execution wording | approved motion/shot direction exists | `$ai-video-prompt-director` |
 | platform execution audit | formal execution or external platform handoff | `$prompt-platform-auditor` |
@@ -73,7 +75,11 @@ formal typography asset
 -> no mother-library, hook, scene map, shot audit, or photorealism gate by default
 
 formal short drama batch
--> intake/state + hook audit when opening/episode applies + character continuity + reference/style + scene map + scene continuity when applicable + shot audit + style lock + prompt audit + generation-ready
+-> intake/state + hook audit when opening/episode applies + character continuity + reference/style + scene map + scene continuity when applicable + shot audit + style lock + shot production registry + prompt audit + generation-ready
+
+formal multi-ratio KV delivery
+-> approve one master composition + lock title/logo/sponsor/performer safe areas + build rendition matrix + inspect crop previews + manually recompose only warned ratios + platform audit + generation-ready when generation is still required
+-> a new ratio is not permission to invent an unrelated composition
 
 formal single-scene product image
 -> intake when managed + product/reference lock + composition/material gate + prompt audit + generation-ready
@@ -122,12 +128,19 @@ For managed video execution, also require the relevant fields:
 ```text
 video_prompt_source_packet:
 source_authority:
+model_target: when a specific model such as seedance_2_5 is selected
+task_mode: when the model/task has distinct reference, edit, extension, keyframe, montage, or transition behavior
 complexity_mode: single_beat / staged_action / multi_shot
 must_preserve:
+reference_asset_map: when multiple or multimodal references exist
 subject_action_or_beats:
+stage_plan: when one generation contains several connected events
 camera_behavior:
 environment_or_light_change:
 ending_behavior:
+edit_master / edit_scope: for local edit
+boundary_state: for video extension
+locked_parameters: when source media controls ratio or duration
 duration:
 ratio:
 audio_mode: only when applicable

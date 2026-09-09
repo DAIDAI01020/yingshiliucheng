@@ -19,6 +19,7 @@ Keep the workflow state in one project-level source of truth. This skill manages
 - `generation-observations.jsonl`: QC evidence tied to source assets/prompts for targeted future fixes.
 - `generation-feedback-summary.json`: grouped evidence and human-confirmed rule-promotion proposals; it never edits global locks automatically.
 - `generation-run-ledger.jsonl`: idempotency, paid-run confirmation, resume, partial-success, usage, and recovery state shared by image/video execution controllers.
+- `production/shot-production-registry.json`: canonical short-drama/film shot state from continuity lock through approved frame, video, QC, and acceptance.
 - `00_project_control/thread-registry.json`: registered child-task/thread state owned by `$project-thread-orchestrator`.
 - `00_project_control/project-context.md`, task packets, and handoffs: versioned cross-thread context and bounded task results.
 
@@ -48,6 +49,7 @@ generation_ready_packet -> generation-jobs / video-runs metadata
 qc_feedback_packet -> asset-index.json / revision-logs
 generation_observation -> generation-observations.jsonl / asset-index.json metadata
 generation_feedback_summary -> revision-logs/generation-feedback-summary.json / project-manifest.json pointer
+shot_production_packet -> production/shot-production-registry.json
 thread_split_plan -> project-manifest.json / 00_project_control/thread-registry.json
 child_thread_task_packet -> 00_project_control/thread-tasks/{task_id}/task-packet.json
 thread_result_packet -> 00_project_control/thread-tasks/{task_id}/handoff.json / thread-registry.json metadata
@@ -153,6 +155,8 @@ Use this structure for new managed projects:
     scene-map.md
     shot-audit.md
     continuity-boards\
+  production\
+    shot-production-registry.json
 ```
 
 Generator task folders live under `{project_root}\generation-runs\{timestamp}_{tool}\` when a managed job has a project root. Preserve legacy paths for existing jobs; do not force migration.
@@ -265,9 +269,16 @@ node .\scripts\manage-project-state.mjs find-asset --project-root {project_root}
 node .\scripts\manage-project-state.mjs record-observation --project-root {project_root} --input {observation_json}
 node .\scripts\manage-project-state.mjs summarize-feedback --project-root {project_root} --minimum-evidence 3
 node .\scripts\manage-project-state.mjs audit --project-root {project_root}
+python .\scripts\manage-shot-production.py init --project-root {project_root}
+python .\scripts\manage-shot-production.py upsert --project-root {project_root} --input {shot_packet_json}
+python .\scripts\manage-shot-production.py transition --project-root {project_root} --shot-id S01 --status image_approved --artifact approved_first_frame=references\S01.png
+python .\scripts\manage-shot-production.py next-batch --project-root {project_root} --from-status prompt_ready --limit 4
+python .\scripts\manage-shot-production.py audit --project-root {project_root}
 ```
 
 `audit` is read-only and is the compatibility check for legacy or messy projects. `record-observation` is idempotent by `observation_id`. `summarize-feedback` may propose a reusable fix only after at least three matching observations, at least two improved outcomes, an improvement rate of at least two-thirds, and no worse outcome. Every proposal remains `needs_human_confirmation`; never edit style locks, mother-library rules, prompts, or global context automatically.
+
+`manage-shot-production.py` is the deterministic owner of shot-registry mutations. Keep artifact paths inside the project root, enforce adjacent production-state transitions, preserve blocked/accepted siblings, detect missing dependencies and dependency cycles, and schedule `anchor -> hero -> coverage -> insert -> bridge` within the requested status. Creative continuity content still comes from the short-drama/scene/shot owners; this skill only validates and stores it.
 
 For manual or external Jimeng / Kling / Kling O1 / Kling VIDEO 3.0 Omni runs, `ingest-video` may ingest a handoff `run_manifest.json` with:
 
@@ -292,7 +303,7 @@ When `outputs.video` is empty and status is `manual_handoff`, the asset state is
 - Store prompt audit status as metadata only; do not change the audited prompt text inside project-state-manager.
 - Store first-frame/public relay provenance without storing private upload tokens.
 - Keep QC and revision decisions tied to the source generated asset and source prompt.
-- Keep generation observations tied to source asset, source prompt, platform, deliverable profile, and attempted fix. Promote repeated evidence deliberately; never let state storage invent a new global rule.
+- Keep generation observations tied to source asset, source prompt, platform/model, deliverable profile, shot type, source authority, reference count, prompt/settings fingerprints, style-lock version, technical-QC report, QC score, and attempted fix when available. Use `platform_performance` only as project evidence for cost/time/quality planning; never silently switch the user's platform or let state storage invent a global rule.
 - Store elapsed time, credits/cost when available, idempotency key, partial-failure items, and retry provenance without storing payment credentials.
 - Treat repeated ingest of the same run ID as an update, not a duplicate generation run.
 - Do not delete old asset records. Mark old or unused outputs as `废稿` only when instructed.

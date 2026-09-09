@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "project_root": "",
+  "shot_id": "S01",
+  "episode_id": "E01",
+  "scene_id": "SC01",
+  "order": 1,
+  "status": "planned",
+  "approval_class": "anchor",
+  "risk_level": "high",
+  "narrative_function": "",
+  "coverage_role": "",
+  "previous_shot_id": "",
+  "dependencies": [],
+  "continuity_in": {
+    "inherits_from": "",
+    "character_state": {},
+    "costume": {},
+    "props": {},
+    "emotion_level": {},
+    "screen_direction": "",
+    "eyeline": "",
+    "camera_axis": "",
+    "background_lock_id": "",
+    "light_lock_id": ""
+  },
+  "continuity_delta": {},
+  "continuity_out": {
+    "character_state": {},
+    "costume": {},
+    "props": {},
+    "emotion_level": {},
+    "screen_direction": "",
+    "eyeline": "",
+    "camera_axis": "",
+    "background_lock_id": "",
+    "light_lock_id": ""
+  },
+  "artifacts": {
+    "image_prompt": "",
+    "approved_first_frame": "",
+    "video_prompt": "",
+    "generation_run": "",
+    "video": "",
+    "technical_qc": "",
+    "semantic_qc": ""
+  },
+  "platform_plan": {
+    "image": "",
+    "video": "",
+    "reason": "",
+    "estimated_cost": null
+  },
+  "qc_decision": "",
+  "blocker": "",
+  "updated_at": ""
+}

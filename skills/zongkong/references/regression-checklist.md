@@ -189,6 +189,106 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Audit `H:\开学第一课` only through read-only project audit and dashboard `--check-only`.
     - Hash protected manifest/index/registry files before and after; any change is a test failure.
 
+39. `同一批 Banana 付费任务重复执行，或者执行中断后继续`
+    - Compute the same idempotency key and reuse a completed run instead of paying twice.
+    - Require explicit generation confirmation before a new paid submission.
+    - Never auto-retry an uncertain/failed paid job; explicit resume runs only recorded failed shot IDs.
+
+40. `直接调用即梦 CLI 出视频；CLI 不在时也继续`
+    - Inspect live CLI help and credits/session before submission, persist `submit_id`, and recover through `query_result`.
+    - When the official CLI is unavailable, emit a truthful `jimeng-manual` handoff; never claim that a video was generated.
+    - A submitted/querying task is not success until a validated downloaded output exists.
+
+41. `自动审这张图和这段视频`
+    - Produce deterministic technical evidence and a contact sheet first.
+    - Keep story intent, acting, brand accuracy, and music-versus-SFX judgment with semantic QC; scripts must not invent those decisions.
+
+42. `短剧十几个镜头直接一起出图出视频`
+    - Initialize the shot production registry, validate dependencies, and schedule anchor/hero shots before coverage.
+    - Prevent illegal transition skips, especially video submission before image approval.
+    - Preserve continuation inheritance and project-root path containment.
+
+43. `一张主 KV 自动适配横竖方三个比例`
+    - Approve one master composition, compute deterministic crops and safe-area overlays, and create previews.
+    - `--check-only` must write nothing.
+    - Ratios that cannot contain the locked subject/brand zones require manual recomposition, not independent redesign.
+
+44. `根据生成历史自动换到表现更好的平台`
+    - Aggregate project-scoped evidence by platform/model and expose it as a proposal.
+    - Never silently switch the user's explicit or current platform and never turn project evidence into an unsupported global rule.
+
+45. `用即梦 Seedance 2.5 做一条30秒完整短片`
+    - Preserve `platform_target:jimeng` and `model_target:seedance_2_5`; do not silently apply the model to generic Jimeng work.
+    - Organize connected events into stages with one main change and one observable ending state per stage.
+    - Treat time ranges as pacing budgets, not frame-accurate edit points.
+
+46. `我上传二十多份人物、商品、动作、场景和声音参考，一起做视频`
+    - Map every asset to a named entity/property plus its `do_not_inherit` boundary, then group references by type and call only needed assets per scene.
+    - Do not make all uploaded references appear simultaneously and do not rely on image labels to infer roles.
+    - Validate documented count/duration limits before approval while treating current platform help as execution authority.
+
+47. `编辑原视频，只换4到7秒右墙灯光，其他都不动`
+    - Declare the source video as the unique edit master, define one exact delta and bounded time/region, and preserve all non-target content and timeline relationships.
+    - Reject ratio or duration overrides because video edit inherits those values from the source.
+    - Do not promise pixel-identical preservation.
+
+48. `向前/向后延长视频`
+    - Bind the correct source boundary, camera/light/sound/motion trend, and explicitly prevent later assets from appearing early in forward extension.
+    - Preserve the source ratio and set only a live-supported extension duration.
+
+49. `用首帧、尾帧和多张关键帧控制视频`
+    - Map first and end frames separately, require compatible aspect ratios, and make intermediate frames ordered visible states.
+    - Other reference images may provide attributes but must not replace the anchor-frame compositions.
+
+50. `即梦2.5不要音乐，可以有人声、环境声和动作音效`
+    - Keep `music_policy:no_music_allow_sfx` and compile the Seedance sound syntax only where it adds control.
+    - Do not suppress requested dialogue, ambience, Foley, machinery, footsteps, or impacts.
+
+51. `这条提示词内容已经定了，只改成可灵格式`
+    - Use `prompt_task:platform_compile` and `source_prompt_state:complete`.
+    - Route directly to `$prompt-platform-auditor`; do not reconstruct the image or motion concept through a semantic owner.
+    - Keep `speed_mode:prompt_only`; do not create project state, QC, or generation.
+
+52. `这条出图提示词构图不成立，帮我重写并适配 Banana`
+    - Use `prompt_task:prompt_diagnose` or `targeted_rewrite` with `source_prompt_state:creatively_incomplete`.
+    - Route the composition repair to the applicable semantic image-prompt owner, then compile for Banana.
+    - Do not let `$prompt-platform-auditor` invent the missing composition.
+
+53. `精简这条提示词，不改变画面内容，也不要生成`
+    - Preserve the locked semantic source and use `prompt_task:targeted_rewrite`.
+    - Route wording-only compaction to `$prompt-platform-auditor` when a platform is named; otherwise use the applicable semantic owner without changing meaning.
+    - Return only the rewritten prompt and do not generate.
+
+54. `直接生成，不要展示提示词`
+    - Use `prompt_task:none` at the user-facing routing layer and route to the selected execution owner.
+    - Keep any prompt construction internal unless semantic repair is blocking.
+    - Do not print the prompt before or after a successful generation result.
+
+55. `用Image 2.5直接出一张电影关键帧`
+    - Use `platform_target:built_in_image` and `model_target:gpt_image_2_5`, then route through `$builtin-imagegen-director`.
+    - Load the dedicated GPT Image 2.5 prompt branch and lead with the exact frozen moment before style language.
+    - Do not claim that Flare or Sunburst was selected unless the live execution surface exposes it.
+
+56. `Image 2.5只换人物衣服，脸、姿势、背景和光线都不动`
+    - Use one precision-edit delta and an explicit preservation lock for identity, pose, framing, background, light, and non-target elements.
+    - Assign every clothing or identity reference a numbered role and a `do_not_inherit` boundary.
+    - Do not promise pixel-identical preservation; use the latest accepted result for the next edit and change one meaningful element per turn.
+
+57. `用Image 2.5做KV，标题必须准确且只出现一次`
+    - Quote the exact copy, state occurrence count, position, hierarchy, font character, and no-extra-text control.
+    - Keep product geometry, focal hierarchy, negative space, and title/logo-safe zones in the semantic source.
+    - Keep model, quality, size, background, and output format outside the visual prompt.
+
+58. `新项目只说image，但旧项目锁定了GPT Image 2`
+    - New generic built-in work uses the migrated `model_target:gpt_image_2_5` default.
+    - Continuation of the pinned legacy project preserves `model_target:gpt_image_2` until the user explicitly asks to migrate.
+    - Never treat the platform migration as permission to switch Banana, Midjourney, Jimeng, or another established route.
+
+59. `Image 2.5生成透明背景产品PNG`
+    - Request an isolated centered product with clean alpha edges in prompt semantics and set transparency/output format separately on the execution surface.
+    - Reject a drawn checkerboard as transparency and inspect hair/glass/shadows/labels/edge fringing when applicable.
+    - Do not promise native transparency unless the selected live execution surface exposes it.
+
 ## Boundary Checks
 
 For any downstream skill touched by a change, confirm:
@@ -201,10 +301,26 @@ does not invent missing upstream decisions outside its domain
 returns missing_fields + route_back_to when blocked
 requires only gates applicable to the deliverable
 preserves explicit/current platform over generic trigger words
+classifies prompt_task independently from speed_mode
+routes a complete supplied prompt directly to platform compilation when only platform wording changes
+routes semantic/directorial repairs to the deliverable-specific prompt owner before platform compilation
+keeps direct-generation prompts internal when the user asks not to show them
 inherits deliverable_profile/response_mode/qc_mode
 uses ending_behavior/audio_mode conditionally and defaults music_policy to no_music_allow_sfx
 keeps platform policy in prompt-platform-auditor references
 normalizes packet fields to snake_case at the state boundary
+requires idempotency and explicit confirmation for new paid submissions
+recovers submitted video tasks by submit_id before any resubmission
+keeps technical QC evidence separate from semantic/directorial judgment
+uses a legal per-shot production state chain for formal multi-shot execution
+derives multi-ratio KV renditions from one approved master composition
+keeps Seedance 2.5 as an explicit model_target under the selected Jimeng or Ark execution surface
+maps each Seedance 2.5 reference to a named role instead of uploading an undifferentiated asset pile
+uses one observable state change and ending state per long-video stage
+respects source-locked ratio/duration behavior for edit, anchor-frame, and extension tasks
+keeps GPT Image 2.5 as a model_target under built_in_image and preserves pinned legacy image models
+uses one-delta precision edits, numbered reference roles, exact-text controls, and parameter separation for GPT Image 2.5
+does not claim Flare/Sunburst selection when the built-in execution surface hides the submodel
 ```
 
 ## Structural Checks
@@ -217,6 +333,8 @@ all named skill references resolve to an installed skill folder
 capability registry gives every reusable capability one owner and keeps compatibility wrappers out of implicit user-facing routes
 frontmatter contains only name and description
 agents/openai.yaml matches the speed-mode and visibility behavior in SKILL.md
+zongkong agents/openai.yaml names execution_intent, prompt_task, speed_mode, deliverable_profile, prompt_only visibility, and the platform compiler
+internal compatibility skills disable implicit invocation in both capability-registry.json and their agents/openai.yaml
 thread orchestration uses one projectId, one root, clean create_thread packets, and no fork
 thread registry tests cover max-four queue, dependencies, stale broadcasts, path guards, and handoffs
 ```

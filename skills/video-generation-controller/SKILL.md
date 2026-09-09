@@ -83,6 +83,8 @@ The ledger is recovery state, not creative state. It stores no keys, tokens, pri
 - Check credit when the CLI exposes it, submit only after confirmation, capture `submit_id`, query/download, write `run_manifest.json`, and ingest state.
 - Never install/update the CLI implicitly and never execute `curl | bash` from this controller.
 - If CLI availability/help fails, preserve a Jimeng manual handoff; do not pretend execution succeeded.
+- Live `jimeng`, `jimeng-cli`, `dreamina`, and `dreamina-cli` providers use `$dreamina-cli` `scripts/dreamina_runner.mjs`; `jimeng-manual` remains an explicit manual route.
+- A returned `gen_status:querying` is recorded as `submitted`, not success. Recover it with the same `submit_id`; do not resubmit.
 
 ### Kling / O1 / Omni
 
@@ -115,6 +117,15 @@ Resume a failed Seedance run:
 ```powershell
 node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider seedance --project-root H:\project --shot S03 --prompt-file H:\project\prompts\S03.txt --image-url https://example.com/frame.png --duration 5 --ratio 16:9 --generation-confirmation approved --resume
 ```
+
+Jimeng live CLI run and recovery:
+
+```powershell
+node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider jimeng --project-root H:\project --shot S03 --prompt-file H:\project\prompts\S03.txt --image-file H:\project\references\S03.png --duration 5 --ratio 16:9 --generation-confirmation approved
+node H:\yingshi\skills\video-generation-controller\scripts\run-video-generation.mjs --provider jimeng --project-root H:\project --shot S03 --prompt-file H:\project\prompts\S03.txt --submit-id {submit_id} --idempotency-key {idempotency_key}
+```
+
+If `dreamina` is unavailable, the same platform route writes a `jimeng-manual` handoff and includes the availability error. It never claims CLI execution.
 
 Kling/O1/Omni handoff:
 

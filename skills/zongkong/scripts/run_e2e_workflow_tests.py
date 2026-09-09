@@ -10,11 +10,20 @@ import sys
 import tempfile
 from pathlib import Path
 
+from PIL import Image
+
 
 SKILLS_ROOT = Path(__file__).resolve().parents[2]
 STATE_SCRIPT = SKILLS_ROOT / "project-state-manager" / "scripts" / "manage-project-state.mjs"
 IMAGE_CONTROLLER = SKILLS_ROOT / "image-generation-controller" / "scripts" / "run-image-generation.mjs"
+BANANA_GENERATOR = SKILLS_ROOT / "banana-image-generator" / "scripts" / "generate-banana-images.mjs"
 VIDEO_CONTROLLER = SKILLS_ROOT / "video-generation-controller" / "scripts" / "run-video-generation.mjs"
+DREAMINA_RUNNER = SKILLS_ROOT / "dreamina-cli" / "scripts" / "dreamina_runner.mjs"
+SHOT_REGISTRY = SKILLS_ROOT / "project-state-manager" / "scripts" / "manage-shot-production.py"
+KV_RENDITION = SKILLS_ROOT / "kv-director" / "scripts" / "build_kv_rendition_matrix.py"
+IMAGE_TECHNICAL_QC = SKILLS_ROOT / "image-qc-director" / "scripts" / "technical_image_qc.py"
+VIDEO_TECHNICAL_QC = SKILLS_ROOT / "video-qc-director" / "scripts" / "technical_video_qc.py"
+SEEDANCE_25_AUDIT = SKILLS_ROOT / "prompt-platform-auditor" / "scripts" / "audit_seedance_25_packet.py"
 DASHBOARD_SCRIPT = SKILLS_ROOT / "production-manager" / "scripts" / "build_project_dashboard.py"
 CAPABILITY_AUDIT = SKILLS_ROOT / "zongkong" / "scripts" / "audit_skill_capabilities.py"
 
@@ -95,6 +104,145 @@ def approve_short_drama_gate(project_root: Path) -> None:
             "audit_status": "approved",
         }
     })
+
+
+def run_execution_extension_e2e(root: Path, project_root: Path, node: str, image_job: Path, prompt_path: Path) -> dict:
+    direct_banana_dir = root / "banana-direct-dry-run"
+    banana = run([
+        node, str(BANANA_GENERATOR), "--input", str(image_job),
+        "--project-root", str(project_root), "--output-dir", str(direct_banana_dir), "--dry-run",
+    ])
+    if banana.get("status") != "dry-run" or len(banana.get("shots", [])) != 2 or not banana.get("idempotencyKey"):
+        raise AssertionError("Direct Banana dry-run did not preserve shots and idempotency metadata.")
+    run([
+        node, str(BANANA_GENERATOR), "--input", str(image_job),
+        "--project-root", str(project_root), "--output-dir", str(root / "banana-paid-block"),
+    ], expect=1)
+
+    shot_input = root / "shots.json"
+    write_json(shot_input, {"shots": [
+        {"shot_id": "S10", "order": 10, "status": "continuity_locked", "approval_class": "coverage", "risk_level": "low"},
+        {"shot_id": "S08", "order": 8, "status": "continuity_locked", "approval_class": "anchor", "risk_level": "high"},
+        {"shot_id": "S09", "order": 9, "status": "continuity_locked", "approval_class": "hero", "risk_level": "medium", "previous_shot_id": "S08", "continuity_in": {"inherits_from": "S08"}},
+    ]})
+    run([sys.executable, str(SHOT_REGISTRY), "init", "--project-root", str(project_root)])
+    run([sys.executable, str(SHOT_REGISTRY), "upsert", "--project-root", str(project_root), "--input", str(shot_input)])
+    shot_batch = run([sys.executable, str(SHOT_REGISTRY), "next-batch", "--project-root", str(project_root), "--from-status", "continuity_locked", "--limit", "3"])
+    if [shot["shot_id"] for shot in shot_batch.get("shots", [])] != ["S08", "S09", "S10"]:
+        raise AssertionError("Shot scheduler did not prioritize anchor/hero before coverage.")
+    run([sys.executable, str(SHOT_REGISTRY), "transition", "--project-root", str(project_root), "--shot-id", "S08", "--status", "video_submitted"], expect=1)
+    shot_audit = run([sys.executable, str(SHOT_REGISTRY), "audit", "--project-root", str(project_root)])
+    if shot_audit.get("valid") is not True:
+        raise AssertionError(f"Shot production registry audit failed: {shot_audit}")
+
+    master_image = root / "kv-master.png"
+    Image.new("RGB", (1600, 900), (42, 56, 76)).save(master_image)
+    image_qc = run([sys.executable, str(IMAGE_TECHNICAL_QC), "--image", str(master_image), "--output-dir", str(root / "image-qc")])
+    if image_qc.get("image_count") != 1 or not Path(image_qc["contact_sheet"]).is_file():
+        raise AssertionError("Technical image QC did not create evidence and contact sheet.")
+
+    kv_plan = json.loads((SKILLS_ROOT / "kv-director" / "templates" / "kv-rendition-plan-template.json").read_text(encoding="utf-8"))
+    kv_plan["master_image"] = str(master_image)
+    kv_input = root / "kv-plan.json"
+    write_json(kv_input, kv_plan)
+    kv_check_dir = root / "kv-check-only-must-not-exist"
+    kv_check = run([sys.executable, str(KV_RENDITION), "--input", str(kv_input), "--output-dir", str(kv_check_dir), "--check-only"])
+    if kv_check_dir.exists() or kv_check.get("check_only") is not True:
+        raise AssertionError("KV --check-only wrote files or did not report check-only mode.")
+    kv_output = root / "kv-renditions"
+    kv_result = run([sys.executable, str(KV_RENDITION), "--input", str(kv_input), "--output-dir", str(kv_output)])
+    kv_matrix = json.loads(Path(kv_result["matrix"]).read_text(encoding="utf-8"))
+    if len(kv_matrix.get("renditions", [])) != 4 or len(list(kv_output.glob("*_safe-area.svg"))) != 4:
+        raise AssertionError("KV rendition matrix did not create all four safe-area variants.")
+
+    seedance_packet = root / "seedance-2.5-valid.json"
+    write_json(seedance_packet, {
+        "model_target": "seedance_2_5",
+        "platform_target": "jimeng",
+        "task_mode": "reference_to_video",
+        "duration": 30,
+        "music_policy": "no_music_allow_sfx",
+        "references": [
+            {"id": "@图片1", "kind": "image", "entity": "人物A", "use": "五官、发型和服装", "do_not_use": "背景", "width": 1080, "height": 1920},
+            {"id": "@视频1", "kind": "video", "entity": "人物A", "use": "动作路径和节奏", "do_not_use": "人物身份和场景", "duration_seconds": 10},
+            {"id": "@音频1", "kind": "audio", "entity": "人物A", "use": "音色和指定台词", "do_not_use": "画面身份", "duration_seconds": 5},
+        ],
+        "stages": [
+            {"label": "阶段一", "time_range": "0-10秒", "start_state": "人物在门外", "main_change": "人物推门进入", "ending_state": "人物站在门内"},
+            {"label": "阶段二", "time_range": "10-20秒", "start_state": "承接门内站位", "main_change": "人物取出盒子", "ending_state": "盒子位于桌面中央"},
+            {"label": "阶段三", "time_range": "20-30秒", "start_state": "盒子位于桌面中央", "main_change": "人物打开盒子", "ending_state": "镜头稳定在盒内物品"},
+        ],
+    })
+    seedance_valid = run([sys.executable, str(SEEDANCE_25_AUDIT), "--input", str(seedance_packet)])
+    if seedance_valid.get("valid") is not True or seedance_valid.get("reference_total") != 3:
+        raise AssertionError(f"Valid Seedance 2.5 packet did not pass: {seedance_valid}")
+    seedance_invalid_packet = root / "seedance-2.5-invalid-edit.json"
+    write_json(seedance_invalid_packet, {
+        "model_target": "seedance_2_5",
+        "platform_target": "jimeng",
+        "task_mode": "video_edit",
+        "music_policy": "no_music_allow_sfx",
+        "edit_master": "@视频1",
+        "edit_scope": "4-7秒右侧墙面",
+        "must_preserve": ["人物、动作、构图、镜头和声音"],
+        "parameter_overrides": {"ratio": "9:16", "duration": 12},
+        "references": [{"id": "@视频1", "kind": "video", "entity": "唯一母版", "use": "原始画面和时间线", "duration_seconds": 10}],
+    })
+    seedance_invalid = run([sys.executable, str(SEEDANCE_25_AUDIT), "--input", str(seedance_invalid_packet)], expect=1)
+    if seedance_invalid.get("valid") is not False or not {"task_mode_forbids_ratio_override", "video_edit_forbids_duration_override"}.issubset(set(seedance_invalid.get("errors", []))):
+        raise AssertionError("Seedance 2.5 locked-parameter audit did not reject edit overrides.")
+
+    fake_cli = root / "fake-dreamina.mjs"
+    fake_cli.write_text(
+        "import fs from 'node:fs';\n"
+        "import path from 'node:path';\n"
+        "const a=process.argv.slice(2), c=a[0]||'';\n"
+        "const val=n=>{const p=a.find(x=>x.startsWith('--'+n+'='));return p?p.slice(n.length+3):''};\n"
+        "if(c==='-h'){console.log('user_credit image2video query_result');}\n"
+        "else if(a.includes('-h')){console.log('--prompt --negative_prompt --image --duration --ratio --resolution --poll --download_dir --submit_id');}\n"
+        "else if(c==='user_credit'){console.log(JSON.stringify({available_credits:100}));}\n"
+        "else if(c==='image2video'){console.log(JSON.stringify({submit_id:'fake-task-001',gen_status:'querying'}));}\n"
+        "else if(c==='query_result'){const d=val('download_dir');fs.mkdirSync(d,{recursive:true});const f=path.join(d,'fake-result.mp4');fs.writeFileSync(f,'fixture');console.log(JSON.stringify({submit_id:'fake-task-001',gen_status:'success',output_paths:[f]}));}\n"
+        "else{process.exitCode=2;}\n",
+        encoding="utf-8",
+    )
+    live_command = [
+        node, str(VIDEO_CONTROLLER), "--provider", "jimeng-cli", "--project-root", str(project_root),
+        "--shot", "S11", "--prompt-file", str(prompt_path), "--image-file", str(master_image),
+        "--duration", "5", "--ratio", "16:9", "--generation-confirmation", "approved",
+        "--dreamina-cli-script", str(fake_cli),
+    ]
+    submitted = run(live_command)
+    if submitted.get("dreamina", {}).get("gen_status") != "querying" or submitted.get("ledgerEvent", {}).get("status") != "submitted":
+        raise AssertionError("Dreamina adapter did not persist the submitted/querying state.")
+    recovered = run(live_command + ["--submit-id", "fake-task-001", "--idempotency-key", submitted["idempotencyKey"]])
+    if recovered.get("recovered") is not True or recovered.get("dreamina", {}).get("gen_status") != "success" or not Path(recovered["video"]).is_file():
+        raise AssertionError("Dreamina recovery did not reuse submit_id and validate the downloaded output path.")
+
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise AssertionError("ffmpeg is required for the technical video QC E2E test.")
+    test_video = root / "technical-qc-fixture.mp4"
+    run([
+        ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+        "-f", "lavfi", "-i", "color=c=black:s=640x360:d=1",
+        "-f", "lavfi", "-i", "sine=frequency=800:duration=1",
+        "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(test_video),
+    ])
+    video_qc = run([sys.executable, str(VIDEO_TECHNICAL_QC), "--video", str(test_video), "--output-dir", str(root / "video-qc"), "--samples", "4"])
+    video_report = json.loads(Path(video_qc["report"]).read_text(encoding="utf-8"))
+    if video_report.get("audio_track_present") is not True or video_report.get("music_vs_sfx_semantic_review_required") is not True:
+        raise AssertionError("Technical video QC did not preserve music-vs-SFX as a semantic review decision.")
+
+    return {
+        "banana_paid_preflight_blocked": True,
+        "shot_order": [shot["shot_id"] for shot in shot_batch["shots"]],
+        "image_qc": True,
+        "video_qc": True,
+        "kv_renditions": len(kv_matrix["renditions"]),
+        "seedance_25_prompt_audit": True,
+        "dreamina_submit_recover": True,
+    }
 
 
 def run_temp_e2e(root: Path, node: str) -> dict:
@@ -183,6 +331,8 @@ def run_temp_e2e(root: Path, node: str) -> dict:
     if not video_first.get("runManifest") or video_second.get("reused") is not True:
         raise AssertionError("Manual video handoff idempotency did not reuse the existing manifest.")
 
+    execution_extensions = run_execution_extension_e2e(root, project_root, node, image_job, prompt_path)
+
     dashboard_dir = root / "dashboard"
     dashboard = run([sys.executable, str(DASHBOARD_SCRIPT), "--project-root", str(project_root), "--output-dir", str(dashboard_dir)])
     if not Path(dashboard["dashboard_html"]).is_file() or not Path(dashboard["dashboard_json"]).is_file():
@@ -208,6 +358,7 @@ def run_temp_e2e(root: Path, node: str) -> dict:
         "feedback_observations": feedback.get("observation_count"),
         "promotion_proposals": len(feedback.get("promotion_proposals", [])),
         "video_handoff_reused": True,
+        "execution_extensions": execution_extensions,
         "dashboard_html": dashboard["dashboard_html"],
         "capabilities": capability.get("capability_count"),
     }

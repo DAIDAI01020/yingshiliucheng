@@ -20,7 +20,9 @@ python scripts/build_project_dashboard.py --project-root {project_root} --check-
 python scripts/build_project_dashboard.py --project-root {project_root}
 ```
 
-The dashboard combines manifest stages, registered child tasks, asset states, image/video runs, idempotency ledger status, elapsed time/credit/cost when available, QC observations, rule-promotion proposals, warnings, and the next five actions. It must not mutate tasks, accept work, submit generation, or rewrite project state.
+The dashboard combines manifest stages, registered child tasks, canonical shot-production status, asset states, image/video runs, idempotency ledger status, elapsed time/credit/cost when available, QC observations, rule-promotion proposals, warnings, and the next five actions. It must not mutate tasks, accept work, submit generation, or rewrite project state.
+
+When `production/shot-production-registry.json` exists, show status counts and prioritize blocked shots, continuity-locked prompt work, and `anchor/hero` generation before coverage/inserts. Never infer a shot as accepted merely because an image or video file exists; use the registry transition and semantic QC decision.
 
 ## Track these stages
 

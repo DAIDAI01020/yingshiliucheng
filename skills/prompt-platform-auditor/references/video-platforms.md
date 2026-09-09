@@ -34,6 +34,8 @@ source authority
 
 For first-frame image-to-video, make the first frame the visual authority. Keep text motion-first and Chinese-first.
 
+When `model_target:seedance_2_5` or the user/current project explicitly names Seedance 2.5 inside Dreamina/即梦, also apply [seedance-2-5.md](seedance-2-5.md). Do not apply its 30-second, 50-reference, edit, extension, keyframe, white-model, or sound-symbol rules to an unspecified/older Jimeng model.
+
 `single_beat`:
 
 ```text
@@ -49,6 +51,8 @@ Reject full style redesign, unrelated multi-actions, conflicting camera moves, u
 Require duration and ratio for executable jobs. For image-driven work, require a usable reference/first-frame source and explicit roles. Preserve relay/public-reference requirements in managed execution state, not as raw private tokens in the prompt.
 
 Use `single_beat`, `staged_action`, or an explicitly supported multi-shot task. Do not assume a multi-shot mode merely because the narrative has several beats.
+
+When `model_target:seedance_2_5`, apply [seedance-2-5.md](seedance-2-5.md). Preserve the same semantic packet across Dreamina and Ark, but compile only parameters and reference upload syntax supported by the selected live execution surface.
 
 ## Kling
 

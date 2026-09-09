@@ -15,7 +15,7 @@ This skill calls OpenRouter's Chat Completions endpoint for `google/gemini-3.1-f
 
 ## Independent Tool Boundary
 
-This is the only user-facing Banana execution skill. It owns Banana API preflight, direct generation, batch generation, per-shot continuation after failures, saved images, saved prompts, and generation logs.
+This is the only user-facing Banana execution skill. It owns Banana API preflight, paid-run confirmation, idempotency, direct generation, batch generation, per-shot continuation after failures, saved images, saved prompts, generation logs, and managed project-state ingest.
 
 Do not use this skill for `image`, `image-2`, `ChatGPT Image`, `内置 image`, or `内置 imagegen`. Those requests belong to `$builtin-imagegen-director` and the built-in imagegen tool. Never silently fall back from Banana to built-in imagegen, and never describe a built-in image result as Banana.
 
@@ -87,6 +87,8 @@ node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json --d
 node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json
 node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json --prompt-mode compact
 node .\scripts\generate-banana-images.mjs --input H:\yingshi\some-input.json --prompt-mode quality
+node .\scripts\generate-banana-images.mjs --input H:\project\generation-jobs\banana.json --project-root H:\project --generation-confirmation approved
+node .\scripts\generate-banana-images.mjs --input H:\project\generation-jobs\banana.json --project-root H:\project --generation-confirmation approved --resume
 ```
 
 Use `--dry-run` before real generation to validate input, output paths, request settings, reference files, and whether `OPENROUTER_API_KEY` is present. Dry run does not call the API.
@@ -119,7 +121,7 @@ retry_allowed:
 next_action:
 ```
 
-Retry only failed shots. A transient network/service error or empty image response may be retried once automatically. Missing keys, invalid input, missing references, API rejection, and save-path errors must be fixed before retrying. Never report success unless an image file was actually saved.
+Never auto-resubmit a paid Banana request. Retry only failed shots after explicit `--resume`; reuse successful outputs and block duplicate running/succeeded jobs with the same idempotency key. Missing keys, invalid input, missing references, API rejection, and save-path errors must be fixed before resuming. Use `--force-new-run` only after the user explicitly asks for a genuinely new paid attempt. Never report success unless an image file was actually saved.
 
 The log uses shared fields with OpenAI generation: shot, version, tool, model, promptSummary, fullPrompt, negativePrompt, finalPrompt, promptPath, promptJsonPath, filePath, status, error, and retrySuggestion.
 `outputDir` is the task root. `imageDir` points to `images\`. `promptDir` points to `prompts\`. `logDir` points to `logs\`.
@@ -133,14 +135,18 @@ For story-driven storyboard batches, short-drama keyframes, TVC narrative shots,
 1. If the user has no Banana prompt yet, first use `$frame-vision-director` and `$banana-pro`.
 2. Convert selected shots into the input JSON shape.
 3. Run the script with `--dry-run`.
-4. If dry run is valid and `OPENROUTER_API_KEY` exists, run real generation.
-5. Return saved image paths and generation table.
+4. Before real generation, require `generation_confirmation`, compute the prompt/reference idempotency key, compare available credit and estimated cost when both are known, and check `generation-run-ledger.jsonl`.
+5. If dry run and safety preflight pass, run real generation. Preserve successful shots; a failed batch resumes only its failed shot IDs.
+6. For a managed `projectRoot`, ingest the generation log into `$project-state-manager`.
+7. Return saved image paths, ledger/reuse state, and the generation table.
 
 ## Guardrails
 
 - Never ask for or print the plaintext API key.
 - Never write the API key into JSON input, logs, skill files, repo files, or final answers.
 - Do not call the API unless the user explicitly asked for real Banana image generation.
+- Do not submit a paid request without `generation_confirmation: approved / direct_test / confirmed`.
+- Do not auto-retry a paid submission; polling/download retries are not generation retries.
 - Use `2K` for normal storyboard/keyframe drafts. Do not reduce to `1K` for token saving unless the user explicitly asks.
 - Prefer full detailed Banana prompts for storyboards and narrative keyframes unless the user explicitly asks for compact execution. Each shot prompt must be self-contained and include subject, composition, camera, lens, aperture/depth, light, material, continuity anchors, ratio, and core negatives.
 - Compact Banana prompts may remove proposal explanations and client-facing rationale, but they must not remove the per-shot camera, light, material, continuity, ratio, or negative-control details needed for execution.

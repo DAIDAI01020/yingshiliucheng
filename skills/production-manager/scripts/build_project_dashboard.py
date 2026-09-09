@@ -100,9 +100,14 @@ def summarize(project_root: Path) -> dict:
     observations_path = root / "revision-logs" / "generation-observations.jsonl"
     feedback_path = root / "revision-logs" / "generation-feedback-summary.json"
     ledger_path = root / "revision-logs" / "generation-run-ledger.jsonl"
+    shot_registry_path = root / "production" / "shot-production-registry.json"
     observations = load_jsonl(observations_path)
     feedback = load_json(feedback_path, {})
     ledger = load_jsonl(ledger_path)
+    shot_registry = load_json(shot_registry_path, {"shots": []})
+    shots = shot_registry.get("shots", []) if isinstance(shot_registry.get("shots", []), list) else []
+    shot_status = Counter(shot.get("status", "unknown") for shot in shots)
+    shot_classes = Counter(shot.get("approval_class", "unknown") for shot in shots)
     latest_ledger_by_key: dict[str, dict] = {}
     for event in ledger:
         if event.get("idempotency_key"):
@@ -125,6 +130,12 @@ def summarize(project_root: Path) -> dict:
     if failed_runs or ledger_status.get("partial") or ledger_status.get("failed"):
         next_actions.append("仅恢复失败生成项，保留成功结果并检查积分/幂等状态")
     proposals = feedback.get("promotion_proposals", [])
+    if shot_status.get("blocked"):
+        next_actions.append(f"处理 {shot_status['blocked']} 个被阻塞镜头，保留已通过镜头")
+    if shot_status.get("continuity_locked"):
+        next_actions.append(f"优先完成 {shot_status['continuity_locked']} 个已锁连续性的镜头提示词")
+    if shot_status.get("prompt_ready"):
+        next_actions.append(f"按 anchor/hero 优先顺序生成 {shot_status['prompt_ready']} 个待出图镜头")
     if proposals:
         next_actions.append(f"人工审核 {len(proposals)} 条基于重复证据的规则升级建议")
     if not next_actions:
@@ -176,6 +187,12 @@ def summarize(project_root: Path) -> dict:
             "promotion_proposal_count": len(proposals),
             "summary_path": str(feedback_path) if feedback_path.is_file() else "",
         },
+        "shots": {
+            "total": len(shots),
+            "registry": str(shot_registry_path) if shot_registry_path.is_file() else "",
+            "status_counts": dict(sorted(shot_status.items())),
+            "approval_class_counts": dict(sorted(shot_classes.items())),
+        },
         "warnings": warnings,
         "next_actions": next_actions[:5],
     }
@@ -209,9 +226,10 @@ body{{font-family:Segoe UI,Microsoft YaHei,sans-serif;background:#0b1020;color:#
 <div class="card"><div class="muted">资产</div><div class="value">{data['assets']['total']}</div><div>图像/视频/提示词统一追踪</div></div>
 <div class="card"><div class="muted">生成运行</div><div class="value">{data['runs']['image_runs'] + data['runs']['video_runs']}</div><div>{data['runs']['failed_or_partial']} 个失败或部分失败</div></div>
 <div class="card"><div class="muted">反馈证据</div><div class="value">{data['feedback']['observation_count']}</div><div>{data['feedback']['promotion_proposal_count']} 条待确认升级建议</div></div>
+<div class="card"><div class="muted">镜头生产状态</div><div class="value">{data['shots']['total']}</div><div>连续性、首帧、视频与QC串联</div></div>
 </div>
 <section><h2>分任务状态</h2><table><thead><tr><th>ID</th><th>任务</th><th>负责人</th><th>状态</th><th>交接/原因</th></tr></thead><tbody>{task_rows}</tbody></table></section>
-<section class="grid"><div class="card"><h2>任务状态统计</h2><table>{rows(data['threads']['status_counts'])}</table></div><div class="card"><h2>资产状态统计</h2><table>{rows(data['assets']['state_counts'])}</table></div><div class="card"><h2>运行账本</h2><table>{rows(data['runs']['ledger_status_counts'])}</table></div></section>
+<section class="grid"><div class="card"><h2>任务状态统计</h2><table>{rows(data['threads']['status_counts'])}</table></div><div class="card"><h2>资产状态统计</h2><table>{rows(data['assets']['state_counts'])}</table></div><div class="card"><h2>镜头状态</h2><table>{rows(data['shots']['status_counts'])}</table></div><div class="card"><h2>运行账本</h2><table>{rows(data['runs']['ledger_status_counts'])}</table></div></section>
 <section class="grid"><div class="card"><h2>下一步</h2><ol>{actions}</ol></div><div class="card"><h2>结构警告</h2><ul>{warnings}</ul></div></section>
 </main></body></html>"""
 

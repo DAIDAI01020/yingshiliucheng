@@ -9,6 +9,15 @@ from pathlib import Path
 DEFAULT_SKILLS_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = Path(__file__).resolve().parents[1] / "references" / "capability-registry.json"
 
+EXPECTED_PROMPT_OWNERS = {
+    "generic_frame_prompt_semantics": "frame-vision-director",
+    "kv_image_prompt_semantics": "kv-image-prompt-director",
+    "storyboard_board_prompt_semantics": "scene-board-image-prompter",
+    "typography_prompt_semantics": "type-png-director",
+    "video_prompt_semantics": "ai-video-prompt-director",
+    "platform_prompt_compilation": "prompt-platform-auditor",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Audit deterministic skill capability ownership.")
@@ -59,6 +68,20 @@ def main() -> int:
         referenced_skills.add(str(entry.get("replacement_owner", "")))
         if entry.get("implicit_invocation") is not False:
             failures.append(f"{entry.get('skill')}: internal compatibility skill must disable implicit invocation")
+
+        skill = str(entry.get("skill", ""))
+        agent_yaml = args.skills_root / skill / "agents" / "openai.yaml"
+        if not agent_yaml.is_file():
+            failures.append(f"{skill}: internal compatibility skill is missing agents/openai.yaml")
+        elif "allow_implicit_invocation: false" not in agent_yaml.read_text(encoding="utf-8"):
+            failures.append(f"{skill}: agents/openai.yaml must disable implicit invocation")
+
+    if "image_prompt_semantics" in owners:
+        failures.append("image_prompt_semantics is deprecated; split prompt semantics by deliverable profile")
+    for capability_id, expected_owner in EXPECTED_PROMPT_OWNERS.items():
+        actual_owner = owners.get(capability_id)
+        if actual_owner != expected_owner:
+            failures.append(f"{capability_id}: expected owner {expected_owner}, got {actual_owner or 'missing'}")
 
     for skill in sorted(referenced_skills):
         if not skill:

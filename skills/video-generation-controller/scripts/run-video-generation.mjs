@@ -6,8 +6,10 @@ import {
   completeRun,
   computeIdempotencyKey,
   failRun,
+  latestRun,
   preflightRun,
   startRun,
+  submitRun,
 } from "../../project-state-manager/scripts/generation-run-ledger.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +17,7 @@ const __dirname = path.dirname(__filename);
 const skillDir = path.dirname(__dirname);
 const skillsRoot = path.dirname(skillDir);
 const seedanceRunner = path.join(skillsRoot, "seedance-2-video", "scripts", "seedance_task.mjs");
+const dreaminaRunner = path.join(skillsRoot, "dreamina-cli", "scripts", "dreamina_runner.mjs");
 const stateManager = path.join(skillsRoot, "project-state-manager", "scripts", "manage-project-state.mjs");
 const DEFAULT_EXTERNAL_AUDIO_POLICY = "不要音乐，不要配乐；可以保留真实环境音效和动作音效，不要额外旁白。";
 
@@ -66,10 +69,24 @@ function providerSlug(value) {
 }
 
 function isManualVideoProvider(provider) {
-  return provider.includes("jimeng")
-    || provider.includes("即梦")
+  return provider.includes("jimeng-manual")
     || provider.includes("kling")
     || provider.includes("可灵");
+}
+
+function isDreaminaLiveProvider(provider) {
+  return ["jimeng", "jimeng-cli", "dreamina", "dreamina-cli", "即梦"].includes(provider);
+}
+
+function dreaminaSubcommand(args) {
+  if (args.dreaminaCommand) return String(args.dreaminaCommand);
+  if (args.firstFrame && args.lastFrame) return "frames2video";
+  if (args.imageFile || args.imageUrl || args.firstFrame) return "image2video";
+  return "text2video";
+}
+
+function firstVideoPath(paths = []) {
+  return paths.find((filePath) => /\.(mp4|mov|webm|mkv)$/i.test(String(filePath))) || "";
 }
 
 function runNode(scriptPath, args, env = process.env) {
@@ -229,9 +246,35 @@ async function main() {
   const promptText = await readText(path.resolve(args.promptFile));
   const projectRoot = args.projectRoot ? path.resolve(args.projectRoot) : "";
   const shot = safeName(args.shot || path.basename(args.promptFile, path.extname(args.promptFile)), "video");
+  const liveDreamina = isDreaminaLiveProvider(provider);
+  const dreaminaAdapterArgs = [
+    ...(args.dreaminaCli ? ["--cli", String(args.dreaminaCli)] : []),
+    ...(args.dreaminaCliScript ? ["--cli-script", path.resolve(String(args.dreaminaCliScript))] : []),
+  ];
+  let dreaminaAvailable = false;
+  let dreaminaDoctorError = "";
+  let detectedDreaminaCredits = null;
+  if (liveDreamina) {
+    if (!(await exists(dreaminaRunner))) throw new Error(`Dreamina adapter not found: ${dreaminaRunner}`);
+    try {
+      runNode(dreaminaRunner, ["doctor", ...dreaminaAdapterArgs]);
+      dreaminaAvailable = true;
+    } catch (error) {
+      dreaminaDoctorError = error.message;
+    }
+    if (dreaminaAvailable && !args.submitId && !args.skipCreditCheck) {
+      try {
+        const creditOutput = runNode(dreaminaRunner, ["credit", ...dreaminaAdapterArgs]);
+        const creditResult = JSON.parse(creditOutput || "{}");
+        detectedDreaminaCredits = creditResult.result?.available_credits ?? null;
+      } catch (error) {
+        throw new Error(`Dreamina credit check failed; log in or use --skip-credit-check only when explicitly approved: ${error.message}`);
+      }
+    }
+  }
   const promptFingerprint = computeIdempotencyKey(promptText);
   const referenceFingerprint = computeIdempotencyKey({ image_url: args.imageUrl || "", image_file: args.imageFile ? path.resolve(args.imageFile) : "", reference_roles: args.referenceRoles || "" });
-  const manualProvider = provider !== "seedance";
+  const manualProvider = provider !== "seedance" && !(liveDreamina && dreaminaAvailable);
   const safetyPayload = {
     provider,
     asset_or_shot_id: shot,
@@ -250,13 +293,61 @@ async function main() {
       audio_policy: args.audioPolicy || "",
     },
   };
+  if (liveDreamina && dreaminaAvailable && args.submitId) {
+    const recoveryStartedAt = Date.now();
+    const recoveryKey = args.idempotencyKey || computeIdempotencyKey(safetyPayload);
+    const existing = projectRoot ? await latestRun(projectRoot, recoveryKey) : null;
+    const recoveryPreflight = { idempotency_key: recoveryKey, attempt: Number(existing?.attempt || 1), existing };
+    const recoveryOutputDir = args.outputDir
+      ? path.resolve(args.outputDir)
+      : projectRoot
+        ? path.join(projectRoot, "video-runs", `${shot}_${timestamp()}_jimeng`)
+        : path.join("H:\\yingshi\\outputs", `jimeng-${shot}-${timestamp()}`);
+    await fs.mkdir(recoveryOutputDir, { recursive: true });
+    try {
+      const recoveredText = runNode(dreaminaRunner, [
+        "recover",
+        "--submit-id", String(args.submitId),
+        "--output-dir", recoveryOutputDir,
+        ...dreaminaAdapterArgs,
+      ]);
+      const recovered = JSON.parse(recoveredText || "{}");
+      const outputVideo = firstVideoPath(recovered.output_paths || []);
+      if (recovered.gen_status === "success" && (!outputVideo || !(await exists(outputVideo)))) {
+        throw new Error("Dreamina reported success but no downloaded video file was found; preserve submit_id and query again instead of resubmitting.");
+      }
+      const manifestResult = await ingestManualVideoRun({
+        args: {
+          ...args,
+          outputDir: recoveryOutputDir,
+          outputVideo,
+          taskId: recovered.submit_id || args.submitId,
+          status: recovered.gen_status || "querying",
+          notes: "Dreamina CLI recovery/query. No new generation submission was made.",
+        },
+        provider: "jimeng-cli",
+        promptText,
+        idempotencyKey: recoveryKey,
+        startedAt: recoveryStartedAt,
+      });
+      const metrics = { elapsed_seconds: Number(((Date.now() - recoveryStartedAt) / 1000).toFixed(3)), estimated_cost: args.estimatedCost ? Number(args.estimatedCost) : null };
+      const ledgerEvent = recovered.gen_status === "success"
+        ? await completeRun({ projectRoot, preflight: recoveryPreflight, payload: safetyPayload, output: { output_dir: recoveryOutputDir, run_manifest: manifestResult.runManifest, video: outputVideo, submit_id: recovered.submit_id }, metrics })
+        : await submitRun({ projectRoot, preflight: recoveryPreflight, payload: safetyPayload, output: { output_dir: recoveryOutputDir, run_manifest: manifestResult.runManifest, submit_id: recovered.submit_id || args.submitId }, metrics });
+      console.log(JSON.stringify({ ...manifestResult, dreamina: recovered, recovered: true, reused: true, idempotencyKey: recoveryKey, ledgerEvent }, null, 2));
+      return;
+    } catch (error) {
+      await failRun({ projectRoot, preflight: recoveryPreflight, payload: safetyPayload, error: error.message, metrics: { elapsed_seconds: Number(((Date.now() - recoveryStartedAt) / 1000).toFixed(3)) } });
+      throw error;
+    }
+  }
   const preflight = await preflightRun({
     projectRoot,
     payload: safetyPayload,
     idempotencyKey: args.idempotencyKey || "",
     generationConfirmation: args.generationConfirmation || "",
     estimatedCost: args.estimatedCost,
-    availableCredits: args.availableCredits,
+    availableCredits: args.availableCredits ?? detectedDreaminaCredits,
     resume: Boolean(args.resume),
     forceNewRun: Boolean(args.forceNewRun),
     maxAttempts: Number(args.maxAttempts || 2),
@@ -279,10 +370,22 @@ async function main() {
   const startedAt = Date.now();
 
   if (manualProvider) {
-    if (!isManualVideoProvider(provider)) {
+    const handoffProvider = liveDreamina ? "jimeng-manual" : provider;
+    if (!isManualVideoProvider(handoffProvider)) {
       throw new Error("Only --provider seedance, jimeng-manual, kling, kling-o1, or kling-omni are supported.");
     }
-    const result = await ingestManualVideoRun({ args, provider, promptText, idempotencyKey: preflight.idempotency_key, startedAt });
+    const result = await ingestManualVideoRun({
+      args: {
+        ...args,
+        notes: liveDreamina
+          ? `Dreamina CLI unavailable; preserved a manual Jimeng handoff. ${dreaminaDoctorError}`
+          : args.notes,
+      },
+      provider: handoffProvider,
+      promptText,
+      idempotencyKey: preflight.idempotency_key,
+      startedAt,
+    });
     const ledgerEvent = await completeRun({
       projectRoot,
       preflight,
@@ -295,6 +398,73 @@ async function main() {
     result.ledgerEvent = ledgerEvent;
     console.log(JSON.stringify(result, null, 2));
     return;
+  }
+
+  if (liveDreamina) {
+    const outputDir = args.outputDir
+      ? path.resolve(args.outputDir)
+      : projectRoot
+        ? path.join(projectRoot, "video-runs", `${shot}_${timestamp()}_jimeng`)
+        : path.join("H:\\yingshi\\outputs", `jimeng-${shot}-${timestamp()}`);
+    await fs.mkdir(outputDir, { recursive: true });
+    const command = dreaminaSubcommand(args);
+    const negativePrompt = args.negativePromptFile ? await readText(path.resolve(args.negativePromptFile)) : (args.negativePrompt || "");
+    const runnerArgs = [
+      "execute",
+      "--subcommand", command,
+      "--prompt-file", path.resolve(args.promptFile),
+      "--generation-confirmation", String(args.generationConfirmation || ""),
+      "--output-dir", outputDir,
+      "--poll", String(args.poll || 30),
+      ...(args.imageFile ? ["--image-file", path.resolve(args.imageFile)] : []),
+      ...(args.imageUrl ? ["--image-url", String(args.imageUrl)] : []),
+      ...(args.firstFrame ? ["--first-frame", path.resolve(args.firstFrame)] : []),
+      ...(args.lastFrame ? ["--last-frame", path.resolve(args.lastFrame)] : []),
+      ...(negativePrompt ? ["--negative-prompt", negativePrompt] : []),
+      ...(args.duration ? ["--duration", String(args.duration)] : []),
+      ...(args.ratio ? ["--ratio", String(args.ratio)] : []),
+      ...(args.resolution ? ["--resolution", String(args.resolution)] : []),
+      ...(args.model ? ["--model", String(args.model)] : []),
+      ...(args.session ? ["--session", String(args.session)] : []),
+      ...(args.extraArgsFile ? ["--extra-args-file", path.resolve(args.extraArgsFile)] : []),
+      ...dreaminaAdapterArgs,
+    ];
+    const startEvent = await startRun({ projectRoot, preflight, payload: safetyPayload });
+    try {
+      const dreaminaText = runNode(dreaminaRunner, runnerArgs);
+      const dreamina = JSON.parse(dreaminaText || "{}");
+      const outputVideo = firstVideoPath(dreamina.output_paths || []);
+      if (dreamina.gen_status === "success" && (!outputVideo || !(await exists(outputVideo)))) {
+        throw new Error("Dreamina reported success but no downloaded video file was found; preserve submit_id and recover instead of resubmitting.");
+      }
+      const result = await ingestManualVideoRun({
+        args: {
+          ...args,
+          outputDir,
+          outputVideo,
+          taskId: dreamina.submit_id,
+          status: dreamina.gen_status || "querying",
+          notes: "Dreamina CLI live execution. Recover querying tasks by submit_id; do not resubmit.",
+        },
+        provider: "jimeng-cli",
+        promptText,
+        idempotencyKey: preflight.idempotency_key,
+        startedAt,
+      });
+      const metrics = {
+        elapsed_seconds: Number(((Date.now() - startedAt) / 1000).toFixed(3)),
+        credits_used: args.creditsUsed ? Number(args.creditsUsed) : null,
+        estimated_cost: args.estimatedCost ? Number(args.estimatedCost) : null,
+      };
+      const ledgerEvent = dreamina.gen_status === "success"
+        ? await completeRun({ projectRoot, preflight, payload: safetyPayload, output: { output_dir: outputDir, run_manifest: result.runManifest, video: outputVideo, submit_id: dreamina.submit_id }, metrics })
+        : await submitRun({ projectRoot, preflight, payload: safetyPayload, output: { output_dir: outputDir, run_manifest: result.runManifest, submit_id: dreamina.submit_id }, metrics });
+      console.log(JSON.stringify({ ...result, dreamina, idempotencyKey: preflight.idempotency_key, ledgerEvent, startEvent, resumed: Boolean(args.resume) }, null, 2));
+      return;
+    } catch (error) {
+      await failRun({ projectRoot, preflight, payload: safetyPayload, error: error.message, metrics: { elapsed_seconds: Number(((Date.now() - startedAt) / 1000).toFixed(3)) } });
+      throw error;
+    }
   }
 
   if (!args.imageUrl && !args.imageFile) throw new Error("Missing --image-url. Use --image-file only when local relay is intentional.");

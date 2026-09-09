@@ -1,6 +1,6 @@
 interface:
   display_name: "内置Image出图"
-  short_description: "以内置Image快速生成或编辑图片并控制多变体与失败重试"
-  default_prompt: "Use $builtin-imagegen-director to preflight and directly generate or edit built-in images with profile-specific locks, bounded retries, and concise output."
+  short_description: "用ChatGPT Images 2.5快速出图、精准编辑并保持参考主体"
+  default_prompt: "Use $builtin-imagegen-director to preflight and directly generate or edit ChatGPT Images 2.5 outputs with profile-specific locks, precision-edit boundaries, bounded retries, and concise output."
 policy:
   allow_implicit_invocation: true

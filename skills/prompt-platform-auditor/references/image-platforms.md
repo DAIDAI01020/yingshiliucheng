@@ -22,6 +22,8 @@ visible target -> unchanged constraints -> requested change -> spatial layout ->
 
 Avoid parameter dumps, repeated camera brands, oversized negative lists, or an abstract style shell before the visible frame.
 
+For `model_target:gpt_image_2_5`, `gpt_image_2_5_flare`, or `gpt_image_2_5_sunburst`, or a new built-in request explicitly routed to the migrated Images 2.5 default, also apply [gpt-image-2-5.md](gpt-image-2-5.md). Keep a project pinned to GPT Image 2 or an older model on its existing rules.
+
 For direct generation, do not print the full prompt first unless requested. After a successful built-in image result, do not append QC or status text in the same response.
 
 ## Banana And Banana Pro

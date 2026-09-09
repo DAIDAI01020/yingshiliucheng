@@ -90,6 +90,15 @@ Use concise issue tags:
 
 ## QC Checklist
 
+Before semantic QC on saved files, generate objective evidence when the runtime is available:
+
+```powershell
+python scripts\technical_image_qc.py --image H:\project\images\S01.png --output-dir H:\project\review\S01 --profile storyboard_frame
+python scripts\technical_image_qc.py --image H:\project\images\S01.png --image H:\project\images\S02.png --reference H:\project\references\character.png --output-dir H:\project\review\scene01
+```
+
+Use `technical-image-qc.json` and the contact sheet for resolution, ratio, exposure clipping, edge-energy, alpha, file fingerprint, and reference-hash evidence. These measurements never decide identity, composition, continuity, generated-text correctness, or aesthetic quality by themselves.
+
 Check:
 
 - 主体是否正确：人物、产品、场景、道具、舞台关系是否符合分镜。

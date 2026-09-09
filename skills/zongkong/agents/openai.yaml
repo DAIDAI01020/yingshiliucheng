@@ -1,6 +1,6 @@
 interface:
   display_name: "总控"
-  short_description: "统筹影视AI任务的路由、项目、多聊天隔离、平台与质量门槛"
-  default_prompt: "Use $zongkong to classify this film/visual request, preserve its platform and quality gates, and route context-isolated multi-part work through one managed project when needed."
+  short_description: "统筹影视AI任务的意图、提示词、平台、项目与质量门槛"
+  default_prompt: "使用 $zongkong 审核并路由当前影视AI请求。先判断 execution_intent、prompt_task、speed_mode、deliverable_profile，以及平台是用户明确指定、项目继承还是尚未确定；新建内置Image任务默认使用 model_target:gpt_image_2_5，已锁定旧模型的项目继续保留原模型。总控只负责分类、保留状态和选择当前唯一负责人，不代写领域创意或平台提示词：从零创建提示词交给对应语义负责人；已有完整提示词的平台适配直接交给 $prompt-platform-auditor；创意不完整时先返回语义负责人；直接生成交给对应执行技能。prompt_only 默认直接返回可复制成品，不创建项目、不启动QC、不展示内部包；只有正式批量、交付或持续状态管理才启用正式门槛。除非用户明确要求多聊天或任务确需上下文隔离，否则保持单聊天。"
 policy:
   allow_implicit_invocation: true

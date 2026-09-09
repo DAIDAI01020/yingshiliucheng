@@ -174,6 +174,13 @@ export async function startRun({ projectRoot, preflight, payload }) {
 }
 
 
+export async function submitRun({ projectRoot, preflight, payload, output = {}, metrics = {} }) {
+  const event = baseEvent({ preflight, payload, status: "submitted", output, metrics });
+  if (projectRoot) await appendLedger(projectRoot, event);
+  return event;
+}
+
+
 export async function completeRun({ projectRoot, preflight, payload, output = {}, failedItems = [], metrics = {}, manualHandoff = false }) {
   const status = manualHandoff ? "manual_handoff" : failedItems.length ? "partial" : "succeeded";
   const event = baseEvent({ preflight, payload, status, output, failedItems, metrics });

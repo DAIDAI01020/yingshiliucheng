@@ -1,5 +1,18 @@
+import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  completeRun,
+  computeIdempotencyKey,
+  failRun,
+  preflightRun,
+  startRun,
+} from "../../project-state-manager/scripts/generation-run-ledger.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const stateManager = path.join(__dirname, "..", "..", "project-state-manager", "scripts", "manage-project-state.mjs");
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "google/gemini-3.1-flash-image-preview";
@@ -15,10 +28,33 @@ function parseArgs(argv) {
     else if (arg === "--input") args.input = argv[++i];
     else if (arg === "--output-dir") args.outputDir = argv[++i];
     else if (arg === "--prompt-mode") args.promptMode = String(argv[++i] || "").toLowerCase();
+    else if (arg === "--project-root") args.projectRoot = argv[++i];
+    else if (arg === "--generation-confirmation") args.generationConfirmation = argv[++i];
+    else if (arg === "--available-credits") args.availableCredits = argv[++i];
+    else if (arg === "--estimated-cost") args.estimatedCost = argv[++i];
+    else if (arg === "--credits-used") args.creditsUsed = argv[++i];
+    else if (arg === "--idempotency-key") args.idempotencyKey = argv[++i];
+    else if (arg === "--max-attempts") args.maxAttempts = argv[++i];
+    else if (arg === "--resume") args.resume = true;
+    else if (arg === "--force-new-run") args.forceNewRun = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
   if (!args.input) throw new Error("Missing --input path.");
   return args;
+}
+
+function runNode(scriptPath, commandArgs) {
+  const result = spawnSync(process.execPath, [scriptPath, ...commandArgs], {
+    cwd: path.dirname(scriptPath),
+    env: process.env,
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024 * 30,
+  });
+  if (result.status !== 0) {
+    const detail = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+    throw new Error(detail || `Command failed: node ${scriptPath}`);
+  }
+  return result.stdout.trim() ? JSON.parse(result.stdout.trim()) : {};
 }
 
 function safeName(value, fallback = "project") {
@@ -302,13 +338,65 @@ async function main() {
   if (args.promptMode) input.promptMode = args.promptMode;
   const model = input.model || process.env.BANANA_MODEL || DEFAULT_MODEL;
   const projectName = safeName(input.projectName || input["项目名"], "banana-image-project");
+  const projectRoot = args.projectRoot || input.projectRoot ? path.resolve(args.projectRoot || input.projectRoot) : "";
   const outputDir = args.outputDir || input.outputDir || path.join(DEFAULT_BASE_DIR, projectName, timestamp());
   const imageDir = path.join(outputDir, "images");
   const promptDir = path.join(outputDir, "prompts");
   const logDir = path.join(outputDir, "logs");
-  const shots = [];
+  let shots = [];
   for (const shot of input.shots) shots.push(await normalizeShot(shot, input));
   const hasApiKey = Boolean(process.env.OPENROUTER_API_KEY);
+  const safetyPayload = {
+    provider: "banana",
+    asset_or_shot_id: shots.map((shot) => shot.shot).join(","),
+    deliverable_profile: input.deliverable_profile || input.deliverableProfile || "storyboard_frame",
+    execution_mode: "api",
+    prompt_fingerprint: computeIdempotencyKey(shots.map((shot) => ({ shot: shot.shot, prompt: shot.finalPrompt }))),
+    reference_fingerprint: computeIdempotencyKey(shots.map((shot) => ({
+      shot: shot.shot,
+      references: shot.references.map((reference) => ({
+        role: reference.role,
+        fingerprint: computeIdempotencyKey(reference.url),
+      })),
+    }))),
+    request: {
+      model,
+      prompt_mode: input.promptMode || input.bananaPromptMode || "quality",
+      shots: shots.map((shot) => ({ shot: shot.shot, ratio: shot.aspect_ratio, image_size: shot.image_size })),
+    },
+  };
+  const preflight = await preflightRun({
+    projectRoot,
+    payload: safetyPayload,
+    idempotencyKey: args.idempotencyKey || input.idempotency_key || "",
+    generationConfirmation: args.generationConfirmation || input.generation_confirmation || "",
+    estimatedCost: args.estimatedCost ?? input.estimated_cost,
+    availableCredits: args.availableCredits ?? input.available_credits,
+    resume: Boolean(args.resume),
+    forceNewRun: Boolean(args.forceNewRun),
+    maxAttempts: Number(args.maxAttempts || input.max_attempts || 2),
+    paid: !args.dryRun,
+  });
+  if (!preflight.allowed) {
+    if (preflight.reuse) {
+      console.log(JSON.stringify({
+        tool: "banana",
+        projectName,
+        reused: true,
+        idempotencyKey: preflight.idempotency_key,
+        reason: preflight.reason,
+        existingRun: preflight.existing,
+      }, null, 2));
+      return;
+    }
+    throw new Error(`Generation safety preflight blocked: ${preflight.reason}`);
+  }
+  if (args.resume && preflight.resume_items?.length) {
+    const failed = new Set(preflight.resume_items.map(String));
+    shots = shots.filter((shot) => failed.has(shot.shot));
+    if (!shots.length) throw new Error("Resume requested, but no failed shot IDs match the current input.");
+  }
+  const startedAt = Date.now();
 
   const log = {
     projectName,
@@ -319,6 +407,9 @@ async function main() {
     promptDir,
     logDir,
     dryRun: args.dryRun,
+    projectRoot: projectRoot || null,
+    idempotencyKey: preflight.idempotency_key,
+    resumed: Boolean(args.resume),
     hasApiKey,
     createdAt: new Date().toISOString(),
     preflight: buildPreflight({ projectName, model, outputDir, shots, hasApiKey }),
@@ -328,6 +419,10 @@ async function main() {
   await fs.mkdir(imageDir, { recursive: true });
   await fs.mkdir(promptDir, { recursive: true });
   await fs.mkdir(logDir, { recursive: true });
+  if (!args.dryRun && !hasApiKey) {
+    throw new Error("OPENROUTER_API_KEY is missing. Set it in the local environment before real generation.");
+  }
+  if (!args.dryRun) await startRun({ projectRoot, preflight, payload: safetyPayload });
 
   for (const shot of shots) {
     const { version, filePath } = await nextVersion(imageDir, shot.shot, "banana", "png");
@@ -373,10 +468,10 @@ async function main() {
       filePaths: [],
       error: null,
       retrySuggestion: null,
+      idempotencyKey: preflight.idempotency_key,
     };
 
     if (!args.dryRun) {
-      if (!hasApiKey) throw new Error("OPENROUTER_API_KEY is missing. Set it in the local environment before real generation.");
       try {
         const result = await generateImage({ apiKey: process.env.OPENROUTER_API_KEY, model, shot, imageDir });
         entry.status = "success";
@@ -398,6 +493,50 @@ async function main() {
     await fs.writeFile(path.join(logDir, "generation-log.json"), JSON.stringify(log, null, 2), "utf8");
   }
 
+  const failedItems = log.shots.filter((entry) => entry.status === "failed").map((entry) => entry.shot);
+  const completedItems = log.shots.filter((entry) => entry.status === "success").map((entry) => entry.shot);
+  log.elapsedSeconds = Number(((Date.now() - startedAt) / 1000).toFixed(3));
+  log.creditsUsed = args.creditsUsed ? Number(args.creditsUsed) : null;
+  log.estimatedCost = args.estimatedCost ?? input.estimated_cost ?? null;
+  log.status = args.dryRun ? "dry-run" : failedItems.length ? (completedItems.length ? "partial" : "failed") : "completed";
+  let ledgerEvent = null;
+  let projectState = null;
+  if (!args.dryRun) {
+    if (completedItems.length) {
+      ledgerEvent = await completeRun({
+        projectRoot,
+        preflight,
+        payload: safetyPayload,
+        output: {
+          output_dir: outputDir,
+          generation_log: path.join(logDir, "generation-log.json"),
+          images: log.shots.flatMap((entry) => entry.filePaths || []),
+        },
+        failedItems,
+        metrics: { elapsed_seconds: log.elapsedSeconds, credits_used: log.creditsUsed, estimated_cost: log.estimatedCost },
+      });
+    } else {
+      ledgerEvent = await failRun({
+        projectRoot,
+        preflight,
+        payload: safetyPayload,
+        error: log.shots.map((entry) => entry.error).filter(Boolean).join(" | ") || "all_shots_failed",
+        failedItems,
+        metrics: { elapsed_seconds: log.elapsedSeconds, credits_used: log.creditsUsed, estimated_cost: log.estimatedCost },
+      });
+    }
+  }
+  log.ledgerEvent = ledgerEvent;
+  await fs.writeFile(path.join(logDir, "generation-log.json"), JSON.stringify(log, null, 2), "utf8");
+  if (!args.dryRun && projectRoot && await fs.access(stateManager).then(() => true).catch(() => false)) {
+    projectState = runNode(stateManager, [
+      "ingest",
+      "--project-root", projectRoot,
+      "--generation-log", path.join(logDir, "generation-log.json"),
+      "--generation-job", path.resolve(args.input),
+    ]);
+  }
+  log.projectState = projectState;
   console.log(JSON.stringify(log, null, 2));
 }
 

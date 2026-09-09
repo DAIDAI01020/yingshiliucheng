@@ -93,6 +93,37 @@ Scene-level visual direction should include:
 | 为什么这样设定 | 用客户能理解的语言解释画面意图 |
 | AI 风险 | 文字乱码、手部异常、屏幕伪 UI、暴力过度、角色漂移等 |
 
+## Shot Production State Chain
+
+For formal multi-shot production, persist one canonical `shot_production_packet` per shot after scene and shot audits. It links the narrative unit to its first frame, video, QC, accepted version, and next-shot continuity instead of treating every generated clip as an isolated task.
+
+Require:
+
+```text
+episode_id / scene_id / shot_id / order
+narrative_function / coverage_role
+approval_class: anchor / hero / coverage / insert / bridge
+risk_level
+previous_shot_id / dependencies
+continuity_in / continuity_delta / continuity_out
+character, costume, prop, emotion, eyeline, camera-axis, background, and light state
+image prompt / approved first frame / video prompt / run / video / technical QC / semantic QC paths
+platform plan / QC decision / blocker
+status: planned / continuity_locked / prompt_ready / image_generated / image_approved / video_submitted / video_generated / qc_passed / accepted / blocked / stale
+```
+
+Use `$project-state-manager` `scripts/manage-shot-production.py` to upsert, transition, audit, summarize, and select the next batch. Produce anchors before volume:
+
+```text
+character and location anchors
+-> high-risk hero/reveal shots
+-> dialogue/coverage shots
+-> inserts and bridges
+-> video generation only from approved first frames when I2V applies
+```
+
+Do not let a shot skip production states. A failed shot becomes `blocked`; preserve accepted siblings and resume only the affected shot. Before the next shot, bind `continuity_in.inherits_from` to the previous shot when physical or emotional state carries forward.
+
 ## Good Style Behavior
 
 Short drama should not use one flat “电影感” label for every scene.
@@ -152,6 +183,8 @@ For formal scripts:
 6. `静态关键帧提示词`
 7. `视频提示词 / 一镜到底可行性判断`
 8. `AI 风险与重出策略`
+
+For formal multi-shot delivery, also return or persist the `shot-production-registry` with anchor-first batches, continuity in/out, artifact paths, and accepted versions.
 
 ## Guardrails
 
