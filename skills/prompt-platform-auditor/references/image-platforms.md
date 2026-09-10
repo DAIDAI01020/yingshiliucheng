@@ -48,7 +48,9 @@ Do not invent or update platform/version parameters without confirming the selec
 
 ## Local Edits
 
-Begin with the base lock:
+First distinguish in-frame edits, crop-only changes, and actual camera relocation using `$frame-vision-director`'s camera-change rule. Reject any overlap between preservation locks and requested changes. A new camera preserves the physical scene, not its old projection or composition.
+
+For an unchanged camera, begin with the applicable base lock (remove fields the user wants changed):
 
 ```text
 只修改[目标区域]，严格保持[背景、构图、透视、光线、色调、景深、比例、非目标主体]不变。

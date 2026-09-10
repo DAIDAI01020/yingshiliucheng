@@ -88,13 +88,23 @@ Prioritize exact glyph/text content, letterform, legibility, extrusion/bevel/mat
 
 ### Local edits
 
-Put the preservation boundary first:
+For an in-frame edit with an unchanged camera, select only applicable preservation fields:
 
 ```text
 严格保持[背景/构图/透视/光线/色调/景深/比例/非目标主体]不变，只修改[目标区域]：[当前状态]变为[目标状态]。
 ```
 
 State how the edit must integrate with existing pose, shadow, grain, material, and edge behavior. Do not introduce a new global style unless requested.
+
+### Camera changes versus crops
+
+Classify a requested new view before building `must_preserve`: `in_frame_edit`, `crop_only`, or `camera_relocation`. A crop does not reveal new surfaces or change perspective. A true camera relocation does.
+
+For `camera_relocation`, preserve world-space facts: set geometry, object positions, identity, proportions, materials, light-source positions, palette, and scene state. Allow perspective, occlusion, visible surfaces, framing, and screen positions to change naturally. Never simultaneously demand a new viewpoint and unchanged composition/perspective/background pixels. Keep `must_preserve` and `must_change` disjoint.
+
+Specify camera location relative to an identifiable subject or set landmark, then viewing direction and height. When “右下角机位” is ambiguous, use a concise explicit assumption for a quick test; ask only if the ambiguity would materially change a formal result. Do not invent exact hidden architecture from a single reference; preserve plausible continuity and flag unseen geometry as uncertain when it matters.
+
+Example: 保留同一空间中的建筑、树、人物位置及光源方向；相机移到原参考画面右侧近地面，朝树中心仰拍。透视、遮挡和取景随新机位自然改变，不搬动场景资产。
 
 ## Visible-First Prompt Shape
 

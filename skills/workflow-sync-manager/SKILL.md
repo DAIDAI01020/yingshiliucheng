@@ -29,11 +29,13 @@ Before a push:
 2. Fetch the remote branch.
 3. Stop if the remote has commits missing locally; never force-push automatically.
 4. Prefer `--paths-file` for a reviewed one-path-per-line whitelist.
-5. Scan the staged diff for plaintext secrets.
+5. Reject pre-staged files outside the reviewed whitelist without altering the user's index. Check sensitive filenames, symlink/submodule entries, and staged file contents for plaintext secrets; deleted secrets must not block their removal.
 6. Write `sync-logs/YYYY-MM-DD.md` and commit it.
 7. If requested, create an annotated immutable release tag and push branch plus tag.
 
 The sync script must not silently fall back from the requested GitHub remote to GitLab or vice versa.
+
+An unchanged sync must not create another log/commit. A push-only retry may publish existing commits. A committed log records publication as pending, never successful before push; report success only after the remote branch hash matches local HEAD. Secret scanning is a safety check, not a guarantee: review the exact changed paths and content before publication.
 
 ## Commands
 
@@ -51,7 +53,7 @@ node .\skills\workflow-sync-manager\scripts\sync-workflow.mjs sync --summary "ä¼
 ## Failure handling
 
 - Secret match: stop before committing.
-- Disallowed path: unstage it and stop.
+- Disallowed or out-of-scope pre-staged path: stop and preserve the user's staging state.
 - Wrong branch or missing remote: stop before committing.
 - Remote branch ahead: stop and ask for an explicit integration decision.
 - Push rejection: keep the local commits and report them; never rewrite history.

@@ -25,9 +25,9 @@ For `formal_managed`, route missing style, scene, shot, prompt-audit, output pat
 
 - The user asks for `Image 2.5`, `ChatGPT Images 2.5`, `imagegen`, `内置出图`, `直接生成一张图`, `快速出图`, or `先看个效果`.
 - The user wants a quick visual concept, mood frame, style test, poster direction, storyboard keyframe, or image edit.
-- The user does not require Banana, Midjourney, OpenAI API, versioned files, prompt logs, or project-state writeback.
+- The user selects built-in generation, including managed work whose versioned files, prompt logs, and state writeback are handled by downstream project skills.
 
-Do not use this skill when the user explicitly says Banana, MJ/Midjourney, OpenAI API, Seedance, 可灵, 即梦, or asks for logged project execution.
+Do not use this skill when the user explicitly selects Banana, MJ/Midjourney, OpenAI API, Seedance, 可灵, or 即梦 execution. Logging requirements alone do not change the chosen generation platform.
 
 ## Workflow
 
@@ -75,7 +75,9 @@ If `missing_fields` would break the image, ask or route back. If the request is 
 
 For a new generic built-in image request, preserve `$zongkong`'s migrated `model_target:gpt_image_2_5`. A continuation pinned to GPT Image 2 or an older model keeps that model unless the user explicitly asks to migrate.
 
-The built-in tool may not expose Flare/Sunburst selection or API parameters. In that case, use the generic Images 2.5 prompt rules, do not claim a submodel, and do not embed model, quality, size, background, or output-format parameters into the visual prompt. If the user explicitly asks for OpenAI API execution, this skill is not the executor.
+The built-in tool may not expose Flare/Sunburst selection or API parameters. Use the selected prompt rules without pretending unsupported API parameters were applied. Keep visual requirements such as aspect ratio, transparent background, and composition in natural-language instructions when no dedicated tool field exists. Do not dump model/quality/output-format API key-value settings into the prompt. If the user explicitly asks for OpenAI API execution, this skill is not the executor.
+
+Distinguish `requested_model` from `observed_model`: a pinned prompt branch is not proof of the serving model. If the tool cannot select or report a model, record the observed model as unknown. If exact model execution is essential, report that limitation before generating; never claim a legacy model was selected merely because its prompt rules were retained.
 
 For precision edits, request one meaningful change per turn, restate identity/product/layout/light locks, and inspect each result before the next edit. Never promise pixel-identical preservation; route truly pixel-locked work to compositing or a deterministic local-edit workflow.
 
@@ -96,13 +98,14 @@ Run `direct_image_preflight_check` once for the whole set. Then execute the requ
 
 Each variant prompt must repeat the shared invariant lock and change only its declared delta. Do not merge multiple requested camera views into one composite image unless the user explicitly asks for a comparison board or contact sheet. Do not create project state or a project folder only because `requested_image_count` is greater than one.
 
+For new camera views, apply `$frame-vision-director`'s camera-change rule: lock physical scene geometry and light sources, while allowing projection, occlusion, and framing to change. Remove conflicting perspective/composition locks before execution.
+
 ## Live-Action / Story-Frame Prompt Shape
 
 Use this shape only for `live_action_people` or photographic `storyboard_frame` when camera language improves the result. Omit inapplicable fields:
 
 ```text
-Create a cinematic key visual / storyboard frame for [project type].
-Subject: [main subject and action].
+[Actual visible subject, action/state, and spatial relationship at this moment].
 Scene: [environment and time].
 Camera/composition: [shot size, camera position, spatial layout, and useful focal/depth behavior].
 Lighting/color: [lighting plan and palette].
@@ -148,7 +151,7 @@ Retry once only for `transient_service` or `empty_result`. For multi-variant gen
 - `qc_mode:none` stops after the generated image. `qc_mode:light_deferred` or `formal` runs only in a separate review turn/workflow.
 - For prompt-only requests, provide a clean copyable prompt.
 - For workflow comparisons, describe it as `内置 imagegen 快速预览`, not as OpenAI API, Banana, or Midjourney.
-- If the image needs tracked files, version names, review boards, or prompt logs, recommend the existing Banana/OpenAI/Midjourney workflow instead.
+- If tracking is required, keep the built-in route and hand actual returned artifacts to the existing asset/state owners. Record a local path only after verifying the file exists. An inline-only result remains pending capture; do not invent a saved path, completed archive, or substitute platform. Managed QC remains a separate review workflow.
 
 ## Guardrails
 

@@ -300,6 +300,16 @@ When the user says “继续出图”, “重出”, “继续做”, or gives r
 
 Do not restart full development merely because one output failed.
 
+### Compact continuation context
+
+Use the current task, latest accepted artifact, applicable locks, and new user delta as the continuation context. Reuse already-read unchanged instructions and approved packets within this turn; do not repeatedly load the entire reference library or completed production history. Read only the relevant references required by the selected skills, in full.
+
+Resolve a new user change against existing locks: replace only the conflicting lock and preserve unaffected decisions. Keep requested platform/model separate from what the actual execution tool can select or verify. Prompt approval is not generation evidence.
+
+Interpret “好/继续/可以” against the immediately preceding concrete proposal. It may approve that proposed action, but does not expand prompt-only work into paid generation, authorize extra variants, or reopen completed jobs. If the previous proposal explicitly included a bounded generation run, continue within that approved scope without asking the same question again.
+
+For multi-part work, pass only the compact current task packet to the existing `$project-thread-orchestrator`; never solve context growth by duplicating the complete hub history.
+
 ## Post-Generation
 
 ```text
