@@ -3,6 +3,8 @@
   "ownership_rule": "Every capability has exactly one decision owner. Supporting skills may contribute but must not replace or contradict the owner.",
   "capabilities": [
     {"capability_id": "top_level_routing", "owner": "zongkong", "supporters": [], "user_facing": true},
+    {"capability_id": "xiaohongshu_account_operations", "owner": "xiaohongshu-operator", "supporters": ["xiaohongshu", "project-state-manager"], "user_facing": true},
+    {"capability_id": "xiaohongshu_post_production_and_publish_handoff", "owner": "xiaohongshu", "supporters": ["xiaohongshu-operator", "style-reference-director", "frame-vision-director", "prompt-platform-auditor", "image-qc-director", "revision-director", "asset-librarian", "project-state-manager"], "user_facing": true},
     {"capability_id": "project_folder_contract", "owner": "project-folder-director", "supporters": ["asset-librarian"], "user_facing": true},
     {"capability_id": "project_state_persistence", "owner": "project-state-manager", "supporters": ["production-manager"], "user_facing": true},
     {"capability_id": "shot_production_state", "owner": "project-state-manager", "supporters": ["short-drama-director", "short-drama-scene-director", "production-manager"], "user_facing": true},

@@ -5,6 +5,7 @@ Use this reference when `$zongkong` has to choose the main creative line, detail
 ## Contents
 
 - Two main lines
+- Xiaohongshu daily-art side branch
 - Commercial/promo route
 - Short-drama/story route
 - Short-drama speed routes
@@ -20,6 +21,16 @@ Use this reference when `$zongkong` has to choose the main creative line, detail
 ```
 
 Do not use the same reference logic for both. Commercial/promo work and short drama have different aesthetics, structure, and success criteria.
+
+## Xiaohongshu Daily-Art Side Branch
+
+Account positioning, audience hypotheses, topic priorities/calendars, packaging strategy and real-data review route to `$xiaohongshu-operator`. Its operations_brief goes to `$xiaohongshu` for post production and publishing handoff. Reuse an existing brief; a fixed creative task or direct upload need not revisit account strategy. Account/data work creates no image execution or timed monitoring by itself.
+
+Explicit Xiaohongshu art-series work or continuation of an established `每日艺术图 / 日常之外` column enters `$xiaohongshu`'s art branch. Keep `main_line:other` and the existing `workflow_mode:image` (or `review` for review-only work); no new production-state enum is needed. Apply its branch isolation rules: `神秘感 / 超现实 / 出图 / 审核` alone does not select it, and publishing an existing project's assets preserves the source project.
+
+The [branch entry](../../xiaohongshu/SKILL.md) selects `surreal_art` versus the existing film diary. Its [surreal-art workflow](../../xiaohongshu/references/surreal-art-workflow.md) is the single source for editorial defaults, applicable specialist checks, image sets, evidence, targeted repair and posting packs.
+
+Requested tracked production and reviewed upload packs use `formal_managed` with formal QC; ideas, prompt-only tasks and isolated previews preserve their lightweight routes. Workflow-maintenance requests edit the branch without launching production. Upload happens when requested for an identified pack; daily content cadence alone creates no scheduled task. No separate chat or subagent is implied.
 
 ## Commercial / Promo Line
 
@@ -203,6 +214,8 @@ AI角色一致性可控
 
 | Mode | Trigger | Main route |
 | --- | --- | --- |
+| 小红书运营模式 | 明确的小红书账号定位、运营、选题排期、封面标题策略、数据复盘 | `$xiaohongshu-operator` -> concrete plan/review or operations_brief -> `$xiaohongshu` only when production is requested |
+| 小红书艺术图旁路 | 明确的小红书艺术栏目，或继续已建立的每日艺术图 / 日常之外；风格词不单独触发 | `$xiaohongshu` -> applicable reference/style/scene/shot owners -> `$frame-vision-director` -> `$prompt-platform-auditor` -> selected image execution -> `$image-qc-director` / targeted revision -> asset/state owners -> post pack and authorized upload |
 | 方案模式 | 方案、创意、PPT、客户提案 | commercial/promo line or short-drama concept line |
 | 方案转KV模式 | 已有方案、已有PPT、创意已通过，下一步做主KV/大屏KV | preserve approved proposal -> `$kv-director` proposal_to_kv_packet -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 短剧完整开发模式 | 从0开发短剧、人物、分集、对白 | full short-drama development route |

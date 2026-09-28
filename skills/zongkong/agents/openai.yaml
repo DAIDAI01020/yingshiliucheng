@@ -1,6 +1,6 @@
 interface:
   display_name: "总控"
   short_description: "统筹影视AI任务的意图、提示词、平台、项目与质量门槛"
-  default_prompt: "使用 $zongkong 继续完成当前影视AI任务：分别判断 execution_intent、平台、prompt_task、speed_mode 和 deliverable_profile，继承有效状态与已有授权，选择当前唯一负责人并推进到所需成品；完整提示词的平台适配直接交给 $prompt-platform-auditor，prompt_only 不创建项目或发起生成，默认单聊天，不重复确认、不重复提交已在运行的任务。"
+  default_prompt: "使用 $zongkong 继续完成当前影视AI任务：分别判断 execution_intent、平台、prompt_task、speed_mode 和 deliverable_profile，继承有效状态与已有授权，选择当前唯一负责人并推进到所需成品；完整提示词的平台适配直接交给 $prompt-platform-auditor，prompt_only 不创建项目或发起生成；小红书账号运营与数据复盘交给 $xiaohongshu-operator，已定内容制作与上传交给 $xiaohongshu，神秘或超现实风格词不单独触发，保留原项目路线；默认单聊天，不重复确认、不重复提交已在运行的任务。"
 policy:
   allow_implicit_invocation: true

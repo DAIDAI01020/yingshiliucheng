@@ -1,6 +1,6 @@
 ---
 name: zongkong
-description: Top-level orchestrator for AI film and visual-production work. Use when starting or continuing a film, commercial, short-drama, storyboard, KV, poster, image, video, review, archive, or project-management task that needs project setup, speed-mode classification, cross-skill routing, context-isolated child threads, platform selection, formal production gates, QC, or next-action decisions. Also use when the creative request is ambiguous and the correct downstream skill is unclear. Do not trigger merely because a conversation is new or for unrelated coding and general tasks.
+description: Top-level orchestrator for AI film and visual-production work. Use when starting or continuing a film, commercial, short-drama, storyboard, KV, poster, image, video, Xiaohongshu daily art series, review, archive, or project-management task that needs project setup, speed-mode classification, cross-skill routing, context-isolated child threads, platform selection, formal production gates, QC, or next-action decisions. Also use when the creative request is ambiguous and the correct downstream skill is unclear. Do not trigger merely because a conversation is new or for unrelated coding and general tasks.
 ---
 
 # Zongkong
@@ -26,6 +26,8 @@ Do not replace specialist direction, prompt writing, platform audit, generation,
 Load only the reference needed for the current decision:
 
 - Main creative line, workflow mode, specialist director, or storyboard variant: read [references/line-routes-and-workflow-modes.md](references/line-routes-and-workflow-modes.md).
+- Explicit Xiaohongshu content, continuation of an established daily-art column, or Xiaohongshu upload: enter [the Xiaohongshu branch](../xiaohongshu/SKILL.md); its [surreal-art workflow](../xiaohongshu/references/surreal-art-workflow.md) owns branch isolation and details. Mystery/surreal style words alone do not select it.
+- Xiaohongshu account positioning, audience, topic priorities/calendars, packaging strategy or performance review: use [Xiaohongshu Operator](../xiaohongshu-operator/SKILL.md); a complete post brief proceeds directly to the production branch.
 - Tool route, direct generation, image/video platform selection, or external handoff: read [references/tool-routing-and-platforms.md](references/tool-routing-and-platforms.md).
 - Formal packets, applicable gates, owners, `missing_fields`, or `route_back_to`: read [references/packets-and-gate-ownership.md](references/packets-and-gate-ownership.md).
 - Deliverable-specific prompt fields, response visibility, QC mode, or quality-profile selection: read [references/deliverable-profiles-and-response-modes.md](references/deliverable-profiles-and-response-modes.md).
@@ -236,6 +238,8 @@ For packet schemas and exact owners, read [references/packets-and-gate-ownership
 ## Core Route Boundaries
 
 - `$zongkong` owns classification and routing, not the specialist result.
+- `$xiaohongshu-operator` owns Xiaohongshu strategy, editorial planning and performance decisions; `$xiaohongshu` owns post realization and publishing handoff. Reuse operations briefs, and never make a direct upload or fixed-image request redo account strategy. Both preserve project/column isolation and shared specialist ownership.
+- Explicit Xiaohongshu art-series work or continuation of its established column routes to `$xiaohongshu` with `main_line:other`, normally `workflow_mode:image`; requested tracked production uses `formal_managed` and `qc_mode:formal`. Generic mystery/surreal style requests stay with the current deliverable owner. Xiaohongshu upload of existing work preserves its source project's route, platform and style. Follow the branch isolation rules; planning and single previews stay lightweight, and a content branch itself creates no scheduler or account authorization.
 - Specialist directors own concept, narrative, composition, scene, character, or shot decisions in their domain.
 - Prompt semantics are deliverable-specific: generic frames, KV assets, storyboard boards, typography assets, and video motion each use the single owner named in `capability-registry.json`.
 - Prompt directors translate approved upstream decisions; they do not invent missing reference, style, scene, shot, character, or platform decisions for formal work.

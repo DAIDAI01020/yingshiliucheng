@@ -23,6 +23,8 @@
 | 商业或活动 KV | `kv-director` → `kv-image-prompt-director` |
 | 电影/短剧海报 | `poster-director` |
 | 一般静帧或改图 | `frame-vision-director` |
+| 小红书每日艺术图、神秘超现实、出图审核上传 | `xiaohongshu`，复用总控的专业审核与生成链路 |
+| 小红书账号运营、选题排期、数据复盘 | `xiaohongshu-operator`，向制作分支交接具体运营简报 |
 | 独立故事板设定板 | `image-storyboard-workflow` |
 | 视频提示词 | `ai-video-prompt-director` |
 | 平台编译与审查 | `prompt-platform-auditor` |

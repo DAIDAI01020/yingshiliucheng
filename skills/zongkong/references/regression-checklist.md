@@ -389,7 +389,51 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Re-ingestion keeps the same asset identity and manual selection for unchanged successful media.
     - Pending-to-success transitions require both an explicit success state and a nonempty local file; physical evidence does not imply QC or acceptance.
 
+83. `把神秘超现实小红书的出图、审核和上传流程写进总控`
+    - Update the workflow and active installation; preserve unrelated skills and user files.
+    - Route to xiaohongshu's surreal_art branch, retaining its film_diary branch separately.
+    - Do not launch a production run, upload, recurring automation, chat or subagent merely to install the branch.
+
+84. `做今天一套艺术图并审核，还是房间里有海水那个方向`
+    - Inherit the accepted everyday-space surreal direction; generate actual separate cover/view/clue images through the selected platform.
+    - Requested tracked review uses applicable creative/style/scene/prompt/image QC owners, not every installed skill or unrelated short-drama/video gates.
+    - Preserve intentional impossible elements. Inspect actual images and versions; generated is not reviewed or selected.
+    - Built-in native generation ends with images; unresolved capture/review continues as a truthful pending separate stage, never a fabricated QC pass.
+
+85. `这组审核过了，上传今天的三张`
+    - Verify exact local files/versions, applicable QC evidence, ordering, copy and target account before upload.
+    - A changed or uninspected file cannot inherit an older version's QC pass. An inline-only asset is pending capture.
+    - Reuse upload authorization; final publish requires scope covering the exact post/account, without reasking if already authorized.
+    - Verify actual page state and check drafts/posts after an uncertain submission before retrying.
+
+86. `继续修第二张，再审一下`
+    - Preserve passed cover/detail files, same-scene anchors and the selected platform; repair only the second image within bounded retry scope.
+    - Reinspect the new version and affected group continuity, update its evidence and delivery selection without overwriting history.
+
+87. `只帮我想接下来七天发什么，有点神秘感`
+    - Deliver a varied surreal-art calendar without mandatory weekend commercials, generation, project setup or automation.
+    - Do not force all scenes to be dark/cyan or turn mystery into horror without that direction.
+
 ## Boundary Checks
+
+Xiaohongshu operations smoke scenarios:
+
+- `规划未来一个月甚至一年，不用每天解释为什么发` -> 12-month thematic framework plus requested detailed daily calendar, weekly production sequence and saved artifacts; no mandatory analytics/positioning questionnaire or generated/published claims.
+- `继续今天的艺术图` with a month plan -> use the next unfinished post_id and existing artifacts; no spontaneous topic replacement or duplicate generation.
+- `小红书艺术号应该怎么运营` -> xiaohongshu-operator creates a concrete account brief and evidence/hypothesis-based plan; no invented metrics or production launch.
+- `根据这十篇后台数据复盘` -> inspect actual metrics, capture times, denominators and comparable windows; missing is not zero and account growth is not automatically post-attributed.
+- `今天就做已排好的森林洗衣房` -> reuse the operations brief and enter xiaohongshu production without repeating account strategy.
+- `一篇没流量，帮我救一下` -> distinguish observations and hypotheses; do not assert algorithm suppression, abandon style or change/delete a live post without evidence and scope.
+- `上传这套审核通过的图` -> xiaohongshu upload; no compulsory strategy loop or new images.
+- `帮我写评论回复` -> draft replies only; no unsolicited comments, DMs, profile mutation or timed follow-up.
+
+Branch-isolation smoke scenarios:
+
+- `给这个品牌KV增加神秘感` -> retain kv-director and the current project; no Xiaohongshu/art-series migration.
+- `给短剧做超现实梦境分镜` -> retain the short-drama/storyboard route and its locks; no art-column defaults.
+- `继续原来的一日一镜，这次超现实一点` -> keep film_diary and its existing project; change only the requested aesthetic property.
+- `把已通过的广告图上传小红书` -> posting handoff only; preserve source assets, ratio, platform, QC and project, without forced three-image regeneration.
+- `继续日常之外，做今天的一套` in the established art-column context -> surreal_art with its local defaults and requested review scope.
 
 For any downstream skill touched by a change, confirm:
 

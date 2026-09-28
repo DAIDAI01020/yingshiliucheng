@@ -1,0 +1,6 @@
+interface:
+  display_name: "小红书艺术图与场景设计"
+  short_description: "总控下的神秘超现实艺术图分支，串联选题、出图、审核、文案与上传"
+  default_prompt: "使用 $xiaohongshu 继续日常空间里的神秘超现实栏目，继承已有方向和授权，完成本次要求的选题、真实出图、适用技能审核或小红书发布素材与上传；保留实际证据并从未完成阶段续接。"
+policy:
+  allow_implicit_invocation: true

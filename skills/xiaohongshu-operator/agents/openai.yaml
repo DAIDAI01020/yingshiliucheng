@@ -1,0 +1,4 @@
+interface:
+  display_name: "小红书运营"
+  short_description: "编排小红书年度主题、月度选题、周制作与每日执行，按需复盘调整"
+  default_prompt: "使用 $xiaohongshu-operator 继承当前栏目的方向，完成年度主题与首月具体日历，安排每周制作并从计划中续接每日任务；不反复解释每篇为什么发，按需利用真实反馈调整。"
