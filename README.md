@@ -2,6 +2,8 @@
 
 给 Codex 使用的影视、短剧、KV、海报、图像与视频制作 skill 库。日常从 `$zongkong` 进入：总控判断当前需求，只调用本次需要的专业能力，不要求每个任务走完整制作链。
 
+完整阶段地图见 [WORKFLOW.md](WORKFLOW.md)。跨阶段交接复用有效成果，按交付物检查适用条件；检查全部技能入口、界面配置和参考链接，避免源码与本机规则长期分叉。
+
 ## 三种工作方式
 
 | 模式 | 常见说法 | 执行边界 |
@@ -86,8 +88,10 @@ QC 结论统一为：`可用 / 可小修 / 定向重出 / 提示词需重写 / �
 
 ```powershell
 python -X utf8 skills/zongkong/scripts/validate_workflow_contracts.py
+python -X utf8 skills/zongkong/scripts/audit_skill_capabilities.py
+python -X utf8 -m unittest discover -s skills/zongkong/tests
 python -X utf8 skills/zongkong/scripts/run_e2e_workflow_tests.py
-node --test skills/workflow-sync-manager/scripts/sync-workflow.test.mjs
+node --test skills/banana-image-generator/scripts/generate-banana-images.test.mjs skills/project-state-manager/scripts/manage-project-state.test.mjs skills/workflow-sync-manager/scripts/sync-workflow.test.mjs
 ```
 
 发布由 `workflow-sync-manager` 处理：使用明确文件白名单，保留白名单外用户暂存内容，检查密钥和远端分歧；远端哈希验证后才报告已推送。没有变更时不制造重复日志或提交。

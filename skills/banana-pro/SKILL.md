@@ -1,6 +1,6 @@
 ---
 name: banana-pro
-description: Prepare and optionally run Banana Pro image-generation prompts through OpenRouter's google/gemini-3-pro-image-preview for text-to-image, image-to-image, multi-reference image workflows, character sheets, clean scene plates, product or prop design images, and storyboard first frames. Use when Codex is asked to work with Banana Pro, Nano Banana 2, Gemini image generation, OpenRouter image generation, aspect-ratio/image-size settings, reusable visual prompt packs, or the installed banana-pro CLI.
+description: Prepare Banana Pro request settings and explicit legacy CLI workflows through OpenRouter's google/gemini-3-pro-image-preview for text-to-image, image-to-image, multi-reference image workflows, character sheets, clean scene plates, product or prop design images, and storyboard first frames. Use when Codex is asked to work with Banana Pro, Nano Banana 2, Gemini image generation, OpenRouter image generation, aspect-ratio/image-size settings, reusable visual prompt packs, or the installed banana-pro CLI.
 ---
 
 # Banana Pro
@@ -9,11 +9,13 @@ description: Prepare and optionally run Banana Pro image-generation prompts thro
 
 Prepare production-ready image prompts and request settings for OpenRouter's `google/gemini-3-pro-image-preview`, also known here as Banana Pro.
 
-This skill includes CLI wrappers named `banana-pro` and `banana-pro.cmd`. On Windows/Codex, prefer `bin\banana-pro.cmd` because it uses PowerShell and does not require Python. When the user explicitly asks to generate/call/run Banana Pro through OpenRouter, use the CLI instead of only preparing a handoff. Do not claim images were generated unless the CLI or another available image tool actually produced outputs.
+This skill includes CLI wrappers named `banana-pro` and `banana-pro.cmd`. On Windows/Codex, prefer `bin\banana-pro.cmd` because it uses PowerShell and does not require Python. For new generation requests use `$banana-image-generator`, the sole execution owner. Use this bundled CLI only when the user explicitly requests this legacy CLI workflow; naming Banana Pro alone does not select it. Do not claim images were generated unless the CLI or another available image tool actually produced outputs.
 
 Never expose API keys in chat, prompt handoffs, markdown examples, logs, or committed skill files. The CLI reads `OPENROUTER_API_KEY` from the environment or from `~/.config/banana-pro/openrouter.env`.
 
 Use the user's language for generated prompt content. For Chinese briefs, write Chinese prompts and labels unless the user asks otherwise.
+
+For prompt work, the deliverable-specific semantic owner creates image meaning and `$prompt-platform-auditor` compiles it. This skill supplies Banana-specific settings or explicit compatibility support, not a second concept or execution route.
 
 ## Default Request Settings
 
@@ -57,7 +59,7 @@ Preserve requested aspect ratio or size when the user specifies them. Prefer `16
    - Read `references/openrouter-direct.md` when the user asks for raw API payloads, SDK shape, response parsing, or OpenRouter-specific request notes.
    - Do not expose API keys or invent secrets.
    - Use `banana-pro --dry-run` or `bin\banana-pro.cmd --dry-run` for payload inspection.
-   - Use `banana-pro "prompt..." -o /path/to/output` or `bin\banana-pro.cmd "prompt..." -o H:\path\to\output` for real generation when the user asks to call OpenRouter.
+   - Use `banana-pro "prompt..." -o /path/to/output` or `bin\banana-pro.cmd "prompt..." -o H:\path\to\output` for real generation only within an explicitly requested legacy CLI workflow.
    - Use `banana-pro --image /path/to/reference.png "prompt..."` or `bin\banana-pro.cmd --image H:\path\reference.png "prompt..."` for image-to-image or multi-reference workflows.
 
 ## Prompt Standards

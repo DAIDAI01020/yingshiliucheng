@@ -25,8 +25,8 @@ Do not use this skill for `image`, `image-2`, `ChatGPT Image`, `内置 image`, o
 
 - `OPENROUTER_API_KEY` must exist in the local environment for real generation.
 - Optional `BANANA_MODEL` can override the default model.
-- Default model: `google/gemini-3.1-flash-image-preview`.
-- Default output folder: `H:\yingshi\outputs\banana-images\{projectName}\{timestamp}\`.
+- Default model for an unpinned generic Banana/Nano Banana 2 request: `google/gemini-3.1-flash-image-preview`. An explicit Banana Pro request uses the existing configured Pro mapping `google/gemini-3-pro-image-preview`; preserve any explicit/inherited model in input `model` instead of silently applying the default. Check live availability before execution.
+- Output folder: use the approved `--output-dir` / input `outputDir`; managed outputs must remain under `projectRoot`. Without an explicit path, use `{projectRoot}/generation-runs/banana/{projectName}/{timestamp}` for managed work or `{current_workspace}/outputs/banana-images/{projectName}/{timestamp}` for a standalone test.
 - Images are saved in `images\`.
 - Full prompts are saved in `prompts\`.
 - Logs are saved in `logs\generation-log.json`.

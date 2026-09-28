@@ -11,6 +11,12 @@ description: Client-facing pitch deck director for film and screen visual propos
 
 PPT is for persuasion and decision-making. It should not dump full execution tables.
 
+## Delivery Boundary
+
+Inherit accepted claims, reference sources, selected image versions, and the requested audience/length. The page plan below is optional structure; avoid duplicate strategy/concept pages when a short deck is enough.
+
+If the user asks for a PPTX or finished presentation, continue from the page plan through the available presentation artifact skill/tool, create the actual file, inspect its rendered pages, and provide the saved file. If only an outline or page copy is requested, that content is the deliverable. Label missing images as placeholders; do not present them as generated or approved.
+
 ## Default Deck Rhythm
 
 | Page | Title | Goal |

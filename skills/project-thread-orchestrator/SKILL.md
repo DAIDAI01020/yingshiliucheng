@@ -28,7 +28,7 @@ Use this skill when any of these applies:
 - the user explicitly asks for a master project with separate chats;
 - a managed project needs up to four parallel child tasks with traceable handoffs.
 
-Keep one short, coherent task in the current chat. Do not split merely because a document is long.
+Keep one short, coherent task in the current chat. A structural split may be proposed, but only an explicit user request for separate chats or approval of the concrete split authorizes their creation. Do not split merely because a document is long.
 
 ## Split workflow
 
@@ -38,7 +38,7 @@ Keep one short, coherent task in the current chat. Do not split merely because a
 4. Suggest a split when at least two change: narrative function, time/location, character group, asset set, or independent revision need.
 5. Merge adjacent short units that share characters, scene, style, references, and approval path.
 6. Put global prerequisites such as brief, concept, style, character, or product locks before dependent tasks.
-7. Show the split table to the user. Do not create a child thread or task folder until the user confirms the plan once.
+7. Make the split concrete and user-visible. A current request or prior approval covering that exact plan satisfies confirmation; ask only for a material unapproved change. Do not create child threads based solely on inferred complexity.
 
 After confirmation, initialize/register through:
 
@@ -106,10 +106,10 @@ Only the hub may modify `project-context.md`, `thread-registry.json`, or project
 When the user says `汇总进度`, `继续项目`, or `同步分聊天`:
 
 1. List/read only registered active child threads.
-2. Ask each ready child to refresh its standard `handoff.json` if needed.
+2. Read available handoffs first. Request a refresh only when user authorization covers messaging that child; a progress-only request is not permission to send new prompts.
 3. Import a handoff with `sync-handoff`; reject a missing, incomplete, mismatched, or out-of-root handoff.
 4. Update the `$production-manager` thread board.
-5. Start the next eligible batch only when slots and dependencies allow.
+5. Start the next eligible batch only within the approved creation/coordination scope and when slots and dependencies allow; a read-only progress request does not launch another batch.
 
 Use these state values exactly:
 
@@ -117,7 +117,7 @@ Use these state values exactly:
 queued / active / waiting_user / blocked / ready_for_review / accepted / stale / archived
 ```
 
-The hub alone changes `ready_for_review` to `accepted`. Promote accepted deliverables to the existing project output structure, then archive the child with the Codex archive tool and mark the registry entry `archived`. Keep the registered hub thread unarchived and pinned.
+The hub alone changes `ready_for_review` to `accepted`. Promote accepted deliverables within the authorized delivery scope. Archive a child with the Codex archive tool only when the user requested archival or approved a lifecycle plan including it, then mark the registry entry `archived`. Acceptance alone does not imply chat archival. Keep the registered hub thread unarchived and pinned.
 
 ## Global context changes
 
@@ -125,17 +125,17 @@ Version global changes instead of replaying the full project history:
 
 1. Update `project-context.md` and increment `context_version`.
 2. Calculate affected registered tasks from `inherited_locks`.
-3. Show the affected child list and obtain one confirmation.
+3. Identify affected recipients and the delta. Reuse existing user authorization covering that scope; otherwise obtain one confirmation.
 4. Send only the delta to those thread IDs.
 5. Run `mark-stale` for affected tasks; queued tasks inherit the new version without becoming stale.
 6. Leave unaffected tasks unchanged.
 
-Do not broadcast before confirmation and do not silently replace accepted work.
+Do not broadcast outside user-authorized scope and do not silently replace accepted work. A child request to reply/report is not independent authorization to message another chat.
 
 ## Existing threads and guardrails
 
 - Never auto-adopt existing chats. List same-project candidates, let the user confirm task bindings once, then run `adopt --confirmed`.
 - Reject project ID/path mismatches, duplicate task IDs, duplicate thread bindings, dependency cycles, task workspaces outside the project root, and more than four active children.
-- Do not add heartbeat, cron, or background polling in v1. Synchronize only on a user command or an active hub turn.
+- Do not add background polling by default. Synchronize within an authorized active workflow; an explicit monitoring request uses the app automation tools and current tool contract.
 - Do not store secrets, private URLs, or complete chat histories in packets or registry state.
 - Preserve existing project files. Initialization may add `00_project_control` and non-destructive manifest pointers; it must not rewrite `asset-index.json` or migrate legacy deliverables.

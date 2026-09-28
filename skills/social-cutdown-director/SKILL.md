@@ -31,7 +31,7 @@ missing_fields:
 route_back_to:
 ```
 
-If source film, platform target, duration, or hook is missing, output `missing_fields` instead of inventing a new cutdown concept.
+Use the available master film, script, or accepted concept; a finished source video is needed for frame-accurate cuts, not for a script adaptation. Derive the hook within this task, preserve source claims and brand meaning, and distinguish the distribution channel from an AI generation platform. Never invent source timecodes without inspecting the media. Check subtitle/crop safety and runtime for each requested rendition.
 
 | 物料 | 比例 | 时长 | 钩子 | 内容结构 | 字幕/包装 | AI生成建议 |
 | --- | --- | --- | --- | --- | --- | --- |

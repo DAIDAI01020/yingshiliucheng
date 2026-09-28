@@ -1,3 +1,4 @@
-display_name: "短剧场戏导演"
-short_description: "拆解短剧场戏、参考角色、视觉风险和下游提示词需求"
-default_prompt: "Use $short-drama-scene-director to turn the script into scene-level visual direction and upstream_handoff_packet fields. Preserve director_contribution_packet and visual_helpfulness_targets in image/video handoffs."
+interface:
+  display_name: "短剧场戏导演"
+  short_description: "拆解场戏空间人物调度与连续性，交付可继承的镜头与提示词需求"
+  default_prompt: "使用 $short-drama-scene-director 完成场戏与镜头设计，保留连续性锁及 director_contribution_packet；按剧情选择结尾，不默认气口，不等待下游最终锁才起草。"

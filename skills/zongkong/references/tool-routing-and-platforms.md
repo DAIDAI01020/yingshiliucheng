@@ -13,14 +13,7 @@ Use this reference when `$zongkong` has classified the speed mode and needs the 
 
 ## Routing Precedence
 
-```text
-explicit platform
-> continue current project platform/route
-> direct generation request
-> prompt-only request
-> formal batch/delivery request
-> generic image/video wording
-```
+Use the independent action, platform/model, and creative-state precedence in [the Zongkong decision order](../SKILL.md#decision-order). Resolve execution intent before matching a platform row below. Platform names, credentials, project tier, and existing assets do not authorize generation by themselves.
 
 “直接用 image 出图” means execute through the built-in image route. “给我出图提示词” means route to the image prompt owner. “重出/继续出” inherits the current project platform; it is not a new generic-platform decision.
 
@@ -29,7 +22,7 @@ explicit platform
 | User intent | Route |
 | --- | --- |
 | 新建工程 / 继续工程 / 项目根目录 / 输出路径 / 文件散落 / 目录混乱 / 不要放总文件夹 / 整理工程但先不移动 | `$project-folder-director` -> `$project-state-manager` / `$asset-librarian` |
-| 大稿件多部分 / 一个总项目拆多个聊天 / 上下文隔离 / 分聊天并行 / 总控汇总 / 同步分聊天 | `$zongkong` confirms managed project/root -> owning director creates semantic split -> `$project-thread-orchestrator` proposes tasks -> one user confirmation -> same-project local child threads (max 4) -> `$production-manager` board / `$project-state-manager` state |
+| 大稿件多部分 / 一个总项目拆多个聊天 / 上下文隔离 / 分聊天并行 / 总控汇总 / 同步分聊天 | explicit separate-chat request -> project/root and director split -> `$project-thread-orchestrator` with authorization for the concrete plan -> same-project local child threads (max 4)；reuse existing registered tasks for continuation/status；a split proposal alone creates no chats |
 | 品牌KV / 活动KV / 发布会KV / 产品KV / 产品主视觉 / 节目主视觉 / LED主视觉 / key visual / 主视觉 / banner system | `$kv-director` -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 已有方案/PPT/创意方向，下一步做KV或大屏KV | preserve approved proposal -> `$kv-director` proposal_to_kv_packet -> large-screen experience packet when needed -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
 | 海报 / 人物海报 / 短剧人物海报 / 短剧封面 / 电影海报 / film key art / 社媒封面 / 缩略图 / poster-like narrative cover | `$poster-director` -> `$frame-vision-director` -> `$prompt-platform-auditor` -> image/layout tool |
@@ -42,10 +35,11 @@ explicit platform
 | TVC逐镜出图提示词 / 每个小分镜提示词 / 单独小分镜 image | quick_test: `$image-storyboard-workflow` -> `$storyboard-planner` tvc_shot_prompt_handoff -> `$frame-vision-director` tvc_shot_image_prompt_packet -> image tool；formal_managed only when the user says 批量 / 客户交付 / QC / 入项目状态 |
 | 故事板宫格 / 场戏控制板 | `$image-storyboard-workflow` -> `$scene-board-image-prompter` -> built-in imagegen |
 | 同场戏背景锁 / 背景连续性参考板 / 正反打背景控制板 / 对视过肩参考板 / short-drama continuity board | `$image-storyboard-workflow` -> `$short-drama-scene-director` scene_continuity_lock -> `$scene-board-image-prompter` short_drama_scene_continuity_board -> built-in imagegen |
-| Banana / Banana Pro / 用Banana出图 / Banana批量出图 / Banana重出 / 继续Banana出图 / 省token | `$banana-image-generator` |
-| MJ / Midjourney / Legnext | `$midjourney` |
+| Banana / Banana Pro / 用Banana出图 / Banana批量出图 / Banana重出 / 继续Banana出图 | generation intent -> `$banana-image-generator`；prompt-only intent -> semantic owner when needed, then `$prompt-platform-auditor`；“省token” alone does not select or change a platform |
+| MJ / Midjourney / Legnext | generation intent -> `$midjourney`；prompt-only intent uses its prompt workflow without submission |
 | 出视频 / 让图动起来 / Seedance / Ark | quick_test: `$ai-video-prompt-director` -> optional lightweight audit -> video tool；formal_managed: `$ai-video-prompt-director` -> `$prompt-platform-auditor` -> `$video-generation-controller` / `$seedance-2-video` |
 | 即梦/可灵/Omini提示词 | prompt_only: `$ai-video-prompt-director` source packet -> `$prompt-platform-auditor` lightweight platform compilation -> direct copyable prompt；no project intake/QC/state；formal_managed uses the full applicable audit/state handoff |
+| 可灵 API Key / 配置可灵 API / 可灵 API 连通测试 | `$kling-api` -> private local credential file outside `skills/` and Git -> optional free live authentication check；never treat key setup as paid-generation approval |
 | 可灵 O1 / VIDEO 3.0 Omni 多参考、元素、视频参考、局部编辑、原生音频 | prompt_only/quick_test: `$ai-video-prompt-director` 做最小 reference role map 并给提示词；formal_managed: `$project-state-manager` reference role map / `$scene-board-image-prompter` board cells -> `$ai-video-prompt-director` -> `$prompt-platform-auditor` -> `$video-generation-controller` manual handoff / run manifest -> `$video-qc-director` |
 | 产品视频重绘 / 产品图动起来 / 山地车辆动作 / 机械动作测试 / 连续反馈修片 | `$product-video-revision-director` -> `$ai-video-prompt-director` -> optional lightweight audit for quick_test / formal audit for formal_managed |
 | 审片/判断图片能不能用 | `$image-qc-director` |
@@ -140,6 +134,8 @@ Jimeng / Dreamina CLI execution
 -> use `query_result` recovery for submitted/querying jobs; do not submit again
 -> if the official CLI is unavailable, produce a same-platform `jimeng-manual` handoff and state that no video was generated
 ```
+
+An explicit current generation request or existing approval covering this concrete run satisfies generation confirmation; do not add a duplicate confirmation step. Check its prompt/reference version, requested outputs, platform, and cost scope before reuse. Prompt-only approval, credential setup, and status inspection do not satisfy it.
 
 The controller must never report an external handoff, a queued task, or a `submit_id` as a generated video. A downloaded and validated output path is required for `generated` or `success`.
 

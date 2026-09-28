@@ -344,6 +344,28 @@ function firstImagePath(entry) {
   return entry.filePath || entry.filePaths?.[0]?.path || entry.filePaths?.[0] || null;
 }
 
+// Physical evidence is a minimum requirement; decoding and creative QC remain separate.
+async function verifiedOutput(filePath, baseDir) {
+  if (typeof filePath !== "string" || !filePath || /^https?:\/\//i.test(filePath)) return null;
+  const resolved = path.resolve(baseDir, filePath);
+  try {
+    const info = await fs.stat(resolved);
+    return info.isFile() && info.size > 0 ? resolved : null;
+  } catch {
+    return null;
+  }
+}
+
+function mergeIngestedAsset(previous, asset) {
+  const sameEvidence = previous.filePath && previous.filePath === asset.filePath
+    && ["success", "succeeded", "completed"].includes(previous.status) && asset.assetState === "候选";
+  return {
+    ...previous, ...asset,
+    createdAt: previous.createdAt || asset.createdAt,
+    assetState: sameEvidence ? previous.assetState || asset.assetState : asset.assetState,
+  };
+}
+
 function runIdFromOutputDir(outputDir) {
   return safeName(path.basename(outputDir || `run_${timestamp()}`), `run_${timestamp()}`);
 }
@@ -354,11 +376,14 @@ async function ingestGeneration({ projectRoot, generationLog, reviewBoard, gener
   const state = await ensureProject({ projectRoot });
   const logPath = path.resolve(generationLog);
   const log = await readJson(logPath, null);
+  if (!log || !Array.isArray(log.shots)) throw new Error(`Invalid generation log: ${logPath}`);
   const reviewPath = reviewBoard ? path.resolve(reviewBoard) : "";
   const now = new Date().toISOString();
   const runId = runIdFromOutputDir(log.outputDir);
   const shots = log.shots || [];
-  const failedCount = shots.filter((shot) => shot.status === "failed").length;
+  let failedCount = 0;
+  let successCount = 0;
+  let dryRunCount = 0;
 
   const existing = state.assetIndex.assets || [];
   for (const entry of shots) {
@@ -366,7 +391,16 @@ async function ingestGeneration({ projectRoot, generationLog, reviewBoard, gener
     const tool = entry.tool || log.tool || "unknown";
     const version = entry.version || "v01";
     const handle = `${shot}_${tool}_${version}`;
-    const imagePath = firstImagePath(entry);
+    const plannedFilePath = firstImagePath(entry);
+    const claimedStatus = String(entry.status || "pending").toLowerCase();
+    const dryRun = claimedStatus !== "failed" && Boolean(log.dryRun || claimedStatus === "dry-run");
+    const claimedSuccess = ["success", "succeeded", "completed"].includes(claimedStatus);
+    const imagePath = log.dryRun || dryRun ? null : await verifiedOutput(plannedFilePath, path.dirname(logPath));
+    const status = dryRun ? "dry-run" : claimedSuccess && !imagePath ? "output_missing" : claimedStatus;
+    const verifiedSuccess = !dryRun && claimedSuccess && Boolean(imagePath);
+    if (dryRun) dryRunCount++;
+    else if (status === "failed") failedCount++;
+    else if (verifiedSuccess) successCount++;
     const asset = {
       assetId: `${handle}_${runId}`,
       handle,
@@ -376,14 +410,15 @@ async function ingestGeneration({ projectRoot, generationLog, reviewBoard, gener
       tool,
       model: entry.model || log.model || "",
       filePath: imagePath,
+      plannedFilePath,
       promptPath: entry.promptPath || "",
       promptJsonPath: entry.promptJsonPath || "",
       generationLog: logPath,
       reviewBoard: reviewPath,
       generationJob: generationJob ? path.resolve(generationJob) : "",
       outputDir: log.outputDir || "",
-      assetState: entry.status === "failed" ? "待重出" : "候选",
-      status: entry.status || "",
+      assetState: dryRun ? "待执行" : status === "failed" ? "待重出" : verifiedSuccess ? "候选" : "待检查",
+      status,
       error: entry.error || null,
       retrySuggestion: entry.retrySuggestion || null,
       idempotencyKey: entry.idempotencyKey || log.idempotencyKey || "",
@@ -395,7 +430,7 @@ async function ingestGeneration({ projectRoot, generationLog, reviewBoard, gener
       updatedAt: now,
     };
     const index = existing.findIndex((item) => item.assetId === asset.assetId);
-    if (index >= 0) existing[index] = { ...existing[index], ...asset };
+    if (index >= 0) existing[index] = mergeIngestedAsset(existing[index], asset);
     else existing.push(asset);
   }
 
@@ -406,18 +441,25 @@ async function ingestGeneration({ projectRoot, generationLog, reviewBoard, gener
   state.manifest.current.latestGenerationLog = logPath;
   state.manifest.current.latestReviewBoard = reviewPath;
   if (generationJob) state.manifest.current.latestGenerationJob = path.resolve(generationJob);
-  state.manifest.stages.imageGeneration = failedCount ? "部分失败" : (log.dryRun ? "dry-run通过" : "已出图");
+  const isDryRun = Boolean(log.dryRun || (shots.length > 0 && dryRunCount === shots.length));
+  const pendingCount = shots.length - successCount - failedCount - dryRunCount;
+  const runStatus = failedCount ? (failedCount === shots.length ? "失败" : "部分失败")
+    : isDryRun && shots.length > 0 ? "dry-run通过"
+      : pendingCount || dryRunCount || !shots.length ? "待检查" : "完成";
+  state.manifest.stages.imageGeneration = runStatus === "完成" ? "已出图" : runStatus;
   state.manifest.generationRuns = upsertRunById(state.manifest.generationRuns, {
     runId,
     tool: log.tool || "",
-    mode: log.dryRun ? "dry-run" : "real-generation",
+    mode: isDryRun ? "dry-run" : "real-generation",
     outputDir: log.outputDir || "",
     generationLog: logPath,
     reviewBoard: reviewPath,
     generationJob: generationJob ? path.resolve(generationJob) : "",
-    status: failedCount ? "部分失败" : "完成",
+    status: runStatus,
     shotCount: shots.length,
     failedCount,
+    successCount,
+    pendingCount,
     idempotencyKey: log.idempotencyKey || "",
     elapsedSeconds: log.elapsedSeconds ?? null,
     creditsUsed: log.creditsUsed ?? null,
@@ -444,7 +486,8 @@ async function ingestVideo({ projectRoot, runManifest, videoJob }) {
   const run = await readJson(manifestPath, null);
   if (!run) throw new Error(`Could not read run manifest: ${manifestPath}`);
   const now = new Date().toISOString();
-  const videoPath = run.outputs?.video || "";
+  const plannedFilePath = run.outputs?.video || "";
+  const videoPath = await verifiedOutput(plannedFilePath, path.dirname(manifestPath)) || "";
   const taskId = run.task?.id || run.taskId || run.externalTaskId || "";
   const runId = runIdFromOutputDir(path.dirname(manifestPath));
   const sourceImages = run.source_images || run.first_frame_or_image_refs || run.references || [];
@@ -453,7 +496,9 @@ async function ingestVideo({ projectRoot, runManifest, videoJob }) {
   const version = run.version || "v01";
   const tool = run.provider || run.tool || run.target_tool || run.request?.provider || run.request?.target_tool || "video";
   const toolSlug = safeName(tool, "video").toLowerCase();
-  const status = run.task?.status || run.status || (videoPath ? "succeeded" : "manual_handoff");
+  const claimedStatus = String(run.task?.status || run.status || "pending").toLowerCase();
+  const claimedSuccess = ["succeeded", "success", "completed"].includes(claimedStatus);
+  const status = claimedSuccess ? (videoPath ? "succeeded" : "output_missing") : claimedStatus;
   const assetState = status === "succeeded" ? "候选" : status === "manual_handoff" ? "待执行" : "待检查";
   const handle = `${shot}_${toolSlug}_${version}`;
   const asset = {
@@ -465,6 +510,7 @@ async function ingestVideo({ projectRoot, runManifest, videoJob }) {
     tool,
     model: run.model || run.target_model || run.request?.model || run.request?.target_model || "",
     filePath: videoPath,
+    plannedFilePath,
     promptPath: run.prompt?.source || run.promptFile || run.approved_prompt_source || "",
     runManifest: manifestPath,
     videoJob: videoJob ? path.resolve(videoJob) : "",
@@ -485,7 +531,7 @@ async function ingestVideo({ projectRoot, runManifest, videoJob }) {
   };
   const existing = state.assetIndex.assets || [];
   const index = existing.findIndex((item) => item.assetId === asset.assetId);
-  if (index >= 0) existing[index] = { ...existing[index], ...asset };
+  if (index >= 0) existing[index] = mergeIngestedAsset(existing[index], asset);
   else existing.push(asset);
   state.assetIndex.assets = existing;
   state.assetIndex.updatedAt = now;
@@ -517,7 +563,7 @@ async function ingestVideo({ projectRoot, runManifest, videoJob }) {
     projectRoot: state.projectRoot,
     manifestPath: state.manifestPath,
     assetIndexPath: state.assetIndexPath,
-    asset,
+    asset: index >= 0 ? existing[index] : asset,
   };
 }
 
@@ -929,10 +975,21 @@ async function readTextIfExists(filePath) {
 }
 
 function textHasApprovedStatus(text, allowedStatuses) {
-  return text.split(/\r?\n/).some((line) => {
-    const match = line.trim().toLowerCase().match(/^status:\s*(.+)$/);
-    return match && allowedStatuses.includes(match[1].trim());
-  });
+  let fence = null;
+  for (const line of text.replace(/^\uFEFF/, "").split(/\r?\n/)) {
+    const marker = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (marker) {
+      if (!fence) fence = marker[1];
+      else if (marker[1][0] === fence[0] && marker[1].length >= fence.length) fence = null;
+      continue;
+    }
+    if (fence) continue;
+    // Only current document metadata counts; examples and historical sections do not.
+    if (/^ {0,3}#{2,6}\s/.test(line)) break;
+    const match = line.match(/^ {0,3}status:\s*(.+)$/i);
+    if (match) return allowedStatuses.includes(match[1].trim().toLowerCase());
+  }
+  return false;
 }
 
 async function checkShortDramaGeneration(paths, manifest) {

@@ -22,7 +22,7 @@ Do not use it as the main director for short drama. Route short drama, micro-ser
 
 ## Responsibilities
 
-`$yingshisheji` owns:
+`$yingshisheji` coordinates the commercial proposal across these decisions; each specialist retains its registered ownership:
 
 - 商业目标判断
 - 受众与传播目标判断
@@ -37,9 +37,13 @@ Do not use it as the main director for short drama. Route short drama, micro-ser
 
 Generation tools only execute after this layer and downstream prompt directors have produced platform-audited prompts.
 
+## Stage Boundary
+
+Use the [stage handoff contract](../zongkong/references/stage-handoff-contract.md). Inherit the total route and current requested deliverable. Coordinate commercial intent and specialist contributions; do not become a second owner for reference selection, script writing, prompt semantics, or platform execution. Reuse accepted upstream work and complete only the stages necessary for this request.
+
 ## Commercial Workflow
 
-Default route:
+Full-development map, not a compulsory call sequence. PPT and generation are included only when requested:
 
 ```text
 brief-analyzer
@@ -113,6 +117,8 @@ For proposal work, output only what the current stage needs. Common modules:
 8. `关键帧出图需求`
 9. `AI图片提示词`
 10. `AI视频提示词`
+11. `PPT页面结构`
+12. `生成与QC计划`
 
 ## Image Storyboard Board Routing
 
@@ -142,29 +148,27 @@ board_type_reason:
 jimeng_direct_reference_board:
 handoff_to: image-storyboard-workflow
 ```
-11. `PPT页面结构`
-12. `生成与QC计划`
 
 ## Image Prompt Rule
 
 When the user asks for image prompts or image generation:
 
 1. Check whether a complete prompt already exists.
-2. If not, route to `$frame-vision-director`.
+2. If not, use the deliverable-specific semantic owner: `$frame-vision-director`, `$kv-image-prompt-director`, `$scene-board-image-prompter`, or `$type-png-director`. A complete prompt needing only platform adaptation goes directly to `$prompt-platform-auditor`.
 3. For formal projects, inherit the style bible.
-4. Every copyable prompt must include full style language inside the prompt itself.
-5. Send the prompt to `$prompt-platform-auditor` before generation.
+4. Each independent prompt contains the relevant visible style controls; omit unrelated camera/realism fields.
+5. Use lightweight compilation for named-platform prompt-only work and the applicable formal audit before managed generation.
 6. Route to the requested tool: built-in imagegen, Banana/Banana Pro, or Midjourney.
 
 ## Video Prompt Rule
 
 When the user asks for video prompts or video generation:
 
-1. Start from a clear first frame or storyboard shot.
+1. Start from the actual source type: text/script, first frame, reference assets, anchor frames, or edit master. Do not require a first frame for text-to-video.
 2. Use `$ai-video-prompt-director` for feasibility and motion design.
 3. For one-take, check continuity risk before writing final prompt.
 4. Send the prompt to `$prompt-platform-auditor` before final output or generation.
-5. Use Seedance/Ark or the user-specified external platform.
+5. Preserve the platform/model selected by the user or total route; do not choose Ark merely because video is requested.
 
 ## PPT Rule
 

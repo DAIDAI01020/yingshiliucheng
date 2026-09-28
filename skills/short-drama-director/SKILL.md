@@ -11,7 +11,7 @@ description: Short drama and vertical micro-series director for AI film workflow
 
 It coordinates story, performance, scene visual direction, character continuity, image prompts, video prompts, and generation risk control. It is not a generic prompt writer. For formal short-drama projects, it must first establish drama logic and scene-level visual direction before any image or video generation.
 
-Professional short-drama execution has two gates before visual execution:
+For formal execution, apply opening-hook and recurring-character gates only when those requirements occur in the requested material. Follow the [stage handoff contract](../zongkong/references/stage-handoff-contract.md). The full dependency map is:
 
 ```text
 hook-audit -> character-continuity -> scene visual direction -> shot audit -> prompts
@@ -71,7 +71,7 @@ hook-audit: prove the first 3-8 seconds have a hook, an audience question, an in
 character-continuity: lock recurring character face, hair, age/body, costume, performance, relationship state, reference-image roles, generation anchor, allowed scene changes, and forbidden drift.
 ```
 
-Do not move a formal short-drama project into scene visual mapping or batch generation if either gate is missing. For existing scripts/storyboards, diagnose the hook and character continuity without rewriting the whole script unless the user asks.
+Draft scenes from existing material while unresolved dependencies are tracked. Hold only dependent final production for an applicable missing gate; an isolated middle scene needs no new episode-opening audit, and character-free material needs no character continuity gate. For existing scripts/storyboards, diagnose without rewriting the whole script unless requested.
 
 ## Scene-Level Visual Direction Is Required
 

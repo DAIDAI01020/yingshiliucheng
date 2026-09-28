@@ -38,6 +38,7 @@ Translate client language into production actions. Do not immediately rewrite ev
 
 - If feedback is vague, translate it into 2-3 likely execution meanings and recommend the most practical one.
 - If feedback affects only one image, do not change the full style package.
-- If feedback repeats across multiple keyframes, route to `$style-bible-director`.
+- Treat repeated feedback as evidence to investigate. Check reference roles, prompt inheritance, execution artifacts, and intended style before proposing a bible change; repetition alone does not authorize a global redesign.
 - After interpreting feedback, route execution to `$revision-director`.
-- If feedback is about generated image quality, route QC to `$image-qc-director` first when image paths are available.
+- Inspect available media before diagnosing; use `$image-qc-director` or `$video-qc-director` as applicable. Label interpretations as hypotheses when evidence is absent.
+- Translate each revision into a visible acceptance condition and preservation boundary, not just an extra adjective or longer negative prompt.

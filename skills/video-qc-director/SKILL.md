@@ -37,6 +37,10 @@ user/client feedback
 
 If a managed project has `asset-index.json`, locate the source prompt, first frame, audit status, and run manifest before judging. If state is missing, output `missing_fields` instead of guessing.
 
+## Inspection Evidence
+
+Inspect actual video playback or temporally sufficient samples for each claimed visual finding; listen to audio before judging dialogue, music or sound effects. A contact sheet alone cannot verify continuous motion, lip-sync, flicker or audio. If a channel cannot be inspected, mark it unverified and limit the judgment; do not invent a full pass from metadata. Record the inspected time ranges and artifact version. A QC pass is not client selection.
+
 ## QC Checks
 
 For a saved video, first create bounded technical evidence when FFmpeg is available:
@@ -50,7 +54,7 @@ Use the resulting JSON, sample frames, and contact sheet to inspect duration, co
 | Area | Check |
 | --- | --- |
 | first-frame preservation | face, product, costume, scene, material, color, light ratio stay stable |
-| action clarity | one action is visible, staged, complete, not finished in one instant |
+| action clarity | each approved beat/stage is visible, readable and complete; multi-shot action follows its intended order and timing |
 | camera behavior | camera follows the approved rule; fixed camera does not push, shake, zoom, or follow |
 | product/vehicle | structure, proportions, wheel size, wheelbase, material, logo placement do not drift |
 | character | no face drift, beauty rewrite, plastic skin, body distortion, costume morph |
@@ -188,7 +192,7 @@ generation_observation:
 
 For quick/test work, one short judgment is enough, but still name the failure type and next owner.
 
-For formal QC or a repeated quick-test failure, write a `generation_observation` containing platform, profile, failure cause, successful fix, and repeat count. Do not promote a one-off model artifact into the global style lock. Promote only after repeated relevant evidence, a proven upstream decision error, or user approval.
+For formal QC or a repeated quick-test failure, write a `generation_observation` with inspected evidence and failure cause; record a successful fix only after inspecting the corrected output. Repeated evidence may support a targeted rule proposal, but applying a global style-lock change needs authorization for that scope. Keep diagnosis, proposed repair and verified repair distinct.
 
 ## Hard Rules
 

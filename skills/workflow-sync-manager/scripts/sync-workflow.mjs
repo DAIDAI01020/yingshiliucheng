@@ -8,7 +8,8 @@ const BLOCKED_SUFFIXES = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".mp4", ".mo
 const SECRET_PATTERNS = [
   /sk-[A-Za-z0-9_-]{20,}/,
   /(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})/,
-  /(?:OPENAI|OPENROUTER|ARK|DREAMINA|JIMENG)_(?:API_KEY|TOKEN|COOKIE)\s*[=:]\s*['"]?[A-Za-z0-9+/_=-]{24,}/i,
+  /(?:OPENAI|OPENROUTER|ARK|DREAMINA|JIMENG|KLING)_(?:API_KEY|TOKEN|COOKIE)\s*[=:]\s*['"]?[A-Za-z0-9+/_=-]{24,}/i,
+  /api-key-kling-[A-Za-z0-9_-]{20,}/i,
   /-----BEGIN (?:(?:OPENSSH|RSA|EC|DSA) )?PRIVATE KEY-----/,
 ];
 

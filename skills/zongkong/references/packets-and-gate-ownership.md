@@ -154,10 +154,12 @@ Require reference URLs, relay paths, start/end frames, audio fields, or platform
 
 ```text
 formal_managed + applicable missing field
--> stop before execution
+-> hold only the dependent execution
 -> return missing_fields
 -> set route_back_to to the owning skill
 -> preserve all approved upstream state
+-> let the owner complete authorized prerequisite work in the current chat
+-> resume dependent execution after the applicable gate passes
 
 quick_test + missing formal-only field
 -> continue when the test can be executed safely
@@ -168,4 +170,6 @@ prompt_only
 -> do not create formal missing fields merely to satisfy a packet
 ```
 
-Never ask a downstream prompt, audit, or generation skill to invent an upstream creative or continuity decision.
+Distinguish a missing record from a missing decision. If current approved evidence already contains the value, let the state owner restore the record with its source; do not ask the user to approve the same decision again. If the decision is genuinely open, the owning director prepares the concrete proposal and requests only the necessary choice or approval. Keep unrelated ready deliverables moving.
+
+Never ask a downstream prompt, audit, or generation skill to invent an upstream creative or continuity decision. A `route_back_to` is an internal repair handoff, not a reason to end the turn with a list of skills. Follow the Zongkong continuation rule if the same blocker returns unchanged.

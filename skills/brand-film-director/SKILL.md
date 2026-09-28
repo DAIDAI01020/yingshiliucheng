@@ -50,7 +50,7 @@ missing_fields:
 route_back_to:
 ```
 
-If the brand claim has no visible proof, no reference route, or no platform target, route back before prompt writing.
+Identify sourced proof for factual claims and propose visible expression within this director task. Do not invent achievements or require an image/video platform just to develop a brand-film concept. Hold only execution that depends on a genuinely missing proof or reference decision.
 
 When used in a formal project, provide:
 

@@ -20,40 +20,21 @@ Track:
 
 For managed projects, treat `asset-index.json` from `$project-state-manager` as the source of truth.
 
-## Default Folder Structure
+If the user asks to fix scattered files, messy project folders, files dumped into the workspace root, or output path confusion, route to `$project-folder-director` first. Use `$asset-librarian` after the folder contract or move plan exists, then inventory assets and version states.
 
-Use this structure unless the user already has a project structure:
+## Route Authority Boundary
 
-```text
-项目名/
-  01_brief/
-  02_ppt_proposal/
-  03_excel_execution/
-  04_prompts/
-  05_generated_images/
-  06_selected_frames/
-  07_video_prompts/
-  08_generated_videos/
-  09_review_boards/
-  10_revision_logs/
-  11_delivery/
-```
+Inherit `$zongkong`, `$project-folder-director`, and `$project-state-manager` decisions when present.
 
-Managed workflow folders:
+This skill owns asset inventory, naming, version state, selected/rejected status, and traceability. It does not choose project tier, change `speed_mode`, move/delete files without an approved plan, decide creative quality, rewrite prompts, or generate images/videos.
 
-```text
-H:\yingshi\projects\{projectSlug}\
-  project-manifest.json
-  asset-index.json
-  generation-jobs\
-  generation-runs\
-  video-runs\
-  review\
-  revision-logs\
-  briefs\
-  prompts\
-  references\
-```
+For formal managed work, use `asset-index.json` and approved output path rules as the source of truth. If state, folder contract, or source prompt/run metadata is missing, output `missing_fields` and route back instead of inventing records.
+
+## Folder Authority
+
+Use the existing `project_folder_contract` and `output_path_rule` from `$project-folder-director`. There is no second asset-librarian directory template. Preserve legacy folder names and locations unless relocation is explicitly in scope; first inventory and identify the exact move/copy plan. Do not hard-code a drive or create an alternative project root.
+
+Read `asset-index.json`, relevant manifests and real files. Persist managed changes through `$project-state-manager`; a request to list or inspect assets is read-only. Missing files, inline-only outputs and intended download paths must not become fabricated local asset records.
 
 ## Naming Rules
 
@@ -129,5 +110,11 @@ Do not leave references as unnamed loose files when they affect generation.
 - Tie every reference image to a shot number or role.
 - If the user asks for final delivery, identify selected assets and missing assets first.
 - Align with `Sheet 7 出图生成记录` and video run manifests.
-- When `asset-index.json` exists, read or update it before producing a manual asset table.
+- When `asset-index.json` exists, read it before producing an asset table; update it only for authorized state changes.
 
+
+## Final Delivery
+
+Use the [stage handoff contract](../zongkong/references/stage-handoff-contract.md). For requested delivery, identify actual selected versions and verify files exist and match the required media type, ratio, resolution, duration, transparency/audio, and naming where applicable. Technical QC and selection status are separate; a newer file is not automatically selected.
+
+Create the requested package under the agreed output path, preserving source versions. Include a concise delivery index mapping deliverable, source asset/version, file and verification status. Report missing items and partial delivery honestly. Exclude credentials, temporary access URLs and private generation logs unless explicitly required and appropriate. Do not treat an inventory alone as a finished requested package.

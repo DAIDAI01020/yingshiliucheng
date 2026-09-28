@@ -275,7 +275,7 @@ For each project, choose:
 
 ```text
 1 primary reference system = main visual discipline
-1 secondary reference system = texture or emotion supplement
+0-2 secondary reference systems = only when each solves a named texture, emotion or composition problem
 1 forbidden drift list = what not to overdo
 ```
 

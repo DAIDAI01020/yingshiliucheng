@@ -68,7 +68,7 @@ Bind only a real same-project thread ID. Keep one hub per registry.
 }
 ```
 
-Require `confirmed:true` before `register-plan`. `parallel_limit` must be `1..4`; default to `4`.
+Require `confirmed:true` before `register-plan`, supported by user authorization for that exact plan (including prior approval). `parallel_limit` must be `1..4`; default to `4`.
 
 ## `child_thread_task_packet`
 
@@ -143,8 +143,8 @@ create/reuse hub -> pin -> bind-hub
 show split plan -> user confirms once
 registry init/register -> next-batch
 create_thread(project + local) -> set title -> bind-thread
-read/send child threads -> sync-handoff
-user accepts -> promote output -> archive tool -> registry archived
+read registered child handoffs -> send only within authorized coordination scope -> sync-handoff
+user accepts -> promote authorized output -> archive only if requested/approved -> registry archived
 ```
 
 Never call a fork operation. A fork copies completed chat history and defeats context isolation.

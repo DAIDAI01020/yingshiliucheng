@@ -8,7 +8,7 @@ description: 生成影视化创意概念。用于TVC广告、品牌片、节目�
 ## Process
 
 1. Start from brief insights, not visual decoration.
-2. Generate 2-3 proposal-ready directions.
+2. Generate distinct directions only when exploration is needed; default to one developed direction when the user asks for a recommendation or has selected a concept.
 3. Make each direction distinct in narrative logic, tone, and visual promise.
 4. Keep concepts executable by script, storyboard, and AI image/video generation.
 
@@ -17,7 +17,7 @@ description: 生成影视化创意概念。用于TVC广告、品牌片、节目�
 | 方向 | 主题命名 | 一句话概念 | 叙事逻辑 | 视觉关键词 | 适合原因 | 风险 |
 | --- | --- | --- | --- | --- | --- | --- |
 
-Then recommend one direction and explain in 3 short points.
+Recommend the strongest direction with its visible proof, audience relevance, and execution tradeoff. Preserve a chosen concept during downstream work; do not reopen concept selection for routine revisions.
 
 ## Quality bar
 

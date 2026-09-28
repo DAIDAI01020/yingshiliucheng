@@ -35,6 +35,10 @@ Use this skill when:
 
 Do not use it for a single quick image unless the user asks for scene/style planning.
 
+## Route Authority Boundary
+
+Inherit the total route and current locks. Own scene-level visual variation, not project tier, final prompt wording, generation approval, or a new platform. Use the [stage handoff contract](../zongkong/references/stage-handoff-contract.md) to distinguish draft dependencies from production gates.
+
 ## Required Inputs
 
 Use whatever is available only for `quick/test` work.
@@ -50,16 +54,16 @@ do not allow it to masquerade as formal batch execution
 
 For formal projects, do not silently continue when required upstream decisions are missing. Mark the missing item and route back.
 
-Required formal upstream:
+Applicable formal inputs; none requires a completed downstream artifact just to draft the map:
 
 ```text
-hook_audit_packet for formal short-drama projects
+hook_audit_packet when the requested scene includes an opening/episode retention requirement
 character_continuity_packet for formal short-drama projects with recurring characters
 style-reference-director decision
 mother_library_application_packet
 reference-image-style-matcher result when reference images are used
-project-style-lock or explicit instruction to create/update one after the map
-shot-language-auditor result for short-drama or dramatic multi-shot work before final prompts
+existing project-style-lock when available; otherwise draft from reference/style decisions before the lock is created
+shot-language-auditor result for dramatic multi-shot work before final prompts, not before drafting the map
 ```
 
 | Input | Use |
@@ -77,7 +81,7 @@ If reference images are present, inherit `$reference-image-style-matcher` output
 
 `$scene-style-map-director` maps scene-level style. It does not invent project references, reference-image matches, style locks, or shot-language logic.
 
-If formal scene mapping lacks hook-audit, character-continuity, style-reference, reference-image-match, project-style-lock, or shot-language inputs, output `待补上游项` and route back to the owning skill before downstream prompt writing.
+Create the map from available script/reference decisions. Hold only final dependent prompts for actually applicable missing approvals and route them to their owners. A missing final style lock or shot audit is not a reason to refuse the scene draft those stages need.
 
 ## Scene Grouping Rule
 
@@ -128,8 +132,8 @@ For each scene that needs image prompts, hand off to `$frame-vision-director` wi
 ```text
 upstream_source
 director_contribution_packet
-hook_audit_packet source
-character_continuity_packet source
+hook_audit_packet source when the opening/episode gate applies
+character_continuity_packet source when recurring characters apply
 全片统一DNA
 mother_library_application_packet id / selected rule
 本场风格机制
@@ -152,7 +156,7 @@ For each scene that needs video prompts, hand off to `$ai-video-prompt-director`
 upstream_source
 director_contribution_packet
 首帧要求
-character_continuity_packet source
+character_continuity_packet source when recurring characters apply
 scene_continuity_lock / background_continuity_lock when this is same-scene coverage
 project-style-lock 压缩句
 mother_library_application_packet video rule
@@ -165,7 +169,7 @@ mother_library_translation 的视频安全压缩句
 自然衔接方式
 结束画面
 jimeng_seedance_motion_rule
-breath_tail_rule
+ending_behavior (legacy breath_tail_rule only when explicitly selected)
 禁止项
 visual_helpfulness_targets: what the video prompt must visibly move, preserve, or protect
 ```
@@ -216,7 +220,7 @@ Also specify what not to inherit:
 
 ## Prompt Quality Gate
 
-Do not allow a downstream image prompt unless each selected shot has:
+For final image handoff require source, scene function, relevant composition/light/material/palette/reference controls and visible risk boundaries. The following photographic detail applies only to cinematic/live-action scenes:
 
 ```text
 upstream_source + mother_library_translation + platform_language_strategy + anti_ai_realism_rule + image_tool_boundary + 景别 + 机位 + 构图 + 摄影机/影像系统 + 焦段 + 光圈/景深 + 光线 + 色彩 + 材质 + 比例 + 负面词
@@ -226,13 +230,13 @@ director_contribution_packet + visual_helpfulness_targets
 Do not allow a downstream video prompt unless it has:
 
 ```text
-upstream_source + jimeng_seedance_motion_rule + breath_tail_rule decision（每镜头轻气口；每段/场戏/情绪落点结尾重气口） + 首帧景别/机位 + 主体动作 + 镜头运动 + 焦段或镜头感 + 光线方向 + 色彩边界 + 材质/空间质感 + 结束画面
+upstream_source + source/anchor-frame requirements when applicable + complexity_mode + action/beats + camera behavior + relevant visual preservation + chosen ending_behavior + ending state
 director_contribution_packet + visual_helpfulness_targets
 ```
 
 If a formal scene map cannot identify upstream_source or mother_library_translation, route back to `$style-reference-director` / `$reference-image-style-matcher` before final prompt writing. If shot function or edit motivation is missing, route through `$shot-language-auditor`.
 
-For formal short-drama work, also route back before prompt writing when the scene map cannot identify:
+For formal short-drama work, require the following only for applicable opening, recurring-character, or same-scene coverage gates:
 
 ```text
 hook_audit_packet

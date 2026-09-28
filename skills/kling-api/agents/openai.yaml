@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kling API Credential"
+  short_description: "Securely configure and verify the official Kling API key"
+  default_prompt: "Use $kling-api to configure or verify my official Kling AI API key without writing the secret into skills, logs, prompts, manifests, or Git."

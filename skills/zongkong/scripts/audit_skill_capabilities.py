@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 
 DEFAULT_SKILLS_ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +21,73 @@ EXPECTED_PROMPT_OWNERS = {
 }
 
 
+def audit_skill_tree(skills_root: Path) -> dict:
+    """Check every installed entrypoint without loading or executing skill code."""
+    root = skills_root.resolve()
+    paths = sorted(root.glob("*/SKILL.md"))
+    failures: list[str] = []
+    links_checked = 0
+    interfaces_checked = 0
+    if not paths:
+        failures.append("No skill entrypoints found.")
+    for path in paths:
+        name = path.parent.name
+        text = path.read_text(encoding="utf-8-sig")
+        front = re.match(r"\A---\s*\n(.*?)\n---(?:\s*\n|$)", text, re.S)
+        if not front:
+            failures.append(f"{name}: missing YAML frontmatter")
+        else:
+            declared = re.search(r"(?m)^name:\s*([^\r\n]+)", front.group(1))
+            if not declared or declared.group(1).strip().strip("\"'") != name:
+                failures.append(f"{name}: frontmatter name does not match directory")
+            if not re.search(r"(?m)^description:[ \t]*\S", front.group(1)):
+                failures.append(f"{name}: missing description")
+
+        # Examples inside code fences may contain intentionally fictional paths.
+        prose: list[str] = []
+        fence = None
+        for line in text.splitlines():
+            match = re.match(r"^\s*(`{3,}|~{3,})", line)
+            if match:
+                marker = match.group(1)
+                if fence is None:
+                    fence = marker
+                elif marker[0] == fence[0] and len(marker) >= len(fence):
+                    fence = None
+                continue
+            if fence is None:
+                prose.append(line)
+        for target in re.findall(r"\]\((<[^>]+>|[^)\s]+)\)", "\n".join(prose)):
+            target = unquote(target.strip("<>").split("#", 1)[0])
+            if not target or re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", target) or target.startswith(("/", "\\")):
+                continue
+            resource = (path.parent / target).resolve()
+            if not resource.is_relative_to(root):
+                failures.append(f"{name}: linked resource escapes skills root: {target}")
+            elif not resource.exists():
+                failures.append(f"{name}: missing linked resource: {target}")
+            links_checked += 1
+
+        metadata = path.parent / "agents" / "openai.yaml"
+        if metadata.exists():
+            interfaces_checked += 1
+            data = metadata.read_text(encoding="utf-8-sig")
+            interface = re.search(r"(?m)^interface:[ \t]*\n((?:[ \t]+[^\n]*\n|\n)*)", data + "\n")
+            if re.search(r"(?m)^(?:display_name|short_description|default_prompt):", data):
+                failures.append(f"{name}: UI fields must be nested under interface")
+            if interface:
+                for field in ("display_name", "short_description", "default_prompt"):
+                    value = re.search(rf"(?m)^  {field}:([^\n]*)", interface.group(1))
+                    if value and value.group(1).strip() in ("", '""', "''", "null", "~"):
+                        failures.append(f"{name}: interface has empty {field}")
+    return {
+        "skill_count": len(paths),
+        "interfaces_checked": interfaces_checked,
+        "resource_links_checked": links_checked,
+        "failures": failures,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Audit deterministic skill capability ownership.")
     parser.add_argument("--skills-root", type=Path, default=DEFAULT_SKILLS_ROOT)
@@ -29,7 +98,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     registry = json.loads(args.registry.read_text(encoding="utf-8"))
-    failures: list[str] = []
+    tree_audit = audit_skill_tree(args.skills_root)
+    failures: list[str] = list(tree_audit["failures"])
     capabilities = registry.get("capabilities", [])
     internal = registry.get("internal_compatibility_skills", [])
     internal_names = {entry.get("skill") for entry in internal}
@@ -95,6 +165,7 @@ def main() -> int:
         "capability_count": len(capabilities),
         "internal_compatibility_count": len(internal),
         "owners": owners,
+        "skill_tree": tree_audit,
         "failures": failures,
     }
     print(json.dumps(result, ensure_ascii=False, indent=2))

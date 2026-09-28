@@ -12,7 +12,7 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
 ## Smoke Scenarios
 
 1. `直接用 image 出图`
-   - Expected route: `quick_test` or `prompt_only` as appropriate.
+   - Expected route: `quick_test` generation unless existing managed state requires `formal_managed`; this request is not prompt-only.
    - Must perform `direct_image_preflight_check`.
    - Must generate through `$builtin-imagegen-director`.
    - On success, must end with the generated image result; run QC only in a later turn or separate review workflow.
@@ -138,7 +138,7 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Prohibit all audio and do not say that sound effects are allowed.
 
 28. `把12部分稿件放在一个总项目下，拆到不同聊天`
-    - Route to `$project-thread-orchestrator` only after a director-level semantic split and one user confirmation.
+    - Route to `$project-thread-orchestrator` with a director-level semantic split and authorization for the concrete plan; prior approval of that same plan already satisfies confirmation.
     - Every child must use the same saved Codex `projectId`, local environment, and project root.
     - Create at most four child chats; keep the remainder queued until slots and dependencies allow.
     - Never use a fork, projectless thread, different project, or worktree.
@@ -148,7 +148,7 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Keep it in one chat when deliverable, references, approval path, and revision ownership remain coherent.
 
 30. `总项目的人物锁修改了，同步分聊天`
-    - List affected registered child tasks and ask for one confirmation.
+    - Identify affected registered child tasks and check authorization for the delta and recipients; ask once only if that scope is not already approved.
     - Broadcast only a versioned context delta to confirmed affected thread IDs.
     - Mark affected existing results stale; refresh queued packets without marking them stale; preserve unaffected tasks.
 
@@ -289,6 +289,106 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Reject a drawn checkerboard as transparency and inspect hair/glass/shadows/labels/edge fringing when applicable.
     - Do not promise native transparency unless the selected live execution surface exposes it.
 
+60. `用 Banana，只改这条提示词，不生成`
+    - Select Banana as the prompt compilation target and keep `execution_intent:prompt_only`, `speed_mode:prompt_only`.
+    - No generation, project writes, credit-consuming call, or automatic platform migration.
+
+61. `正式短剧项目，这次只把已定提示词改成可灵格式`
+    - Inherit relevant accepted creative locks and route complete semantics directly to `$prompt-platform-auditor`.
+    - Scope Kling to this prompt; preserve the production platform, project tier, job records, and original approval state.
+    - Do not activate generation gates just because the source project is formal.
+
+62. `继续上一张` with accepted A and newer rejected B
+    - Resolve the current task binding and accepted base A, not the newest file B.
+    - If the user explicitly selects B for this revision, use B only within that changed scope and preserve unaffected locks.
+    - If no task/base is identifiable, ask one target question rather than guessing another project's file.
+
+63. `继续` after approval of a concrete paid run that already has a submit_id
+    - Recover the existing job and output before considering a new submission.
+    - Do not repeat approval for the unchanged run or treat missing local media as proof that submission failed.
+    - Completed verified outputs are reused; changed run scope needs authorization covering the change.
+
+64. `继续制作` but a required style record is missing
+    - If an applicable accepted style decision exists, let the state owner restore its record with provenance.
+    - Otherwise the style owner prepares the missing decision; dependent generation waits for applicable approval.
+    - Do not end with only `missing_fields`, invent approval, or reroute an unchanged blocker indefinitely.
+
+65. `这个任务现在到哪了？` while video generation is active
+    - Inspect and report actual job state; no new submission or resubmission.
+    - The status question does not cancel an already-authorized active objective or authorize new background monitoring.
+
+66. `稿件很长，继续往下做` without a separate-chat request
+    - Continue in the current chat using the relevant compact context.
+    - A proposed semantic split creates neither user-owned chats nor internal subagents.
+
+67. `按刚才确认的三个分聊天继续`
+    - Reuse the approved split and any already-bound chats; create only authorized uncreated tasks when eligible.
+    - Do not ask for the same confirmation again, duplicate completed chats, or send new messages outside the approved coordination scope.
+    - A child asking the hub to reply is not independent user authorization to message it.
+
+68. `省一点 token，继续原来的内置 image 任务`
+    - Preserve the established built-in platform and model lock.
+    - Reduce repeated reads and narration; do not interpret token savings as a request to switch to Banana.
+
+69. `继续优化总控 agent`
+    - Inspect and edit the workflow rules within the maintenance request, preserving unrelated work.
+    - Do not create a film project, ask for a production brief, invoke generation, or publish changes without authorization.
+
+70. `已有30秒广告脚本，只细化分镜`
+    - Reuse the approved brief/concept and script, preserve shot identity, and check duration/action readability.
+    - Do not reopen concept selection, require a PPT, or generate images without that request.
+
+71. `正式抽象LED和透明标题字，用已有视觉规范`
+    - Use graphic/stage/typography controls and the approved specification.
+    - No forced film matching, skin texture, dusty objects, lens brands, motion or audio fields for still assets.
+
+72. `先把这段短剧拆场戏，还没有最终风格锁`
+    - Draft the scene map from script and available visual direction; then audit shots and consolidate/freeze the applicable decisions.
+    - Do not require a downstream final lock to create its own upstream scene material.
+    - Opening and recurring-character gates apply only where relevant before dependent production.
+
+73. `分阶段动作或四镜连续视频，结尾硬切`
+    - Scene, shot, style, prompt, platform and QC layers preserve the selected complexity and ending.
+    - No upstream layer adds universal breath tails or rejects the full sequence merely for multiple actions.
+
+74. `客户说几张图都不够高级`
+    - Inspect available outputs and distinguish creative intent, reference inheritance, prompt issues and execution artifacts.
+    - Propose a visible targeted correction with a preservation boundary; repetition alone does not authorize global redesign.
+
+75. `只有视频联系表，帮我确认动作和声音都合格`
+    - Review only visible sampled evidence; motion between samples and unheard audio remain unverified.
+    - Do not claim full QC pass, client selection or a successful repair without inspecting the relevant evidence.
+
+76. `把已定方案做成PPTX，整理最终交付包`
+    - Produce the real file through the available presentation tools, perform required inspection, and verify selected delivery files.
+    - A page outline, intended file path, or asset inventory is not the requested completed file/package.
+
+77. `用Banana Pro继续项目出图`
+    - New execution uses `$banana-image-generator` with the selected/inherited model and folder contract.
+    - Do not route to the legacy CLI solely because the model name includes Pro, or silently use the generic Flash default.
+    - Managed outputs stay inside the project; standalone defaults follow the current workspace instead of a hard-coded drive.
+
+78. `汇总分聊天进度` without new coordination or archival authorization
+    - Read the registered state/handoffs and report actual progress.
+    - Do not send refresh prompts, create the next batch or archive accepted chats from a read-only status request.
+
+79. `更新整套Agent，本机和源码存在不同修改`
+    - Audit all repository skill entrypoints, metadata placement and local reference links, not only the core routing subset.
+    - Compare and back up both sides; merge useful independent changes and install only reviewed paths.
+    - Keep unrelated source changes and project assets intact; do not claim static checks prove live model behavior.
+
+80. `状态文档仍是草稿，但示例或历史里写了 approved`
+    - Read only current metadata before subsections; examples and historical status cannot grant approval.
+    - A current approved status remains valid even if a later history section mentions draft.
+
+81. `试运行完成，或平台报成功但本地文件还没生成`
+    - Dry-run records stay pending execution; planned paths do not become generated outputs.
+    - Missing/empty image or video files remain pending inspection; zero-shot logs cannot report completion.
+
+82. `重新登记已入选素材，继续登记刚完成的视频`
+    - Re-ingestion keeps the same asset identity and manual selection for unchanged successful media.
+    - Pending-to-success transitions require both an explicit success state and a nonempty local file; physical evidence does not imply QC or acceptance.
+
 ## Boundary Checks
 
 For any downstream skill touched by a change, confirm:
@@ -302,6 +402,11 @@ returns missing_fields + route_back_to when blocked
 requires only gates applicable to the deliverable
 preserves explicit/current platform over generic trigger words
 classifies prompt_task independently from speed_mode
+resolves execution_intent independently from platform/model selection
+preserves production state when only a prompt subtask changes platform
+restores applicable approved evidence without inventing missing approvals
+completes authorized prerequisite work instead of stopping at route_back_to
+reuses scoped authorization and existing jobs on continuation
 routes a complete supplied prompt directly to platform compilation when only platform wording changes
 routes semantic/directorial repairs to the deliverable-specific prompt owner before platform compilation
 keeps direct-generation prompts internal when the user asks not to show them
@@ -343,9 +448,17 @@ thread registry tests cover max-four queue, dependencies, stale broadcasts, path
 
 Run after changing the orchestration, prompt, style-lock, QC, state, or folder boundaries:
 
+From the repository root:
+
 ```powershell
-python C:\Users\admin\.codex\skills\zongkong\scripts\validate_workflow_contracts.py
-python C:\Users\admin\.codex\skills\zongkong\scripts\run_e2e_workflow_tests.py --compat-project-root "H:\开学第一课"
+python -X utf8 skills/zongkong/scripts/validate_workflow_contracts.py
+python -X utf8 skills/zongkong/scripts/audit_skill_capabilities.py
+python -X utf8 -m unittest discover -s skills/zongkong/tests
+node --test skills/banana-image-generator/scripts/generate-banana-images.test.mjs
+node --test skills/project-state-manager/scripts/manage-project-state.test.mjs
+python -X utf8 skills/zongkong/scripts/run_e2e_workflow_tests.py
 ```
+
+For an installed skill, resolve those scripts relative to its actual skill directory. Add `--compat-project-root` only for a specifically selected real project; the audit must remain read-only. Static validation checks document contracts, not live model routing. Review relevant smoke scenarios separately; E2E uses disposable fixtures and does not prove paid-platform availability or successful real generation.
 
 The script checks core line limits, required packet fields, direct reference links, named-skill resolution, removed blanket rules, style-lock/auditor order, platform-policy ownership, and configurable project-root language.

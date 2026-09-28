@@ -16,7 +16,6 @@ const stateManager = path.join(__dirname, "..", "..", "project-state-manager", "
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "google/gemini-3.1-flash-image-preview";
-const DEFAULT_BASE_DIR = "H:\\yingshi\\outputs\\banana-images";
 const VALID_RATIOS = new Set(["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9", "1:4", "4:1", "1:8", "8:1"]);
 const VALID_IMAGE_SIZES = new Set(["0.5K", "1K", "2K", "4K"]);
 
@@ -339,7 +338,14 @@ async function main() {
   const model = input.model || process.env.BANANA_MODEL || DEFAULT_MODEL;
   const projectName = safeName(input.projectName || input["项目名"], "banana-image-project");
   const projectRoot = args.projectRoot || input.projectRoot ? path.resolve(args.projectRoot || input.projectRoot) : "";
-  const outputDir = args.outputDir || input.outputDir || path.join(DEFAULT_BASE_DIR, projectName, timestamp());
+  const baseDir = projectRoot ? path.join(projectRoot, "generation-runs", "banana") : path.join(process.cwd(), "outputs", "banana-images");
+  const outputDir = path.resolve(args.outputDir || input.outputDir || path.join(baseDir, projectName, timestamp()));
+  if (projectRoot) {
+    const relativeOutput = path.relative(projectRoot, outputDir);
+    if (relativeOutput === ".." || relativeOutput.startsWith(`..${path.sep}`) || path.isAbsolute(relativeOutput)) {
+      throw new Error("Managed Banana output directory must remain inside projectRoot.");
+    }
+  }
   const imageDir = path.join(outputDir, "images");
   const promptDir = path.join(outputDir, "prompts");
   const logDir = path.join(outputDir, "logs");

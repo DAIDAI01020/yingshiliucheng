@@ -107,7 +107,7 @@ def approve_short_drama_gate(project_root: Path) -> None:
 
 
 def run_execution_extension_e2e(root: Path, project_root: Path, node: str, image_job: Path, prompt_path: Path) -> dict:
-    direct_banana_dir = root / "banana-direct-dry-run"
+    direct_banana_dir = project_root / "generation-runs" / "banana-direct-dry-run"
     banana = run([
         node, str(BANANA_GENERATOR), "--input", str(image_job),
         "--project-root", str(project_root), "--output-dir", str(direct_banana_dir), "--dry-run",

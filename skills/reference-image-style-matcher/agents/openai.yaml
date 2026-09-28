@@ -1,3 +1,4 @@
-display_name: 参考图风格匹配
-short_description: 分析参考图并反向匹配影视/TVC母库风格。
-default_prompt: 分析用户提供的参考图，拆解景别、构图、镜头、光线、色彩、材质和情绪，从母库中匹配最接近的影视/TVC/摄影参考，并输出给后续提示词使用的转译规则。
+interface:
+  display_name: "参考图风格匹配"
+  short_description: "观察参考图并区分身份结构与审美角色，按需要匹配视觉机制"
+  default_prompt: "使用 $reference-image-style-matcher 先查看实际参考图，明确继承与不继承项；仅在需要审美匹配时调用母库，不从文件名猜图。"

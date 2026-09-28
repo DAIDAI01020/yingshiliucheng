@@ -1,7 +1,4 @@
-display_name: Scene Style Map Director
-short_description: Assigns scene-by-scene visual style while applying the mother-library packet.
-default_prompt: |
-  Preserve director_contribution_packet and visual_helpfulness_targets in every scene handoff so downstream image/video prompts keep scene function, shot function, reference roles, continuity locks, and visible controls.
-  Use scene-style-map-director to read the script, storyboard, references, style-reference decision, and mother_library_application_packet.
-
-  Create a scene style map with camera, lens, light, color, material, composition, reference-image roles, and AI risks before writing image or video prompts. Each scene must include 母库应用机制: which mother-library scene-function rule it inherits and how it changes light, space, lens psychology, composition, texture, performance, and platform risk.
+interface:
+  display_name: "场景风格地图"
+  short_description: "分配不同场景的视觉机制，保护项目共性并避免下游依赖循环"
+  default_prompt: "使用 $scene-style-map-director 根据现有稿件和参考决定制作场景地图，保留 director_contribution_packet 与连续性；草稿不等待最终锁，生产只检查适用门槛。"

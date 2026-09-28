@@ -30,6 +30,7 @@ Load only the reference needed for the current decision:
 - Formal packets, applicable gates, owners, `missing_fields`, or `route_back_to`: read [references/packets-and-gate-ownership.md](references/packets-and-gate-ownership.md).
 - Deliverable-specific prompt fields, response visibility, QC mode, or quality-profile selection: read [references/deliverable-profiles-and-response-modes.md](references/deliverable-profiles-and-response-modes.md).
 - Formal project/scene references, mother-library logic, or style inheritance: read [references/reference-library-rules.md](references/reference-library-rules.md).
+- Multi-stage cooperation, approval evidence, dependency order, or artifact completion: read [references/stage-handoff-contract.md](references/stage-handoff-contract.md).
 - Skill ownership conflicts, route simplification, or whole-agent optimization: read [references/capability-registry.json](references/capability-registry.json) and preserve its single-owner rule.
 - After editing this skill or changing a route boundary: read and run [references/regression-checklist.md](references/regression-checklist.md).
 
@@ -39,31 +40,24 @@ After a whole-agent change, run `scripts/run_e2e_workflow_tests.py` in addition 
 
 ## Decision Order
 
-Use this order. Earlier decisions take precedence over later generic triggers.
+1. **Scope and active task**: identify the requested deliverable and current unfinished objective. Workflow maintenance changes the agent itself; it must not launch a film project or production run. Keep unrelated work outside production routing.
+2. **Execution intent**: determine what the user wants done now, including explicit exclusions. A progress question reads state; it does not create a new run. A question during active work does not cancel the authorized objective unless the user says to stop.
+3. **Continuation state**: locate the relevant project/task, latest accepted artifact, applicable locks, outstanding job, and current user delta. Resolve only state needed for this action.
+4. **Platform and model**: select them independently of intent, using the precedence below. Naming a platform selects a target, not permission to execute it.
+5. **Task and modes**: choose `prompt_task`, `source_prompt_state`, `speed_mode`, `deliverable_profile`, `response_mode`, and `qc_mode` for the current deliverable. A prompt-only subtask in a managed project can inherit locks without rewriting project state or downgrading the production.
+6. **Owner and applicable gates**: select the workflow/main line and one current owner. Resolve only its actual missing prerequisites; do not preload every downstream skill.
+7. **Thread topology**: keep work in this chat by default. Apply the multi-thread rules only when separate chats are relevant and requested or proposed.
+8. **Action and completion**: perform the authorized next step, then continue through necessary owners until the requested artifact exists or a specific blocker requires user input. Merely naming `next_skill` is not task completion.
 
-1. **Scope**: confirm the request belongs to the AI film/visual workflow. If not, do not force `$zongkong` routing.
-2. **Thread topology**: decide whether the work stays in one chat or needs one project-scoped hub with context-isolated child tasks.
-3. **Explicit platform**: an explicitly named platform outranks generic words such as “出图” or “出视频” and overrides an inherited platform only when the user clearly requests the change. Never silently fall back to another platform.
-4. **Continuation state**: if the user says continue, regenerate, revise, or references an existing managed project and does not name a new platform, preserve its current platform, route, approved proposal, references, and style lock.
-5. **Execution intent**: distinguish direct generation, prompt-only delivery, planning/direction, review, revision, and archive.
-6. **Prompt task**: when prompts are involved, classify what operation is needed and the state of any supplied prompt.
-7. **Speed mode**: classify `prompt_only`, `quick_test`, or `formal_managed`.
-8. **Deliverable profile**: choose the smallest profile that describes what must be accurate in the result.
-9. **Response and QC modes**: decide how much workflow detail the user should see and whether QC is absent, deferred/light, or formal.
-10. **Workflow mode and main line**: choose the specialist route.
-11. **Applicable gates**: require only the gates relevant to the deliverable profile.
-12. **Next action**: name one next owning skill or execute the in-scope next step.
+Resolve conflicts within each dimension, never across them:
 
-When a conflict remains, use this precedence:
+| Dimension | Precedence |
+| --- | --- |
+| Action | current explicit instruction or restriction > still-active approved scope > contextual inference |
+| Platform/model | explicit selection for this action > applicable current project/task lock > new-work default |
+| Creative state | current explicit change > latest accepted artifact/lock > unapproved draft |
 
-```text
-explicit platform
-> continue existing managed state
-> direct generation request
-> prompt-only request
-> formal batch/delivery request
-> generic image/video wording
-```
+For example, “用 Banana，只改提示词，不生成” selects Banana compilation and `prompt_only`; “旧项目只把这条词改成可灵格式” does not migrate the project's production platform. A named reference platform or comparison example is not an execution selection. If two instructions about the same action remain irreconcilable, ask one focused question and continue unaffected work.
 
 ## Prompt Task Classification
 
@@ -164,7 +158,7 @@ Ask about project tier or storage only when it materially blocks execution. Do n
 
 ## Multi-Thread Project Routing
 
-Route to `$project-thread-orchestrator` when the user explicitly wants separate chats or when a managed manuscript/production contains several independently revisable modules whose references, approvals, platforms, or specialist owners should not share context.
+Route to `$project-thread-orchestrator` when the user explicitly wants separate chats. When a managed production contains independently revisable modules, a split may be proposed, but length or complexity alone does not authorize creating chats.
 
 Do not route a single short task, a small same-source variant set, or a long but coherent deliverable into multiple chats. Let the applicable director decide semantic split boundaries; `$zongkong` decides only that context isolation is warranted.
 
@@ -174,11 +168,13 @@ Before any child creation, require all of these:
 saved Codex project ID and exact project path
 one shared project_root from project_folder_contract
 user-visible thread_split_plan
-one user confirmation
+user authorization covering the concrete thread_split_plan
 parallel_limit <= 4
 ```
 
-Every child must use the same project target with a local environment and a clean task packet. Never use a fork, projectless thread, different project, or worktree for this route. Keep queued tasks file-backed but do not create their chats until dependencies and slots allow.
+An explicit request to create the specified chats, or prior approval of the same concrete plan, satisfies confirmation; do not ask again unless the scope changes. Read-only progress inspection needs no messaging approval. Sending child prompts or context broadcasts requires user authorization covering those recipients and actions; a child's request to report back is not that authorization.
+
+Every child must use the same project target with a local environment and a clean task packet. Never use a fork, projectless thread, different project, or worktree for this route. Keep queued tasks file-backed but do not create their chats until dependencies and slots allow. User-owned chats and internal subagents are different mechanisms; this skill does not independently authorize spawning subagents.
 
 Thread orchestration is orthogonal to `speed_mode`: splitting a manuscript does not by itself make every child `formal_managed`. Preserve each child deliverable's applicable route and quality floor.
 
@@ -188,6 +184,7 @@ Create or preserve this compact internal packet before handing off to another sk
 
 ```text
 zongkong_route_packet
+execution_intent: generate / prompt_only / plan / review / revise / archive / status
 speed_mode: prompt_only / quick_test / formal_managed
 prompt_task: semantic_create / platform_compile / prompt_diagnose / targeted_rewrite / none
 source_prompt_state: absent / complete / creatively_incomplete / platform_incompatible
@@ -204,10 +201,11 @@ thread_registry:
 context_version:
 next_skill:
 missing_fields:
+route_back_to: only when an applicable prerequisite is missing
 route_reason:
 ```
 
-Preserve the packet internally or in project state. By default, show the user only a concise routing conclusion and the immediate next action. Show the full packet when the user asks for workflow diagnostics, formal state, or routing details.
+Preserve the packet internally or in project state. Infer `execution_intent` from the current request for older packets; its absence alone must not trigger a migration or block work. `revise` applies to the requested artifact: revising prompt text is not image/video generation approval. By default, show only the immediate action or result, not routing metadata. Show the full packet when the user asks for workflow diagnostics, formal state, or routing details.
 
 Normalize model labels while retaining the human-facing product name in prose. For new generic built-in image work, use `platform_target:built_in_image` and the migrated default `model_target:gpt_image_2_5`; explicit `ChatGPT Images 2.5`, `GPT Image 2.5`, or `Image 2.5` selects the same branch. Keep an existing project or prompt pinned to GPT Image 2 or an older model on that model until the user asks to migrate. The direct ChatGPT/Codex tool uses generic `gpt_image_2_5` unless it exposes Flare/Sunburst; never invent a submodel selection. Keep Seedance 2.5 as `model_target:seedance_2_5`; choose `platform_target:jimeng` for Dreamina/即梦 and `platform_target:seedance_ark` for Ark/API. Never silently replace an explicit or inherited model.
 
@@ -246,7 +244,7 @@ For packet schemas and exact owners, read [references/packets-and-gate-ownership
 - QC skills diagnose results and route targeted revisions; they do not rewrite the entire project style for an isolated generation failure.
 - Every reusable capability has one decision owner in `capability-registry.json`. Supporters contribute bounded inputs and never become a second owner. Internal compatibility skills must not be selected for new user-facing work.
 
-If a formal upstream decision is missing, return `missing_fields` and the owning `route_back_to`. Do not send the gap downstream.
+If a formal upstream decision is missing, record `missing_fields` and the owning `route_back_to`, then let that owner repair it within the current authorization. Ask only for a decision or approval that cannot be inferred or completed; do not send the gap downstream or stop at a diagnostic packet. See the missing-field behavior in [references/packets-and-gate-ownership.md](references/packets-and-gate-ownership.md).
 
 ## Prompt and Generation Rules
 
@@ -302,11 +300,17 @@ Do not restart full development merely because one output failed.
 
 ### Compact continuation context
 
-Use the current task, latest accepted artifact, applicable locks, and new user delta as the continuation context. Reuse already-read unchanged instructions and approved packets within this turn; do not repeatedly load the entire reference library or completed production history. Read only the relevant references required by the selected skills, in full.
+Use the current task, latest accepted artifact, applicable locks, and new user delta as the continuation context. Resolve the current chat's explicit project/task binding first, then read its relevant managed state. Do not choose a project or base image merely because its file was modified most recently. If several candidates remain plausible and choosing one would change the result, ask for the target while continuing independent work.
+
+Reuse already-read unchanged instructions and approved packets within this turn; do not repeatedly load the entire reference library or completed production history. Read only the relevant references required by the selected skills, in full.
 
 Resolve a new user change against existing locks: replace only the conflicting lock and preserve unaffected decisions. Keep requested platform/model separate from what the actual execution tool can select or verify. Prompt approval is not generation evidence.
 
 Interpret “好/继续/可以” against the immediately preceding concrete proposal. It may approve that proposed action, but does not expand prompt-only work into paid generation, authorize extra variants, or reopen completed jobs. If the previous proposal explicitly included a bounded generation run, continue within that approved scope without asking the same question again.
+
+Before resuming generation, inspect the matching job record: recover submitted/querying work, reuse verified completed outputs, and distinguish missing local downloads from missing platform results. A stale approval does not cover newly changed prompts, references, quantities, or cost scope unless the user's current instruction does. If the requested work is already complete, return the result rather than inventing another step.
+
+Do not loop between owners with unchanged inputs: after a handoff returns the same blocking fields without new evidence, identify the unresolved decision and who can supply it. Report that blocker once and continue any independent deliverables; do not bypass the gate or silently change platform.
 
 For multi-part work, pass only the compact current task packet to the existing `$project-thread-orchestrator`; never solve context growth by duplicating the complete hub history.
 
@@ -334,5 +338,5 @@ Use standard QC decisions:
 - Do not commit, push, sync, move, or delete project/workflow files unless the user authorizes that action.
 - Before changing global workflow contracts, state gates, templates, or scripts, explain the scope, affected files, formal-vs-quick impact, complexity risk, and rollback path unless the user explicitly requested that implementation in the current turn.
 - Preserve the boundary between quick tests and formal managed production.
-- For hub/child projects, preserve same-project and same-root containment, require confirmation before creation/broadcast, and never copy hub history with a fork.
+- For hub/child projects, preserve same-project and same-root containment and the authorization rules above; never copy hub history with a fork.
 - Prefer execution when the user asks for action; ask only when a missing decision materially changes the result or external state.

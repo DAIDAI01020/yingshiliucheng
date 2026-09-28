@@ -1,6 +1,6 @@
 interface:
-  display_name: "Style Bible Director"
-  short_description: "Maintain visual continuity and unified style rules across shots"
-  default_prompt: "Use $style-bible-director to create or update the unified visual style bible for this project. Preserve mother_library_application_packet, director_contribution_packet, and visual_helpfulness_targets, then convert them into fixed style-lock variables for downstream prompt directors."
+  display_name: "风格圣经导演"
+  short_description: "整合适用视觉规则与连续性，区分草稿整合和正式执行变量冻结"
+  default_prompt: "使用 $style-bible-director 整合已选视觉决定和适用场景变化，保留可见控制及来源，将获批规则交给 project-style-lock，不代设动作、气口或平台默认值。"
 policy:
   allow_implicit_invocation: true

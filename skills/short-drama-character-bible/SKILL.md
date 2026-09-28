@@ -31,7 +31,7 @@ Use before generating multiple scenes with recurring characters, or when the use
 For managed formal short-drama projects, output or update `references/character-continuity.md` with:
 
 ```text
-status: approved / passed
+status: draft / approved / passed
 character_continuity_packet
 character_id
 name
@@ -69,6 +69,10 @@ must_not_be_overwritten_by: style reference, camera movement, platform beautific
 
 | 角色A | 角色B | 关系 | 冲突 | 情绪状态 |
 | --- | --- | --- | --- | --- |
+
+## Approval Evidence
+
+Keep proposed material `draft`. Use `passed` only for a completed applicable review and `approved` only for an actual accepted decision; record its source. File creation alone does not pass a production gate. Preserve existing valid approvals and stable character/episode IDs.
 
 ## Rules
 

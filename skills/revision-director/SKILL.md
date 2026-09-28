@@ -8,15 +8,17 @@ description: Revision director for film visual proposals after client feedback o
 ## Process
 
 1. Classify feedback: strategy, information, tone, script, visual, storyboard, frame prompt, video prompt, reference image, unified style, or revision tracking.
-2. Identify the affected scope: whole proposal, PPT page, Sheet 2 storyboard, Sheet 3 image priority, Sheet 4 image prompts, Sheet 5 video prompts, Sheet 6 feedback log, Sheet 7 image generation record.
+2. Identify the exact source artifact/version and affected scope using the existing project structure. Sheet 2-7 labels below are examples for projects already using that workbook, not required new files.
 3. Preserve approved parts and only change affected sections.
 4. If the user adds a shot, inherit the current unified visual style package unless they explicitly change the overall style.
 5. If the user modifies one prompt, change only that shot's subject, action, framing, reference constraint, negative prompt, or video motion unless they explicitly request a style change.
 6. If the user changes the whole style, update the unified style package first, then regenerate all affected S/A image prompts and relevant video prompts.
-7. Produce a revision summary before revised content.
+7. Deliver revised content directly for prompt-only work; include a brief change summary only when useful or requested.
 8. Mark unresolved conflicts as `待确认`.
 
 If feedback is vague client language such as `不够高级`, `太AI`, `不够大气`, `不像品牌`, or `画面太乱`, use the interpretation from `$client-feedback-interpreter` before editing sheets.
+
+Use the [stage handoff contract](../zongkong/references/stage-handoff-contract.md). Preserve stable IDs and earlier versions; mark only affected dependencies for revision. A suggested regeneration does not submit a paid job. Use approved source constraints for video edits/extensions; do not apply an impossible ratio/duration change.
 
 ## Revision types
 
@@ -53,7 +55,7 @@ When the user asks to add a shot:
 
 When the user asks to modify an existing image or video prompt:
 
-1. Output `修改前 / 修改后 / 修改原因` when previous content is available.
+1. Return the revised artifact; show `修改前 / 修改后 / 修改原因` when comparison is requested or materially helps review.
 2. Keep the unified style package unless the user says the overall style should change.
 3. For image prompts, preserve detailed style expansion and update only the requested shot detail.
 4. For video prompts, preserve first-frame logic and update only motion, action, duration, ratio, or forbidden items.
@@ -69,7 +71,7 @@ When feedback is about generated images, such as `这张不行`, `S03换构图`,
 
 1. Classify the issue as prompt issue, reference-image issue, model generation issue, post-production issue, or unified-style issue.
 2. If only one shot is affected, change only that shot and recommend regenerating that shot.
-3. If multiple S/A shots share the same style drift, update the unified style package before regeneration.
+3. If multiple shots share a failure, inspect cause first. Propose a style-package change only when evidence implicates the upstream style decision; keep failed inheritance or execution issues local.
 4. Record the affected image version and the new target version.
 5. Update `Sheet 6 客户反馈与修改` and `Sheet 7 出图生成记录`.
 

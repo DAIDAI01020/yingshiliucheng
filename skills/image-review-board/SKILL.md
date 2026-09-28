@@ -54,10 +54,10 @@ For each image:
 ## Rules
 
 - Do not rewrite prompts while building the board.
-- If a prompt file exists, use it as the source of truth.
+- Use the immutable prompt/request snapshot associated with this exact asset version. A same-named prompt edited later is not proof of what generated the image; show later revisions separately.
 - If a prompt file is missing, fall back to `fullPrompt`, `negativePrompt`, and `finalPrompt` in `generation-log.json`.
-- If an image is missing, still show the prompt and mark image as `图片缺失`.
-- Keep one board per generation task folder.
+- If an image is missing, still show the prompt and mark image as `图片缺失`. If the original prompt snapshot is missing, mark it unknown rather than reverse-inventing it from the image.
+- Keep one board per generation task folder. A board groups evidence; it does not itself approve images or select delivery versions.
 - Use the shot/version/tool id as the modification handle, such as `S01_banana_v01`.
 - In managed projects, the caller should write the board path back to `asset-index.json` through `$project-state-manager`.
 

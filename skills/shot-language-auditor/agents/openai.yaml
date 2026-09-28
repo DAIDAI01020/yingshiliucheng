@@ -1,3 +1,4 @@
-display_name: 镜头语言审核
-short_description: 审核分镜景别、机位、焦段和剪辑动机是否成立。
-default_prompt: 审核这组分镜或视频镜头是否有电影语言，检查景别递进、机位焦段、剪辑动机、空间关系和竖屏可读性，并给出修正后的镜头流。必须输出 director_contribution_packet 和 visual_helpfulness_targets，确保提示词导演保留镜头功能、剪辑动机、连续性锁和结束画面。
+interface:
+  display_name: "镜头语言审核"
+  short_description: "检查镜头功能轴线视线与剪辑动机，按动作结构给出可执行修正"
+  default_prompt: "使用 $shot-language-auditor 审核镜头功能、剪辑动机与连续性，按 single_beat、staged_action 或 multi_shot 检查时长和结尾，保留 director_contribution_packet。"

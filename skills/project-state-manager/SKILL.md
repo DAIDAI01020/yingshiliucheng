@@ -27,6 +27,15 @@ Keep the workflow state in one project-level source of truth. This skill manages
 
 For formal projects, `$project-state-manager` is the state and traceability layer. It does not make creative decisions, write prompts, audit prompts, or choose references. It stores or locates the approved outputs from the owning skills.
 
+Follow the shared [stage handoff contract](../zongkong/references/stage-handoff-contract.md). A draft, audited prompt, user approval, generated file, QC pass and client selection are distinct evidence states.
+
+- Keep Markdown approval metadata near the document title, before the first subsection. The first current `status:` is authoritative; fenced examples and historical sections cannot grant approval.
+- A dry-run records a plan and stays pending execution. Keep intended paths in `plannedFilePath`; never report a dry-run as generated media or a completed generation run.
+- Image/video ingestion requires explicit success plus a nonempty local file before marking generated/candidate. Missing outputs stay `output_missing` / 待检查; pending tasks stay pending. Resolve relative output paths against the source log or run manifest.
+- File existence is only physical evidence, not decoding, creative QC or acceptance. Preserve manual selection and original creation time when re-ingesting the same successful asset.
+
+Verify state behavior with `node --test scripts/manage-project-state.test.mjs` from this skill directory. Tests use temporary projects and do not submit generation jobs.
+
 ## Route Authority Boundary
 
 Inherit `$zongkong` route decisions when a `zongkong_route_packet` is present.

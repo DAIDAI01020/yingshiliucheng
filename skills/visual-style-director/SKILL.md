@@ -5,6 +5,10 @@ description: Define cinematic visual style for TVC ads, brand films, TV program 
 
 # Visual Style Director
 
+## Scope
+
+Use for initial visual-direction recommendations when no approved system exists. `$style-reference-director` owns reference selection, `$style-bible-director` consolidates continuity, and `$project-style-lock` freezes approved variables. Do not restart these stages or overwrite their decisions. Select photographic, graphic, product, typography, or stage controls according to the deliverable; camera and realism fields are conditional.
+
 ## Process
 
 1. Read the script, storyboard, or brief and infer its natural visual temperament.

@@ -55,6 +55,10 @@ Check against the preflight intent, prompt, inherited style/source, subject cons
 
 Use `deliverable_profile` to select checks. Do not judge a graphic/abstract, typography, product, LED/stage, or local-edit asset against unrelated live-action camera/skin rules.
 
+## Inspection Evidence
+
+Open the actual image and relevant references before semantic judgments. If unavailable, provide a limited technical or user-reported diagnosis and mark visual QC unverified. Record inspected asset/version and unresolved checks. Missing formal context limits approval but does not prevent reporting visible defects. QC usability is not client selection.
+
 ## QC Decisions
 
 | 判断 | 含义 | 下一步 |
@@ -72,10 +76,10 @@ QC must classify the root cause before recommending regeneration:
 | 问题归因 | 含义 | 回到哪里 |
 | --- | --- | --- |
 | 生成偶发问题 | 手、脸、局部瑕疵、轻微结构错误，提示词方向正确 | 定向重出或负面词增强 |
-| 提示词表达问题 | 主体、构图、材质、光线写得不够准 | `$frame-vision-director` |
+| 提示词表达问题 | 主体、构图、材质、光线或文字语义不准 | 按交付物交给 `$frame-vision-director` / `$kv-image-prompt-director` / `$scene-board-image-prompter` / `$type-png-director` |
 | 平台适配问题 | Banana/MJ/imagegen/即梦表现偏平台默认味或执行不稳 | `$prompt-platform-auditor` |
 | 背景连续性问题 | 同场戏多张图的房间、墙面、门窗、灯位、桌椅、道具、A/B背景侧或轴线漂移 | `$short-drama-scene-director` / `$shot-language-auditor` / `$frame-vision-director` |
-| 风格锁问题 | 多张图同类漂移，说明全局风格变量不够明确 | `$project-style-lock` / `$style-bible-director` |
+| 风格锁问题 | 证据表明已批准的全局规则有误或互相矛盾，不能只凭重复瑕疵判断 | `$project-style-lock` / `$style-bible-director` |
 | 前置导演判断问题 | 镜头本身没叙事功能、场戏风格错、参考图匹配错 | `$scene-style-map-director` / `$shot-language-auditor` / `$style-reference-director` |
 
 Only `风格锁问题` and `前置导演判断问题` justify upstream redesign. Ordinary generation failures must not trigger full style rewrites.
@@ -156,7 +160,7 @@ repeat_count:
 promotion_target: none / prompt risk profile / style lock / continuity lock
 ```
 
-Do not promote a one-off generation artifact into a global rule. Promote only when the upstream decision is wrong, the same relevant failure repeats across at least two outputs, or the user approves the new rule.
+Record repeated relevant failures as linked evidence. Propose a rule change only when the diagnosed cause supports it; applying a global lock change requires authorization for that scope. Record successful_fix only after a changed result has actually been inspected.
 
 ### 出图质检表
 
@@ -185,7 +189,7 @@ If regeneration is needed, output only affected rows:
 - If only one shot fails, do not change the full style bible.
 - If multiple S/A shots drift in the same way, recommend updating the style bible.
 - If same-scene backgrounds drift but the style is correct, do not change the style bible; repair the background_continuity_lock prompt inheritance or regenerate affected shots with the continuity board as reference.
-- If text/logo is wrong, first recommend removing generated text or reserving blank title space.
+- If text/logo is wrong, preserve the requested exact-copy and brand intent. Route text assets to the typography owner or propose a layout correction; do not silently remove required text as a shortcut.
 - If face/hand/product structure fails, simplify the action and strengthen reference constraints.
 - If the image is for video first frame, judge clean motion potential, not only still-frame beauty.
 - QC is not a new creative direction step. Do not recommend broad upstream changes unless the root cause is style-lock or director-logic failure.

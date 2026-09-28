@@ -63,7 +63,7 @@ Show this section only when `$project-thread-orchestrator` is active.
 | 任务ID | 分聊天 | 负责人Skill | 依赖 | 上下文版本 | 当前状态 | 等待原因/交付摘要 |
 | --- | --- | --- | --- | --- | --- | --- |
 
-Treat `active`, `waiting_user`, `blocked`, and `ready_for_review` as occupied concurrency slots. Show at most four occupied tasks and list the rest as `queued`; do not imply that queued tasks already have chats.
+Treat `active`, `waiting_user`, `blocked`, and `ready_for_review` as occupied concurrency slots. Enforce the four-slot limit when scheduling; if persisted state exceeds it, report the inconsistency instead of relabeling real active tasks as queued. Do not imply that queued tasks already have chats.
 
 ### 待确认清单
 
@@ -72,13 +72,13 @@ Treat `active`, `waiting_user`, `blocked`, and `ready_for_review` as occupied co
 
 ### 下一步建议
 
-Give 3-5 concrete next actions. Prefer actions that unblock the workflow.
+Give the next actionable priority and its dependency; use a longer list only when it helps coordinate multiple deliverables. A progress-only request must not start work, send messages or mutate state.
 
 ## Rules
 
-- If the user asks what to do next, produce the project board first.
+- For a simple status or next-step question, answer concisely from the relevant records. Build the full board only when requested or needed for multi-task coordination.
 - If image generation is involved, separate `只出提示词`, `dry-run检查`, and `真实出图`.
-- If multiple skills could handle the same issue, assign one primary skill and one supporting skill.
+- Assign the registered decision owner; add a supporting skill only when it supplies a missing input. Do not add another skill merely to fill a team structure.
 - Do not let project management replace creative judgment; route creative decisions back to the relevant director skill.
 - Preserve the registry status vocabulary exactly: `queued / active / waiting_user / blocked / ready_for_review / accepted / stale / archived`.
 - Read child summaries from their registered `handoff.json`. If a handoff is missing or invalid, show the gap instead of declaring the task complete.

@@ -13,7 +13,7 @@ description: Proposal-level cinematic storyboard planner for TVC ads, brand film
 4. For dramatic or short-drama sequences, audit shot logic with `$shot-language-auditor` before finalizing the table.
 5. Write both production language and client proposal language.
 6. Add AI generation notes only where the shot benefits from image or video generation.
-7. Classify image generation priority before prompting.
+7. Classify image generation priority before prompting. Verify total duration, readable action/dialogue time, motivated transitions, and source coverage. Preserve shot IDs on revision; change ordering separately from identity.
 
 ## P1 No Lazy Handoff
 
@@ -34,7 +34,7 @@ missing_fields
 route_back_to
 ```
 
-If shot function, edit motivation, reference route, or style source is missing, route back before `$frame-vision-director` / `$ai-video-prompt-director`.
+Develop shot function, timing, and edit motivation here instead of returning your own missing decisions upstream. Request missing reference/style decisions from their owners only when applicable before final execution. A draft storyboard may precede its audit and final style lock.
 
 ## Image Storyboard Segment Lock Handoff
 

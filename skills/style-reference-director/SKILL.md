@@ -1,6 +1,6 @@
 ---
 name: style-reference-director
-description: Project-level and scene-level style reference director for film AI workflows. Use when the user provides a script, storyboard, shot list, reference images, or named film/TVC/style references and needs a clear visual reference direction before style bible, scene style mapping, image prompts, or video prompts. Mandatory for formal projects before image/video prompt generation.
+description: Project-level and scene-level style reference director for film AI workflows. Use when the user provides a script, storyboard, shot list, reference images, or named film/TVC/style references and needs a clear visual reference direction before style bible, scene style mapping, image prompts, or video prompts. Use for formal visual work that needs a reference system; reuse complete approved direction and omit this stage for unrelated typography, review, or production-state work.
 ---
 
 # Style Reference Director
@@ -21,9 +21,9 @@ It answers:
 这些参考怎么转成镜头、焦段、摄影机、光线、色彩、材质、构图？
 ```
 
-## Mandatory Use
+## Applicability
 
-For formal projects, use this skill before:
+When formal work needs a new reference system, use this skill before:
 
 - `$reference-aesthetic-director`
 - `$scene-style-map-director`
@@ -31,7 +31,7 @@ For formal projects, use this skill before:
 - `$frame-vision-director`
 - `$ai-video-prompt-director`
 
-Do not jump directly from script/storyboard/reference images to Banana/Jimeng/Seedance prompts.
+Reuse an approved reference decision when available. A complete product, identity, typography, or graphic specification does not require film matching. Follow the [stage handoff contract](../zongkong/references/stage-handoff-contract.md); select references for the current deliverable, not every skill in the full chain.
 
 ## Inputs
 
@@ -57,7 +57,7 @@ When the user has not named a style, proactively recommend:
 ```text
 1 primary mother-library reference family
 0-2 supporting references, each only if it solves a named scene, communication, or deliverable problem
-1 top cinematography anchor
+1 applicable anchor: cinematography for cinematic/live action; composition, product/material, typography, or stage for other profiles
 ```
 
 Use the expanded mother-library routes deliberately:
@@ -75,7 +75,7 @@ When the user names a film, director, TVC, photographer, or visual style, valida
 
 For film/prestige research, presence on ShotDeck, awards, popularity, or a famous cinematographer is not enough. Apply `$reference-visual-library`'s ShotDeck-first quality gate, start with the `Core A` pool, and select at shot-mechanism level. Use `Specialist B` only when it solves a named gap. If the authenticated ShotDeck session was not actually inspected, return a search recipe instead of claiming a deck or shot match.
 
-When the user provides reference images, inherit `$reference-image-style-matcher` first. Do not skip the mother-library recommendation just because a reference image exists.
+For an aesthetic-reference image, inherit its visible analysis from `$reference-image-style-matcher`. Identity/product-only references need role and preservation analysis, not a new mother-library recommendation.
 
 Every recommendation must output two layers:
 
@@ -153,7 +153,7 @@ Use the matcher result as evidence. If the matcher says confidence is low, prese
 
 ## Output 1: 项目级风格参考表
 
-Always output this first for formal projects.
+Use this table for a requested reference proposal; keep it internal when only the downstream artifact is requested.
 
 | 项目类型 | 主参考体系 | 辅助参考 | 顶级摄影锚点 | 适用原因 | 可借鉴机制 | 不适用部分/不照搬内容 | 转译后的画面机制 | AI风险 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -162,11 +162,11 @@ Rules:
 
 - `主参考体系`: one primary reference family only.
 - `辅助参考`: zero to two, only when they solve a specific visual problem.
-- `顶级摄影锚点`: mandatory; choose one cinematography/director visual anchor.
+- `顶级摄影锚点`: required for cinematic/live-action reference work; otherwise use the applicable composition, material, type, or stage anchor.
 - `适用原因`: explain why this reference mechanism fits this project/scene, not just why it is famous.
-- `可借鉴机制`: must include camera/lens/light/color/material/composition.
+- `可借鉴机制`: include relevant light/color/material/composition controls; camera/lens apply to photographic content.
 - `不照搬内容`: no copied frames, logos, celebrities, protected production design, exact composition.
-- `转译后的画面机制`: must be a prompt-ready sentence containing light, space, lens, composition, color, material, performance, and AI risk.
+- `转译后的画面机制`: give a prompt-ready visible mechanism using only fields relevant to this deliverable; do not invent people, lenses, or performance for graphic work.
 - `AI风险`: explain likely generation failures.
 
 After this table, output a compact `mother_library_application_packet` with:
@@ -270,7 +270,7 @@ Reject these as style reference output:
 只写奥斯卡感/大片感/纪录片感
 只堆电影名、导演名、摄影师名
 每个镜头随便换一个大师
-没有说明景别、焦段、摄影机、光线、色彩、材质、构图
+没有说明本交付物适用的构图、光线、色彩、材质等可见机制
 没有说明每场戏为什么不同
 没有说明如何仍属于同一项目
 ```

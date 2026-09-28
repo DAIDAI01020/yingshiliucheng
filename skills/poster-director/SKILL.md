@@ -1,15 +1,17 @@
 ---
 name: poster-director
-description: Poster and key-art visual director under zongkong for film AI workflows. Use when zongkong routes poster/KV work for creating or revising short-drama posters, film posters, character posters, suspense case posters, brand key visuals, event KV, program posters, social covers, thumbnails, banners, or any poster-like deliverable that needs layout-safe AI image prompts, title-safe composition, character hierarchy, no-text base art, layered visual assets, and handoff to frame-vision-director, prompt-platform-auditor, Canva, Photoshop, or manual typography/layout.
+description: Poster and narrative key-art visual director under zongkong for film AI workflows. Use when zongkong routes poster/key-art work for creating or revising short-drama posters, film posters, character posters, relationship posters, suspense case posters, program posters, social covers, thumbnails, covers, or poster-like narrative deliverables that need layout-safe AI image prompts, title-safe composition, character hierarchy, no-text base art, layered visual assets, and handoff to frame-vision-director, prompt-platform-auditor, Canva, Photoshop, or manual typography/layout. Do not use for commercial brand/event/product/program/LED KV systems, launch key visuals, main visuals, or banner systems; route those to kv-director.
 ---
 
 # Poster Director
 
 ## Core Role
 
-`$poster-director` is a specialist director under `$zongkong`. It turns a film, short-drama, promo, brand, event, or program brief into a poster/key-art direction after `$zongkong` has identified poster/KV mode.
+`$poster-director` is a specialist director under `$zongkong`. It turns a film, short-drama, narrative, program-cover, or poster-like brief into a poster/key-art direction after `$zongkong` has identified poster/key-art mode.
 
-Do not use it as a top-level production orchestrator. `$zongkong` decides project tier, route, upstream style requirements, and whether poster/KV mode is needed; `$poster-director` only handles poster communication, layout logic, and poster image-prompt handoff.
+Do not use it as a top-level production orchestrator. `$zongkong` decides project tier, route, upstream style requirements, and whether poster/key-art mode is needed; `$poster-director` only handles poster communication, layout logic, and poster image-prompt handoff.
+
+Commercial brand/event/product/program/LED KV systems, launch key visuals, main visuals, and banner systems belong to `$kv-director`.
 
 It does not treat posters as ordinary keyframes. A poster is a communication object:
 
@@ -59,10 +61,8 @@ Choose one poster route before writing image prompts:
 | 人物海报 | one character or cast identity | face continuity, posture, costume anchor, clean name/title area |
 | 关系海报 | short-drama love/revenge/family conflict | character hierarchy, eye-line tension, emotional distance |
 | 悬疑案件海报 | crime, missing person, evidence, investigation | object clue, negative space, procedural tension, no cheap blue filter |
-| 品牌 KV | brand film, launch, product, event | brand object/product clarity, slogan-safe area, premium material |
 | 节目/栏目海报 | program promo, variety, campaign cover | host/cast hierarchy, readable category signal |
 | 社媒封面/缩略图 | vertical cover, feed image, thumbnail | instant hook, clean face/object, safe crop at small size |
-| Banner / 横版 | site header, deck cover, widescreen screen | wide negative space, center-safe subject, title/logo zone |
 
 Do not output only `生成一张海报`. First decide the poster job.
 
@@ -87,11 +87,13 @@ For short drama, sell the hook:
 人物关系 + 秘密/反转/欲望/危险 + 一个可读物件或空间符号
 ```
 
-For commercial/promo, sell trust or value:
+For commercial/promo poster-like covers, sell trust or value without turning the task into a full KV system:
 
 ```text
 品牌/产品主体 + 使用场景/工程/人物/城市规模 + clean claim area
 ```
+
+If the user needs a brand, event, launch, product, program, LED, or banner key visual system with logo/sponsor zones and extension ratios, route to `$kv-director`.
 
 ## Layout-Safe Composition Rule
 
@@ -105,7 +107,6 @@ Specify safe areas:
 | 4:5 feed | keep top or bottom band clean; avoid key face too near crop edge |
 | 1:1 square | center-safe subject, simple background, title band top/bottom |
 | 16:9 / banner | subject left or right third, large negative space opposite for title/logo |
-| event KV / LED | center-safe main object, large simple shapes, title and sponsor zone separated |
 
 Use layout language inside the prompt:
 
@@ -131,6 +132,8 @@ If a design needs text, write:
 ```text
 标题、Logo、标语、演员名、播出信息、二维码、平台标识由后期排版添加，不在AI图内生成。
 ```
+
+If the user wants a separate stylized title, 3D lettering, or transparent PNG text asset for the poster, route that typography asset to `$type-png-director` instead of baking text into the poster base art.
 
 Allowed AI text exceptions:
 
@@ -172,10 +175,10 @@ image_tool_boundary
 For poster/key-art reference mechanisms, read `references/poster-key-art-reference-library.md` when:
 
 ```text
-the user asks for a poster/KV/key art/cover route
+the user asks for a poster/key art/cover route
 the poster type is unclear
 the poster needs professional layout-safe reference logic
-the project needs short-drama platform cover, prestige series key art, film poster, brand KV, event KV, or social thumbnail guidance
+the project needs short-drama platform cover, prestige series key art, film poster, program cover, or social thumbnail guidance
 ```
 
 Poster references can include:
@@ -184,9 +187,7 @@ Poster references can include:
 film key art
 Netflix / Apple TV / HBO prestige series key art
 short-drama platform covers
-brand KV
-event launch key visual
-program poster
+program poster or program cover
 social thumbnail
 ```
 

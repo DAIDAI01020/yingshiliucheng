@@ -1,4 +1,4 @@
 interface:
   display_name: "Banana Pro"
-  short_description: "Banana Pro OpenRouter image prompt and generation workflow"
-  default_prompt: "Use $banana-pro to prepare or run a Banana Pro image prompt through OpenRouter."
+  short_description: "Banana request settings and explicit legacy CLI compatibility"
+  default_prompt: "Use $banana-pro for Banana request settings or explicitly requested legacy CLI work; route new image generation to $banana-image-generator."

@@ -1,3 +1,4 @@
-display_name: "短剧对白医生"
-short_description: "优化短剧台词、冲突节奏、人物口吻和字幕友好度"
-default_prompt: "Use $short-drama-dialogue-doctor to polish short-drama dialogue while preserving the approved plot and character intent."
+interface:
+  display_name: "短剧对白医生"
+  short_description: "改善角色口吻口语节奏与情绪冲突，保留已确认剧情和人物关系"
+  default_prompt: "使用 $short-drama-dialogue-doctor 在既定剧情与人物关系内润色对白，检查可说性和时长，不擅自增加剧情或发起生成。"

@@ -19,14 +19,9 @@ references/scene-map.md
 
 Use `$project-state-manager check --stage generation` as the gate source. If the project state says `scene-map` is missing, produce or update the scene map before any final image/video prompt handoff.
 
-For formal projects, do not create or approve `references/scene-map.md` unless it inherits:
+Draft `references/scene-map.md` from the available script, character and visual direction. Reuse an existing style lock; do not require a completed lock before creating the scene map it depends on. Before final production handoff require only applicable hook/character/reference approvals and the completed scene/shot checks.
 
-```text
-hook_audit_packet
-character_continuity_packet
-style_lock_packet
-mother_library_application_packet
-```
+Inherit total route and state-owner decisions. This skill owns grouping, scene geography, blocking, continuity and shot requirements; it cannot change speed mode, approve generation or replace a missing upstream decision. Follow the [stage handoff contract](../zongkong/references/stage-handoff-contract.md).
 
 Use when the user provides:
 
@@ -86,52 +81,91 @@ For every scene, output this before any prompt:
 - `为什么这样设定`: Explain in plain production language so clients understand the intention.
 - `AI 风险`: Identify what generation may break and how to avoid it.
 
-## Required Output 2A: Same-Scene Continuity Lock
+## Required Output 2A: 同场连续性锁 / Coverage Packet
 
-When several shots share the same location, light, character blocking, or conversation beat, create one `scene_continuity_lock` before writing shot prompts. This is mandatory for master wide, two-shot, reverse-angle, over-shoulder, eye contact, reaction shot, interrogation, confrontation, dining-table dialogue, office dialogue, living-room dialogue, or any same-scene coverage.
+When several shots share the same location, light, character blocking, or conversation beat, create one `scene_continuity_lock` before writing shot prompts. This is mandatory for 大景/全景建立镜头、两人对视、正反打、过肩、反应镜头、同桌谈话、审问、争吵、沉默对峙, or any same-scene coverage.
 
 ```text
 scene_continuity_lock
-scene_id
-space_geography
-time_and_light
-color_material
-prop_anchor
-character_blocking
-screen_direction
-camera_axis
-background_side_map
-background_continuity_lock
-lens_family
-wide_master_rule
-forbidden_drift
+scene_id:
+space_geography: room layout, doorway/window/table/sofa/desk positions
+time_and_light: same time period, practical light source, direction, color temperature
+color_material: wall/floor/furniture/fabric/prop material continuity
+prop_anchor: phone, file, cup, chair, evidence, lamp, door, window, etc.
+character_blocking: A position, B position, distance, posture, who controls the space
+screen_direction: A looks left/right, B looks left/right, do not flip eyelines
+camera_axis: which side of the 180-degree line the camera stays on
+background_side_map: what background belongs behind A, what background belongs behind B
+background_continuity_lock: fixed walls, doors, windows, furniture, practical lights, prop positions, background depth
+lens_family: wide/master lens and close coverage lens family
+wide_master_rule: what the 大景/全景 establishes and what later shots must inherit
+forbidden_drift: no new room, no changed wall/window/door, no changed light, no swapped positions, no mirrored eyelines, no moved props
+```
+
+`background_continuity_lock` must be practical and visible, not a vague mood phrase:
+
+```text
+A背后固定为灰绿色墙面+半开的木门+桌角前景
+B背后固定为窗帘+暖台灯+旧沙发边缘
+桌上手机在两人中间偏A侧，水杯在B侧
+后续所有正反打、过肩、对视、反应镜头都不能新增窗户、换墙色、移动桌椅或改变灯位
 ```
 
 For dialogue or confrontation scenes, also output:
 
 ```text
 dialogue_coverage_packet
-coverage_type
-coverage_role
-source_scene_continuity_lock
-character_visible
-foreground_shoulder_or_object
-eyeline_direction
-background_side
-shot_size
-camera_position
-focal_length_logic
-edit_motivation
-handoff_to_prompt
+coverage_type: master_wide / two_shot / ots_on_A / ots_on_B / clean_single_A / clean_single_B / reaction_A / reaction_B / insert_object
+coverage_role:
+source_scene_continuity_lock:
+character_visible:
+foreground_shoulder_or_object:
+eyeline_direction:
+background_side:
+shot_size:
+camera_position:
+focal_length_logic:
+edit_motivation:
+handoff_to_prompt:
 ```
 
+### 大景 / Master Wide Rule
+
+Do not treat 大景、全景、远景 as decorative wide shots. Use them only when they establish or re-establish:
+
+```text
+空间地理
+人物左右关系
+权力距离或孤立感
+门/窗/桌/证据/出口的位置
+后续正反打的轴线和背景侧
+```
+
+For vertical short drama, prefer a readable master wide or medium-wide only when it clarifies geography, isolation, threat, or final pressure. After the master wide, all close/OTS/reaction prompts must preserve the same `scene_continuity_lock`.
+
+### Continuity Reference Board Handoff
+
 For formal same-scene coverage, create or request one `short_drama_scene_continuity_board` before batch image/video generation when background drift would be costly.
+
+Route:
 
 ```text
 scene_continuity_lock + background_continuity_lock + dialogue_coverage_packet
 -> scene-board-image-prompter short_drama_scene_continuity_board
 -> frame-vision-director / ai-video-prompt-director uses the board as scene/background reference
 -> image/video QC checks generated outputs against the board
+```
+
+Board handoff fields:
+
+```text
+continuity_reference_board
+board_type: short_drama_scene_continuity_board
+scene_id:
+source_locks: scene_continuity_lock / background_continuity_lock / dialogue_coverage_packet
+must_show: master wide, overhead axis map, A background side, B background side, prop positions, light position, coverage preview cells
+use_as_reference_for: same-scene image prompts, first frames, video prompts, QC
+state_writeback: references/scene-map.md + asset-index continuity board record
 ```
 
 ## Required Output 3: Shot/Keyframe Table
@@ -231,9 +265,9 @@ mother_library_translation 的视频安全压缩句
 空间路径
 遮挡/衔接方式
 结束画面
-jimeng_seedance_motion_rule
-breath_tail_rule
-禁止跳切/换景/多动作
+complexity_mode and per-shot/stage motion intent
+ending_behavior
+禁止项按镜头意图确定；连续镜头禁止无动机跳切，多镜头保留有动机的切换
 ```
 
 For dialogue, confrontation, reaction, interrogation, or over-shoulder coverage, set `prompt_direction: dialogue_coverage` and preserve:
@@ -249,12 +283,7 @@ edit_motivation
 
 Do not turn long dialogue into generated mouth-sync unless explicitly requested. For normal short-drama video, describe restrained performance, breath, eye movement, hand tension, and reaction timing; subtitles and exact spoken words belong in post.
 
-For video handoff, mark breath_tail_rule at two levels:
-
-```text
-每个镜头：轻气口，动作/台词后保留约0.5-1秒呼吸、眼神停顿和轻微余动作。
-每一段/场戏/情绪落点结尾：重气口，保留约1-2秒，人物不再说新台词，只保留呼吸、眼神和情绪余韵。
-```
+For video handoff, propose `ending_behavior` from the scene edit intent: hold, breath_light, breath_heavy, hard_cut, action_exit, or loop. Breath tails are optional dramatic choices and must fit the duration; do not append them to every shot. The video prompt owner checks feasibility and the platform auditor compiles the choice.
 
 If upstream_source is missing for a formal project, do not move directly to final prompts. Route back to reference-image-style-matcher, style-reference-director, scene-style-map-director, shot-language-auditor, style-bible-director, or project-style-lock as appropriate.
 
@@ -263,13 +292,13 @@ For managed projects, also preserve the state path or packet source in `upstream
 ## AI Risk Rules
 
 - More than two speaking characters in one frame increases consistency risk.
-- Long dialogue should be subtitles in post, not generated inside image/video.
+- Long readable text usually belongs in post. Preserve explicitly requested generated dialogue and route native audio/lip-sync feasibility to the video prompt owner instead of silently removing it.
 - Screens, phones, documents, monitors, case files, and court signs should not contain readable long text.
 - Complex fights, crying, kissing, crowds, and hand-object interaction need simplified shots.
 - Preserve character identity over fancy camera movement.
 - For vertical short drama, prioritize close-up, over-shoulder, two-shot, reaction shot, and controlled blocking.
 - For same-scene coverage, missing scene_continuity_lock, background_continuity_lock, camera axis, eyeline direction, background side, or wide/master inheritance is a workflow gap, not a prompt-writing detail.
-- Missing mother_library_translation, director_contribution_packet, visual_helpfulness_targets, platform_language_strategy, anti_ai_realism_rule, jimeng_seedance_motion_rule, breath_tail_rule, or upstream_source is a workflow gap, not a prompt-writing detail. Fix the upstream handoff before final prompts.
+- Missing applicable source, reference, continuity or director decisions must be resolved before final execution. Still-image handoffs do not require motion, ending or audio fields; camera/realism controls are profile-specific.
 
 ## Quality Bar
 

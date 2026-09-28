@@ -44,7 +44,7 @@ When the user gives a finished script:
 For managed formal short-drama projects, output or update `references/hook-audit.md` before visual execution:
 
 ```text
-status: approved / passed
+status: draft / approved / passed
 hook_audit_packet
 opening_hook
 audience_question
@@ -56,6 +56,10 @@ ai_execution_risk
 ```
 
 The hook check is not a rewrite request by default. If the script already exists, diagnose whether the first 3-8 seconds are strong enough and suggest targeted fixes only where the hook, information gap, or conflict entry is weak.
+
+## Approval Evidence
+
+Keep proposed material `draft`. Use `passed` only for a completed applicable review and `approved` only for an actual accepted decision; record its source. File creation alone does not pass a production gate. Preserve existing valid approvals and stable character/episode IDs.
 
 ## Rules
 

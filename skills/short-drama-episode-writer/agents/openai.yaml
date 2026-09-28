@@ -1,3 +1,4 @@
-display_name: "短剧分集编剧"
-short_description: "设计分集结构、开场钩子、反转和集尾悬念"
-default_prompt: "Use $short-drama-episode-writer to outline episode beats, reversals, cliffhangers, and next-episode hooks."
+interface:
+  display_name: "短剧分集编剧"
+  short_description: "组织单集冲突与反转节奏，按需要诊断开场并记录真实审核依据"
+  default_prompt: "使用 $short-drama-episode-writer 完成分集结构或已有稿件的局部诊断，仅对适用开场做 hook_audit_packet，区分草稿、审核通过和实际批准。"

@@ -1,8 +1,4 @@
-display_name: "参考审美转译"
-short_description: "把母库和摄影锚点转成可执行视觉机制"
-default_prompt: |
-  Use $reference-aesthetic-director to translate the selected reference system into light, space, lens, material, performance, and AI-risk mechanisms.
-
-  Preserve or create mother_library_application_packet. Translate the mother library into project DNA, scene function rules, shot execution rules, platform risk controls, do_not_copy, forbidden_drift, and fields that must become style-bible / project-style-lock variables.
-
-  Also output director_contribution_packet with owner_skill, decision_owned, visual_controls_contributed, downstream_must_preserve, and must_not_be_overwritten_by so downstream prompts keep the elite reference translation as visible camera/light/space/material/performance controls.
+interface:
+  display_name: "参考审美导演"
+  short_description: "转译影视与商业参考机制，保护适用的构图光线材质及连续性判断"
+  default_prompt: "使用 $reference-aesthetic-director 转译已选参考为可见机制和必要风险，保留来源及 director_contribution_packet，不重新选风格或强加无关摄影规则。"

@@ -21,6 +21,8 @@ It does not choose the visual style. It audits:
 每个镜头是否有叙事功能
 ```
 
+Inherit total route and existing scene decisions. Own shot-language audit only, not style selection, generation approval, or final prompt writing. Draft corrections within the approved story rather than requiring the final audit before a shot plan can exist.
+
 If the sequence is only a random list of CU/MS/ECU shots, reject it.
 
 ## When To Use
@@ -73,7 +75,7 @@ Rules:
 
 ## Same-Scene Coverage Rules
 
-For same-location dialogue, confrontation, eye contact, reverse-angle, over-shoulder, interrogation, argument, dining-table, living-room, or office conversation, audit the sequence as one coverage group instead of isolated pretty shots.
+For 同一场景、两人对话、对视、正反打、过肩、审问、争吵、餐桌/客厅/办公室谈话, audit the sequence as a coverage group, not as isolated pretty shots.
 
 Require a `scene_continuity_lock` or equivalent:
 
@@ -90,6 +92,34 @@ lens_family
 wide_master_rule
 ```
 
+Default useful coverage flow:
+
+```text
+master_wide / medium_wide 建立空间和左右关系
+-> two_shot 建立对峙距离
+-> ots_on_A / clean_single_A
+-> ots_on_B / clean_single_B
+-> reaction_A or reaction_B
+-> insert_object only when it reveals information
+-> closing wide / compressed single only when it changes power or ends the beat
+```
+
+### 大景 / Master Wide Audit
+
+A 大景、全景、远景 passes only if it establishes one of:
+
+```text
+where both people are
+who controls the room
+distance, isolation, threat, or social pressure
+door/window/table/prop geography
+the axis and background sides used by later reverse angles
+```
+
+Reject decorative wide shots that do not affect later coverage. In vertical short drama, use a master wide sparingly and crop it for readability; do not keep returning to a wide shot unless it shows new power, isolation, entry/exit, or final pressure.
+
+### Axis, Eyeline, And Background Rules
+
 Reject or rewrite if:
 
 ```text
@@ -102,7 +132,20 @@ OTS foreground shoulder belongs to the wrong character
 reverse angles use unrelated lens families or lighting logic
 ```
 
-For formal batch work, recommend a `short_drama_scene_continuity_board` when background drift would be costly.
+### Background Continuity Audit
+
+For a same-scene shot group, background continuity is a hard requirement. Audit whether every shot preserves:
+
+```text
+same room or continuous space
+same wall/window/door/furniture positions
+same practical lights and light direction
+same prop positions on table/floor/hand
+same background side behind each character
+same spatial depth and foreground obstruction logic
+```
+
+Reject coverage if the background changes only because the prompt rewrote the room. Only allow background change when the camera has clearly moved to a motivated new side of the same space and the `background_side_map` explains it.
 
 ## Edit Motivation Rules
 
@@ -179,10 +222,10 @@ When the original sequence is weak, output a corrected flow:
 For short-drama video, every corrected flow must also mark:
 
 ```text
-是否适合一个主体动作
-是否适合一个镜头运动
-是否需要轻气口：每个镜头都需要，动作/台词后约0.5-1秒
-是否需要重气口：每一段/场戏/情绪落点结尾需要，约1-2秒
+complexity_mode: single_beat / staged_action / multi_shot
+每个节拍或镜头的主变化、镜头运动、衔接动机
+ending_behavior: hold / breath_light / breath_heavy / hard_cut / action_exit / loop
+结尾时长是否符合剧情和总时长；气口只在有明确表演或剪辑作用时使用
 是否建议拆段
 ```
 
@@ -245,7 +288,7 @@ For `$ai-video-prompt-director`:
 ```text
 director_contribution_packet
 visual_helpfulness_targets
-video prompt must keep one dominant camera move and one shot-size path
+video prompt preserves motivated camera behavior per shot/stage and a readable shot-size path
 handoff_to_prompt
 scene_continuity_lock
 background_continuity_lock
@@ -253,8 +296,8 @@ coverage_role
 screen_direction
 background_side
 jimeng_seedance_motion_rule
-breath_tail_rule decision
-split recommendation when one action/one camera move cannot hold the beat
+ending_behavior decision; preserve legacy breath_tail_rule only when explicitly selected
+split recommendation when the chosen stage/shot plan cannot fit duration or continuity constraints
 ```
 
 Cross-skill management rule:
@@ -263,9 +306,8 @@ Cross-skill management rule:
 If upstream_source is missing, state which upstream table or scene decision is missing.
 Preserve upstream mother_library_translation, platform_language_strategy, and anti_ai_realism_rule as protected handoff context; do not rewrite them inside shot-language-auditor.
 Preserve or create director_contribution_packet and visual_helpfulness_targets so downstream prompt skills cannot reduce shot logic to decorative camera labels.
-If the shot has no function, no edit motivation, or cannot fit one subject action and one camera movement, do not let downstream prompt skills convert it into a final video prompt.
-Every short-drama shot must mark breath_tail_rule as light breath tail unless the user explicitly requests a hard cut, beat cut, flash cut, or shock point.
-If the shot ends a segment, scene, accusation, evidence reveal, phone/message reading, silent reaction, emotional realization, or confrontation, mark breath_tail_rule as heavy breath tail.
+If shot function, motivated transition or readable motion is missing, repair the shot plan before final prompting. Multiple actions or camera moves across staged/multi-shot work are valid when causally connected and feasible.
+Propose ending_behavior from the approved edit intent; do not impose a breath tail or extra seconds by default. The video prompt owner owns motion feasibility and final ending behavior.
 ```
 
 This skill does not choose visual style, but its handoff must protect the style pipeline by naming what downstream prompts must preserve.

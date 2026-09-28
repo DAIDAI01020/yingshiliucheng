@@ -32,7 +32,7 @@ missing_fields:
 route_back_to:
 ```
 
-If screen ratio, safe area, viewing distance, stage relation, or content scale is missing, output `missing_fields` before final prompts.
+For concept previews, state provisional screen assumptions and proceed. Exact delivery requires actual screen geometry, resolution, safe areas, and stage relation; identify only the blocking missing measurements. Route commercial KV composition to `$kv-director` and rectangular LED split/After Effects calculations to `$aedaping`; do not invent engineering measurements.
 
 | 大屏判断 | 建议 |
 | --- | --- |

@@ -31,7 +31,7 @@ prompt-platform-auditor
 
 ## Required Workflow
 
-When a formal project includes reference images, use this skill before style selection or prompt writing:
+Inspect the actual supplied image before describing it. Use the full route when the image is an aesthetic reference needing a new style decision:
 
 ```text
 reference image(s)
@@ -43,7 +43,7 @@ reference image(s)
 -> prompt-platform-auditor
 ```
 
-For quick tests, use a lightweight version: visual features + one best match + prompt translation notes.
+For quick tests, use visible features, reference roles, preservation boundaries, and concise translation notes. For identity, product geometry, clothing, or layout-only references, stop after that analysis unless style matching is requested. If the image cannot be accessed, do not infer its contents from its filename.
 
 ## Library Matching
 
@@ -53,7 +53,8 @@ Use `$reference-visual-library` as the source of truth.
 | --- | --- |
 | Commercial / promo / TVC / brand film / event / LED | `commercial-promo-library.md` + `shared-elite-cinematography.md` |
 | Short drama / narrative / suspense / romance / family / crime | `short-drama-story-library.md` + `shared-elite-cinematography.md` |
-| Unknown type | choose the closest line, state the assumption, and include one cinematography anchor |
+| Graphic/KV/type/stage | match the relevant composition/material/type/stage mechanisms; no forced film or cinematography anchor |
+| Unknown type | infer the intended reference role from the request; clarify only when the role materially changes the result |
 
 Do not claim an exact film match unless the user explicitly provides that reference. Prefer:
 
@@ -64,7 +65,7 @@ Do not claim an exact film match unless the user explicitly provides that refere
 
 ## Mother-Library Match To Prompt Rule
 
-Reference image analysis alone is not enough. After reading the image, always connect it to the mother library and provide a final-prompt translation sentence.
+When aesthetic matching is applicable, connect observed features to the mother library and provide a final-prompt translation sentence. Role-only analysis is sufficient for non-aesthetic reference constraints.
 
 Required chain:
 
@@ -77,7 +78,7 @@ Required chain:
 -> 给最终提示词的转译句
 ```
 
-`给最终提示词的转译句` must be self-contained and must include:
+`给最终提示词的转译句` must be self-contained. Select applicable controls from:
 
 ```text
 光线方向
