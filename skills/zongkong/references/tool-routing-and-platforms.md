@@ -21,6 +21,7 @@ Use the independent action, platform/model, and creative-state precedence in [th
 
 | User intent | Route |
 | --- | --- |
+| Blender / 已有.blend / 可编辑三维模型或场景 / 建模材质灯光 / 骨骼动画 / 几何节点 / 三维模拟渲染 | `$blender-production-director` -> actual environment/scene inspection -> applicable 3D modules -> versioned scene and verified outputs；plan stays plan；rendered is not QC-approved；a 3D-looking AI image alone stays on its image route |
 | 新建工程 / 继续工程 / 项目根目录 / 输出路径 / 文件散落 / 目录混乱 / 不要放总文件夹 / 整理工程但先不移动 | `$project-folder-director` -> `$project-state-manager` / `$asset-librarian` |
 | 大稿件多部分 / 一个总项目拆多个聊天 / 上下文隔离 / 分聊天并行 / 总控汇总 / 同步分聊天 | explicit separate-chat request -> project/root and director split -> `$project-thread-orchestrator` with authorization for the concrete plan -> same-project local child threads (max 4)；reuse existing registered tasks for continuation/status；a split proposal alone creates no chats |
 | 品牌KV / 活动KV / 发布会KV / 产品KV / 产品主视觉 / 节目主视觉 / LED主视觉 / key visual / 主视觉 / banner system | `$kv-director` -> `$kv-image-prompt-director` -> `$prompt-platform-auditor` -> image/layout tool |
@@ -55,6 +56,8 @@ For image故事板 routes, do not call built-in imagegen until `image_storyboard
 ```
 
 ## Image Routing
+
+Explicit Blender or editable 3D requirements take precedence over generic image/video/3D-text rows. Blender rendering uses its own task and scene checks, not AI image/video prompt gates. Preserve an existing film/KV/stage creative owner while Blender owns scene implementation. Rendering a first frame does not by itself authorize AI-video submission.
 
 Quick multi-variant image rule:
 
@@ -104,7 +107,7 @@ Project-managed Jimeng/Kling/Kling O1/Kling VIDEO 3.0 Omni runs are usually exte
 ## Video Platform Packet Rule
 
 ```text
-Before any formal video generation or external handoff, `$zongkong` must require a `video_prompt_source_packet` plus an approved `audited_prompt_packet`, or equivalent fields:
+Before formal AI video generation or external AI-platform handoff, `$zongkong` must require a `video_prompt_source_packet` plus an approved `audited_prompt_packet`, or equivalent fields:
 platform_target, model_target when selected, task_type, task_mode when model-specific, complexity_mode, source_authority, must_preserve, reference_roles/reference_asset_map, do_not_inherit, subject_action_or_beats/stage_plan, camera_behavior, environment_or_light_change, ending_behavior, edit/boundary/locked-parameter fields when applicable, duration, ratio, audio_mode when applicable, style_lock_compact, risk_profile.
 manual_execution: external_platform, upload_roles, copyable_prompt, expected_output_path, status.
 

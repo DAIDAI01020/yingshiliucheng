@@ -18,6 +18,7 @@
 
 | 需求 | 主要负责能力 |
 | --- | --- |
+| Blender 建模、材质灯光、动画模拟、渲染及可编辑工程 | [blender-production-director](skills/blender-production-director/SKILL.md)，按需复用现有导演、审核和项目管理 |
 | 影视提案、广告、品牌片 | `yingshisheji` 和对应专项导演 |
 | 短剧 | `short-drama-director`，按需进入人物、分集、场景、镜头与对白能力 |
 | 商业或活动 KV | `kv-director` → `kv-image-prompt-director` |
@@ -44,6 +45,8 @@
 每张独立出图都有自己的精简完整提示词。两张机位图不会合成一张拼图，除非用户明确要求对比板。
 
 ## 视频制作
+
+Blender 三维制作由独立分支处理，覆盖方案、预览、正式制作及已有工程修改。执行工具先检测本机 Blender，再检查场景、保存新版本、渲染并核对实际文件；支持匹配输入的断点续作。未找到 Blender 时明确标记真实渲染未验证。纯三维任务不套用 AI 提示词审核，图像序列不冒充成片。
 
 先完成当前镜头所需的首帧/参考与动作提示词，再按明确选择的平台执行：即梦 CLI 走 `dreamina-cli`，火山 Ark 走 `seedance-2-video`；不在两者之间自动切换。只写提示词不会自动发起付费生成。
 

@@ -1,13 +1,13 @@
 ---
 name: zongkong
-description: Top-level orchestrator for AI film and visual-production work. Use when starting or continuing a film, commercial, short-drama, storyboard, KV, poster, image, video, Xiaohongshu daily art series, review, archive, or project-management task that needs project setup, speed-mode classification, cross-skill routing, context-isolated child threads, platform selection, formal production gates, QC, or next-action decisions. Also use when the creative request is ambiguous and the correct downstream skill is unclear. Do not trigger merely because a conversation is new or for unrelated coding and general tasks.
+description: Top-level orchestrator for AI film and visual-production work. Use when starting or continuing a film, commercial, short-drama, storyboard, KV, poster, image, video, Blender 3D production, Xiaohongshu daily art series, review, archive, or project-management task that needs project setup, speed-mode classification, cross-skill routing, context-isolated child threads, platform selection, formal production gates, QC, or next-action decisions. Also use when the creative request is ambiguous and the correct downstream skill is unclear. Do not trigger merely because a conversation is new or for unrelated coding and general tasks.
 ---
 
 # Zongkong
 
 ## Role
 
-Act as the decision layer above film, short-drama, image, video, and asset skills.
+Act as the decision layer above film, short-drama, image, video, Blender 3D production, and asset skills.
 
 Decide only what the orchestration layer owns:
 
@@ -29,6 +29,7 @@ Load only the reference needed for the current decision:
 - Explicit Xiaohongshu content, continuation of an established daily-art column, or Xiaohongshu upload: enter [the Xiaohongshu branch](../xiaohongshu/SKILL.md); its [surreal-art workflow](../xiaohongshu/references/surreal-art-workflow.md) owns branch isolation and details. Mystery/surreal style words alone do not select it.
 - Xiaohongshu account positioning, audience, topic priorities/calendars, packaging strategy or performance review: use [Xiaohongshu Operator](../xiaohongshu-operator/SKILL.md); a complete post brief proceeds directly to the production branch.
 - Tool route, direct generation, image/video platform selection, or external handoff: read [references/tool-routing-and-platforms.md](references/tool-routing-and-platforms.md).
+- Explicit Blender, existing .blend, editable 3D assets or local 3D rendering: use [Blender 三维制作导演](../blender-production-director/SKILL.md). Its modules cover modeling, materials, lighting, animation, simulation, rendering and delivery; visual “3D style” alone does not select it.
 - Formal packets, applicable gates, owners, `missing_fields`, or `route_back_to`: read [references/packets-and-gate-ownership.md](references/packets-and-gate-ownership.md).
 - Deliverable-specific prompt fields, response visibility, QC mode, or quality-profile selection: read [references/deliverable-profiles-and-response-modes.md](references/deliverable-profiles-and-response-modes.md).
 - Formal project/scene references, mother-library logic, or style inheritance: read [references/reference-library-rules.md](references/reference-library-rules.md).
@@ -129,7 +130,7 @@ Choose one primary `deliverable_profile`:
 ```text
 live_action_people / product_structure / commercial_kv / graphic_abstract /
 typography_asset / led_stage / local_edit / storyboard_frame /
-video_i2v / video_multi_shot / archive_review
+video_i2v / video_multi_shot / three_d_asset / three_d_render / three_d_animation / archive_review
 ```
 
 The profile determines which style, camera, realism, typography, motion, audio, and QC fields apply. Do not use photographic camera or anti-AI realism fields as universal requirements. Read [references/deliverable-profiles-and-response-modes.md](references/deliverable-profiles-and-response-modes.md) when selecting or validating a profile.
@@ -191,10 +192,10 @@ speed_mode: prompt_only / quick_test / formal_managed
 prompt_task: semantic_create / platform_compile / prompt_diagnose / targeted_rewrite / none
 source_prompt_state: absent / complete / creatively_incomplete / platform_incompatible
 project_tier: formal / quick / misc / undecided
-workflow_mode: proposal / short_drama / storyboard / image_storyboard / commercial_kv / poster_key_art / typography_png_asset / image / video / product_ai_video / review / archive
+workflow_mode: proposal / short_drama / storyboard / image_storyboard / commercial_kv / poster_key_art / typography_png_asset / image / video / product_ai_video / blender_production / review / archive
 main_line: commercial_promo / short_drama_story / other
-deliverable_profile: live_action_people / product_structure / commercial_kv / graphic_abstract / typography_asset / led_stage / local_edit / storyboard_frame / video_i2v / video_multi_shot / archive_review
-platform_target: built_in_image / banana / banana_pro / jimeng / kling / kling_o1 / kling_video_3_omni / seedance_ark / midjourney / layout / none
+deliverable_profile: live_action_people / product_structure / commercial_kv / graphic_abstract / typography_asset / led_stage / local_edit / storyboard_frame / video_i2v / video_multi_shot / three_d_asset / three_d_render / three_d_animation / archive_review
+platform_target: built_in_image / banana / banana_pro / jimeng / kling / kling_o1 / kling_video_3_omni / seedance_ark / midjourney / blender / layout / none
 model_target: user/current-project model name or normalized model enum when explicitly selected
 response_mode: direct / compact / diagnostic
 qc_mode: none / light_deferred / formal
@@ -228,7 +229,8 @@ Use this matrix before requiring a gate:
 | shot production registry | formal multi-shot/episodic execution needs dependencies, legal state transitions, or resumable batch progress |
 | KV rendition matrix | one approved KV composition must ship to multiple aspect ratios or screen formats |
 | prompt-platform audit | formal prompt execution or external platform handoff |
-| generation-ready packet | managed image/video execution |
+| generation-ready packet | managed AI image/video execution |
+| Blender scene/render readiness | Blender execution requiring scene, camera, dependencies, output settings or caches; owned by blender-production-director |
 | QC/state writeback | generated managed deliverables |
 
 Do not require short-drama gates for commercial KV, typography, archive, or unrelated formal work. Do not require photorealism constraints for stylized, graphic, abstract, typography, or stage-visual deliverables.
@@ -238,6 +240,7 @@ For packet schemas and exact owners, read [references/packets-and-gate-ownership
 ## Core Route Boundaries
 
 - `$zongkong` owns classification and routing, not the specialist result.
+- `$blender-production-director` owns Blender scene production and rendering. Pure 3D tasks use `workflow_mode:blender_production`, `platform_target:blender`, `prompt_task:none`; a Blender step inside an existing film/KV/stage project preserves its creative workflow/profile. Plan-only requests remain `execution_intent:plan`; do not reinterpret them as image prompts. Use Blender scene/render checks instead of AI prompt or provider-generation gates. Reuse existing project/style/QC/asset owners and separate saved scenes, rendered media, visual approval and selection.
 - `$xiaohongshu-operator` owns Xiaohongshu strategy, editorial planning and performance decisions; `$xiaohongshu` owns post realization and publishing handoff. Reuse operations briefs, and never make a direct upload or fixed-image request redo account strategy. Both preserve project/column isolation and shared specialist ownership.
 - Explicit Xiaohongshu art-series work or continuation of its established column routes to `$xiaohongshu` with `main_line:other`, normally `workflow_mode:image`; requested tracked production uses `formal_managed` and `qc_mode:formal`. Generic mystery/surreal style requests stay with the current deliverable owner. Xiaohongshu upload of existing work preserves its source project's route, platform and style. Follow the branch isolation rules; planning and single previews stay lightweight, and a content branch itself creates no scheduler or account authorization.
 - Specialist directors own concept, narrative, composition, scene, character, or shot decisions in their domain.

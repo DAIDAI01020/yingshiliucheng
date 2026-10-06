@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blender 三维制作导演"
+  short_description: "统筹建模、材质灯光、动画模拟、渲染合成和可编辑工程交付"
+  default_prompt: "使用 $blender-production-director 完成当前三维制作任务，复用已有工程与风格，先预览验证，再交付实际画面、动画及可编辑工程。"

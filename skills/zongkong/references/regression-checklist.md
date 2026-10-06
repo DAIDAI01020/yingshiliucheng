@@ -414,6 +414,25 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Deliver a varied surreal-art calendar without mandatory weekend commercials, generation, project setup or automation.
     - Do not force all scenes to be dark/cyan or turn mystery into horror without that direction.
 
+88. `总控下面加一个 Blender 技能，先给方案`
+    - Plan only; no scene, render, plugin installation or external publication.
+    - Cover editable assets, materials/light, animation, simulation, rendering/compositing and delivery under one specialist entry.
+
+89. `这个 .blend 只把产品改为磨砂金属，交付新工程和预览`
+    - Inspect the saved source; preserve geometry/camera/animation and unrelated materials.
+    - Save/reopen a new version, render an actual preview; do not require AI prompt approval.
+
+90. `渲染中断了继续，贴图刚改过`
+    - Changed dependencies require a new render identity; never mix old/new frames.
+    - Unchanged runs reuse only verified frames; missing or corrupt files remain incomplete until repaired.
+
+91. `出一张3D风格图片，用 Banana`
+    - Preserve the explicitly selected image route; 3D appearance alone does not select Blender.
+
+92. `用 Blender 做动画交片，但本机没有 Blender`
+    - Detect and report the missing runtime; retain independent work and do not claim real scene/render validation.
+    - Technical/host-side tests, image sequences and script output are not substitutes for actual movie delivery.
+
 ## Boundary Checks
 
 Xiaohongshu operations smoke scenarios:
@@ -498,6 +517,7 @@ From the repository root:
 python -X utf8 skills/zongkong/scripts/validate_workflow_contracts.py
 python -X utf8 skills/zongkong/scripts/audit_skill_capabilities.py
 python -X utf8 -m unittest discover -s skills/zongkong/tests
+python -X utf8 -m unittest discover -s skills/blender-production-director/tests -v
 node --test skills/banana-image-generator/scripts/generate-banana-images.test.mjs
 node --test skills/project-state-manager/scripts/manage-project-state.test.mjs
 python -X utf8 skills/zongkong/scripts/run_e2e_workflow_tests.py

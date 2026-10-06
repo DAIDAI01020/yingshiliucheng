@@ -42,6 +42,7 @@ For managed short-drama work, use `$project-state-manager` to initialize/check s
 
 | Gate or missing decision | Applies when | Owner / `route_back_to` |
 | --- | --- | --- |
+| Blender scene/render readiness | explicit Blender/editable 3D production: saved source, relevant units/camera/frames/settings/dependencies/cache | `$blender-production-director` |
 | project folder contract / output path | managed project, multiple saved files, scattered files | `$project-folder-director` |
 | managed project state | formal managed production | `$project-state-manager` |
 | concept / brand claim / story premise | not yet approved | matching concept or specialist director |
@@ -62,6 +63,8 @@ For managed short-drama work, use `$project-state-manager` to initialize/check s
 | image/video result diagnosis | output exists | `$image-qc-director` / `$video-qc-director` |
 
 Do not route a missing hook audit to a prompt skill. Do not route missing character continuity to the scene map or platform auditor.
+
+Pure Blender execution uses [the Blender task/result contract](../../blender-production-director/references/handoff-contract.md), not AI prompt-platform audit or provider generation-ready packets. Shared folder/style/shot gates apply only where relevant. A .blend source is a 3D asset, an image sequence is image evidence, and only an actual encoded/verified movie can be ingested as completed video.
 
 ## Applicability Rules
 

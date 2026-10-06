@@ -9,6 +9,7 @@ from pathlib import Path
 SKILL_ROOT = Path(__file__).resolve().parents[2]
 
 CORE_SKILLS = [
+    "blender-production-director",
     "zongkong",
     "frame-vision-director",
     "openai-image-prompt-director",
@@ -36,6 +37,7 @@ CORE_SKILLS = [
 ]
 
 REQUIRED_BY_SKILL = {
+    "blender-production-director": ["blender_task_packet", "blender_mode", "blender_task.py", "simulation", "render", "visual QC"],
     "zongkong": ["prompt_task", "source_prompt_state", "semantic_create", "platform_compile", "prompt_diagnose", "targeted_rewrite", "deliverable_profile", "response_mode", "qc_mode", "thread_orchestration", "project-thread-orchestrator", "model_target:gpt_image_2_5"],
     "frame-vision-director": ["image_prompt_source_packet", "must_preserve", "must_change", "model_target", "task_mode"],
     "ai-video-prompt-director": ["video_prompt_source_packet", "model_target", "task_mode", "complexity_mode", "reference_asset_map", "stage_plan", "edit_master", "boundary_state", "locked_parameters", "ending_behavior", "audio_mode", "music_policy", "no_music_allow_sfx"],

@@ -46,6 +46,7 @@ prompt_only 是只交付提示词的任务模式，不触发生成。正式项�
 
 | 交付物 | 负责人 |
 | --- | --- |
+| Blender 模型、场景、材质灯光、动画模拟、渲染与可编辑工程 | blender-production-director；方案/预览/正式制作按需进入，纯三维使用自身场景与渲染检查 |
 | 品牌片、企业或城市片 | brand-film-director |
 | 产品广告、TVC | tvc-director |
 | 活动开场、发布会、盛典 | event-opener-director |
@@ -120,6 +121,7 @@ python -X utf8 skills/zongkong/scripts/audit_skill_capabilities.py
 python -X utf8 skills/zongkong/scripts/run_e2e_workflow_tests.py
 python -X utf8 skills/reference-visual-library/scripts/validate_reference_library.py
 python -X utf8 -m unittest discover -s skills/zongkong/tests
+python -X utf8 -m unittest discover -s skills/blender-production-director/tests -v
 python -X utf8 -m unittest discover -s skills/project-thread-orchestrator/tests
 node --test skills/banana-image-generator/scripts/generate-banana-images.test.mjs skills/project-state-manager/scripts/manage-project-state.test.mjs skills/workflow-sync-manager/scripts/sync-workflow.test.mjs skills/kling-api/scripts/kling_api.test.mjs
 ```

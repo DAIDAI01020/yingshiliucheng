@@ -2,6 +2,7 @@
   "schema_version": 1,
   "ownership_rule": "Every capability has exactly one decision owner. Supporting skills may contribute but must not replace or contradict the owner.",
   "capabilities": [
+    {"capability_id": "blender_3d_production", "owner": "blender-production-director", "supporters": ["style-reference-director", "image-qc-director", "video-qc-director", "project-state-manager", "asset-librarian"], "user_facing": true},
     {"capability_id": "top_level_routing", "owner": "zongkong", "supporters": [], "user_facing": true},
     {"capability_id": "xiaohongshu_account_operations", "owner": "xiaohongshu-operator", "supporters": ["xiaohongshu", "project-state-manager"], "user_facing": true},
     {"capability_id": "xiaohongshu_post_production_and_publish_handoff", "owner": "xiaohongshu", "supporters": ["xiaohongshu-operator", "style-reference-director", "frame-vision-director", "prompt-platform-auditor", "image-qc-director", "revision-director", "asset-librarian", "project-state-manager"], "user_facing": true},

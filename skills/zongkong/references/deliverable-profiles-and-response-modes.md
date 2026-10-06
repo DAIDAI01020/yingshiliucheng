@@ -14,6 +14,9 @@ Use this reference to select task-specific prompt requirements, user-visible out
 
 | Profile | Required accuracy | Apply only when relevant | Do not require by default |
 | --- | --- | --- | --- |
+| `three_d_asset` | source/version, scale/units, geometry, materials, editability, dependencies and export requirements | deformation topology, UV/baking, destination import tests | image-prompt audit, render camera for model-only work, exact dimensions inferred from one image |
+| `three_d_render` | scene/camera, reference/style, engine, color management, dimensions, dependencies, actual readable output | alpha, passes, compositor, multiple ratios | AI provider prompt/generation gates, animation fields for a still |
+| `three_d_animation` | editable scene/rig, fps/range, action/camera timing, cache dependencies, complete frame evidence and playback | simulation, sound, export/encoding | universal breath tail, assumed AI platform, image sequences counted as movies |
 | `live_action_people` | visible subject, performance state, scene, composition, motivated light, color/material, identity continuity, realism risks | camera/lens/depth, mother-library application, skin/hand controls | typography, product geometry, stage-safe zones |
 | `product_structure` | exact structure, proportions, material, color, logo/text policy, placement, reflections | camera/light when photographic; motion physics for video | skin realism, hook audit, breath tail |
 | `commercial_kv` | claim/hook, first-read hierarchy, composition, negative space, title/logo/sponsor-safe zones, ratio | product or live-action extension; reference system when aesthetic continuity matters | shot audit, breath tail, full scene map for one master KV |
