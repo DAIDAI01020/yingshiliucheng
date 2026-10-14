@@ -10,6 +10,11 @@
     "route": "__ROUTE__",
     "deliverable_type": "storyboard_execution",
     "main_line": "short_drama_story",
+    "format_spec": {
+      "master_ratio": "",
+      "delivery_ratios": [],
+      "framing_notes": ""
+    },
     "reference_source": "none",
     "mother_library_route": "short-drama-story-library.md + shared-elite-cinematography.md",
     "platform_target": {

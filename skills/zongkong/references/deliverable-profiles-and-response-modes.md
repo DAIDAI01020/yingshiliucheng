@@ -14,6 +14,8 @@ Use this reference to select task-specific prompt requirements, user-visible out
 
 | Profile | Required accuracy | Apply only when relevant | Do not require by default |
 | --- | --- | --- | --- |
+| `audio_stems` | source stream, true speech/music/sfx labels, aligned duration/channels, source offset, actual decodable files | model/config identity and listening review for leakage/transients | generative no-music policy, AI image/video prompt gates, accompaniment relabeled as pure effects |
+| `subtitle_srt` | spoken content, source timeline, valid SRT timing, confirmed body formatting, actual UTF-8 file | word alignment, language, listening/name/number review | mandatory separation, script rewriting/translation, punctuation removal from timecodes |
 | `three_d_asset` | source/version, scale/units, geometry, materials, editability, dependencies and export requirements | deformation topology, UV/baking, destination import tests | image-prompt audit, render camera for model-only work, exact dimensions inferred from one image |
 | `three_d_render` | scene/camera, reference/style, engine, color management, dimensions, dependencies, actual readable output | alpha, passes, compositor, multiple ratios | AI provider prompt/generation gates, animation fields for a still |
 | `three_d_animation` | editable scene/rig, fps/range, action/camera timing, cache dependencies, complete frame evidence and playback | simulation, sound, export/encoding | universal breath tail, assumed AI platform, image sequences counted as movies |

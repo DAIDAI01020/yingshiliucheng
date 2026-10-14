@@ -2,6 +2,8 @@
   "schema_version": 1,
   "ownership_rule": "Every capability has exactly one decision owner. Supporting skills may contribute but must not replace or contradict the owner.",
   "capabilities": [
+    {"capability_id": "cinematic_audio_stem_separation", "owner": "audio-stem-separator", "supporters": ["asset-librarian", "project-state-manager"], "user_facing": true},
+    {"capability_id": "speech_to_editing_srt", "owner": "video-srt-director", "supporters": ["audio-stem-separator", "asset-librarian", "project-state-manager"], "user_facing": true},
     {"capability_id": "blender_3d_production", "owner": "blender-production-director", "supporters": ["style-reference-director", "image-qc-director", "video-qc-director", "project-state-manager", "asset-librarian"], "user_facing": true},
     {"capability_id": "top_level_routing", "owner": "zongkong", "supporters": [], "user_facing": true},
     {"capability_id": "xiaohongshu_account_operations", "owner": "xiaohongshu-operator", "supporters": ["xiaohongshu", "project-state-manager"], "user_facing": true},

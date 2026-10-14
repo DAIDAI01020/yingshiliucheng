@@ -1,6 +1,6 @@
 ---
 name: short-drama-director
-description: Short drama and vertical micro-series director for AI film workflows. Use when creating or adapting 短剧, 微短剧, 竖屏剧情, 连续剧情短片, finished scripts, existing storyboards, reference-image-driven scenes, character-driven episodes, dramatic scripts, dialogue, character bibles, AI keyframes, and video prompts for narrative short-form series.
+description: Direct short drama and narrative micro-series in landscape 16:9, portrait 9:16, or a project-specified format. Use for concepts, novel adaptation, finished scripts, storyboards, character continuity, scene coverage, AI keyframes and video production.
 ---
 
 # Short Drama Director
@@ -20,7 +20,7 @@ hook-audit -> character-continuity -> scene visual direction -> shot audit -> pr
 Use it when the user says:
 
 ```text
-短剧 / 微短剧 / 竖屏短剧 / 剧情短片 / 连续剧情 / 分集 / 第一集 / 人设 /
+短剧 / 微短剧 / 横屏短剧 / 竖屏短剧 / 16:9 / 剧情短片 / 连续剧情 / 分集 / 第一集 / 人设 /
 剧本对白 / 已有稿子 / 已有分镜 / 帮我拆分镜 / 参考图做短剧 / 短剧出图 / 短剧视频
 ```
 
@@ -42,6 +42,10 @@ Use it when the user says:
 | `$image-qc-director` | 生成后 QC 与重出建议 |
 
 ## Formal Short-Drama Default
+
+Short drama is a narrative form, not an aspect ratio or fixed runtime. Inherit `format_spec` from `project-intake.json`: `master_ratio`, `delivery_ratios`, and `framing_notes`. A supplied project ratio takes precedence over templates and provider defaults; never infer 9:16 from “短剧” or 16:9 from a borrowed workflow. If absent, continue script/scene work and resolve the ratio before composition or generation. Preserve a specified 16:9 project throughout.
+
+For novel adaptation, recurring cameras, candidate comparison or revisions in multi-shot production, read [references/adaptation-and-shot-production.md](references/adaptation-and-shot-production.md). It extends the existing owners and state chain; simple one-shot work needs only its relevant part.
 
 When the user provides a script, finished draft, storyboard, or reference images, do not jump directly to image prompts.
 
@@ -67,7 +71,7 @@ Formal default order:
 Optimized formal gate:
 
 ```text
-hook-audit: prove the first 3-8 seconds have a hook, an audience question, an information gap, conflict entry, payoff/cliffhanger, and AI execution risk control.
+hook-audit: assess the opening against the approved runtime, audience and narrative intent; 3-8 seconds is a fast-feed example, not a rule for every drama. Record audience question, information gap, conflict entry, payoff/cliffhanger where applicable, and AI execution risk control.
 character-continuity: lock recurring character face, hair, age/body, costume, performance, relationship state, reference-image roles, generation anchor, allowed scene changes, and forbidden drift.
 ```
 
@@ -105,6 +109,8 @@ narrative_function / coverage_role
 approval_class: anchor / hero / coverage / insert / bridge
 risk_level
 previous_shot_id / dependencies
+ratio / camera_id / camera_reference_shot_id / reference_roles
+source_evidence / frame_selection when applicable
 continuity_in / continuity_delta / continuity_out
 character, costume, prop, emotion, eyeline, camera-axis, background, and light state
 image prompt / approved first frame / video prompt / run / video / technical QC / semantic QC paths
@@ -123,6 +129,8 @@ character and location anchors
 ```
 
 Do not let a shot skip production states. A failed shot becomes `blocked`; preserve accepted siblings and resume only the affected shot. Before the next shot, bind `continuity_in.inherits_from` to the previous shot when physical or emotional state carries forward.
+
+Editorial order (`previous_shot_id`) alone does not require sequential generation. Record actual image reference dependencies through `camera_reference_shot_id` and semantic continuity through `continuity_in.inherits_from`; keep `dependencies` for predecessors that require completed clip QC. When an upstream prompt, reference, format or continuity changes, invalidate that shot and its dependent descendants; retained files are historical until reviewed/rebuilt. Do not regenerate unaffected siblings.
 
 ## Good Style Behavior
 

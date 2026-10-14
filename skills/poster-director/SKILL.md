@@ -68,6 +68,8 @@ Do not output only `生成一张海报`. First decide the poster job.
 
 ## Poster Strategy
 
+For concrete concept comparisons, Chinese typography, editable layout, series variants and actual-export review, use [design system and layout review](../kv-director/references/design-system-and-layout-review.md). Apply it to this poster's story hook and existing safe-area plan; it does not transfer narrative-poster ownership to the KV director or require a new approval round.
+
 A good poster direction must state:
 
 ```text

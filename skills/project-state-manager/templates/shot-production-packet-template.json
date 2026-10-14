@@ -1,5 +1,11 @@
 {
   "schema_version": 1,
+  "ratio": "",
+  "camera_id": "",
+  "camera_reference_shot_id": "",
+  "reference_roles": [],
+  "source_evidence": [],
+  "frame_selection": {},
   "project_root": "",
   "shot_id": "S01",
   "episode_id": "E01",

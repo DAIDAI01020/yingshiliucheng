@@ -42,10 +42,14 @@ prompt_only 是只交付提示词的任务模式，不触发生成。正式项�
 
 从已有有效输入进入相应阶段。已定方案不重新做概念，已定提示词只改平台时直接编译。先起草场景与镜头，再审核并冻结相关决定；不要求场景草稿先具备依赖它才能产出的最终风格锁。
 
+短剧同时支持 16:9、9:16 和指定画幅；比例从项目传到分镜、首帧与视频，时长和叙事节奏单独确定。[短剧制作扩展](skills/short-drama-director/references/adaptation-and-shot-production.md)借鉴 ViMax 的原著检索、机位参考和候选首帧比较，复用现有导演与状态管理。上游修改会标记受影响镜头待复核，保留旧素材及无关镜头；制作看板显示画幅、参考关系和下一批具备条件的镜头。原著证据与视觉选择由相应技能执行，不宣称已安装 ViMax 或自动视觉评判服务。
+
 ## 专项入口
 
 | 交付物 | 负责人 |
 | --- | --- |
+| 人声、音乐、音效三轨分离 | audio-stem-separator；保留源时间轴，核实模型语义及实际音轨 |
+| 视频声音转剪辑用 SRT、字幕正文整理 | video-srt-director；保留时间码和数字，按已确认格式处理正文，转写后试听校对 |
 | Blender 模型、场景、材质灯光、动画模拟、渲染与可编辑工程 | blender-production-director；方案/预览/正式制作按需进入，纯三维使用自身场景与渲染检查 |
 | 品牌片、企业或城市片 | brand-film-director |
 | 产品广告、TVC | tvc-director |
@@ -122,6 +126,8 @@ python -X utf8 skills/zongkong/scripts/run_e2e_workflow_tests.py
 python -X utf8 skills/reference-visual-library/scripts/validate_reference_library.py
 python -X utf8 -m unittest discover -s skills/zongkong/tests
 python -X utf8 -m unittest discover -s skills/blender-production-director/tests -v
+python -X utf8 -m unittest discover -s skills/audio-stem-separator/tests -v
+python -X utf8 -m unittest discover -s skills/video-srt-director/tests -v
 python -X utf8 -m unittest discover -s skills/project-thread-orchestrator/tests
 node --test skills/banana-image-generator/scripts/generate-banana-images.test.mjs skills/project-state-manager/scripts/manage-project-state.test.mjs skills/workflow-sync-manager/scripts/sync-workflow.test.mjs skills/kling-api/scripts/kling_api.test.mjs
 ```

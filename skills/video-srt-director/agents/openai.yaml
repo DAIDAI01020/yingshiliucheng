@@ -1,0 +1,4 @@
+interface:
+  display_name: "视频字幕 SRT"
+  short_description: "根据视频声音生成剪辑用字幕，正文去逗号句号问号感叹号并用三个空格断句"
+  default_prompt: "使用 $video-srt-director 根据视频声音生成剪辑用 SRT，字幕正文去掉逗号、句号、问号和感叹号，同条断句使用三个半角空格。"

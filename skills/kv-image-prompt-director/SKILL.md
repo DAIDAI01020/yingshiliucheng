@@ -71,6 +71,8 @@ source_prompt:
 
 ### No-text base art
 
+Inherit the resolved title/image relationship, exact negative-space placement and rendition-specific recomposition from the director's [layout decisions](../kv-director/references/design-system-and-layout-review.md). Describe these spatially in the image prompt; keep actual copy/font instructions in `post_typography_plan`. If the KV will animate, preserve its static/hero/ambient layer roles rather than inventing motion here.
+
 Preserve the primary visual hook, focal hierarchy, gaze path, negative space, title/logo/sponsor zones, and ratio. Make typography space visibly usable. Do not ask the image model for final readable text or marks.
 
 ### Subject/product asset

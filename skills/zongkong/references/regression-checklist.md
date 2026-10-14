@@ -433,6 +433,20 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Detect and report the missing runtime; retain independent work and do not claim real scene/render validation.
     - Technical/host-side tests, image sequences and script output are not substitutes for actual movie delivery.
 
+93. `把视频声音分成人声、音乐和音效`
+    - Route to cinematic audio separation with the actual selected source stream.
+    - Require a real speech/music/sfx model; no accompaniment/residual relabeling or fake silent third stem.
+    - Keep source duration, offsets and prior versions; technical decode is not listening approval.
+
+94. `根据视频声音出剪辑用SRT，正文不要逗号句号问号感叹号，断句三个空格`
+    - Route to the subtitle owner, retaining source timing and spoken content.
+    - Cue-body phrase breaks use exactly three ASCII spaces; SRT timestamps, indices, zero and other digits survive unchanged.
+    - Clear speech needs no mandatory separation. No fake words over silence or arbitrary interpolated timing.
+
+95. `这个SRT只整理标点`
+    - Read the existing file, retain cue timing and source, write a new actual SRT.
+    - Preserve other punctuation and ordinary English spaces unless requested; review numeric semantics.
+
 ## Boundary Checks
 
 Xiaohongshu operations smoke scenarios:
@@ -517,6 +531,7 @@ From the repository root:
 python -X utf8 skills/zongkong/scripts/validate_workflow_contracts.py
 python -X utf8 skills/zongkong/scripts/audit_skill_capabilities.py
 python -X utf8 -m unittest discover -s skills/zongkong/tests
+python -X utf8 -m unittest discover -s skills/project-state-manager/tests -v
 python -X utf8 -m unittest discover -s skills/blender-production-director/tests -v
 node --test skills/banana-image-generator/scripts/generate-banana-images.test.mjs
 node --test skills/project-state-manager/scripts/manage-project-state.test.mjs

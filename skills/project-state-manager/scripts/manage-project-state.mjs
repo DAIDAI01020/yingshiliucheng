@@ -1034,6 +1034,22 @@ async function checkShortDramaGeneration(paths, manifest) {
   const generationReady = await readJson(stateFiles.generationReady, null);
   const generationPacket = generationReady?.generation_ready_packet;
   const generationReadyMissing = generationPacket ? generationReadyMissingFields(generationPacket) : ["generation-ready-packet"];
+  // New projects lock delivery formats in intake; legacy projects retain their existing gate.
+  const format = intakePacket?.format_spec;
+  if (format) {
+    const ratioKey = (value) => {
+      const match = /^(\d+):(\d+)$/.exec(String(value || ""));
+      if (!match || Number(match[1]) <= 0 || Number(match[2]) <= 0) return null;
+      return Number(match[1]) / Number(match[2]);
+    };
+    const master = ratioKey(format.master_ratio);
+    const deliveries = Array.isArray(format.delivery_ratios) ? format.delivery_ratios : [];
+    const allowed = [master, ...deliveries.map(ratioKey)];
+    const ratio = ratioKey(generationPacket?.ratio);
+    if (master === null || allowed.includes(null)) generationReadyMissing.push("project-format");
+    if (ratio === null) generationReadyMissing.push("explicit-ratio");
+    else if (!allowed.includes(ratio)) generationReadyMissing.push("ratio-not-in-project-format");
+  }
   gates.generationReady = generationReadyMissing.length === 0;
   if (!gates.generationReady) missingFields.push("generation-ready");
 

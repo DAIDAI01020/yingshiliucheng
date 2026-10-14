@@ -170,6 +170,8 @@ For screen work, choose one `primary_large_screen_adaptation` and at most one su
 
 ## KV Strategy
 
+For typography relationships, alternative directions, series consistency or rendered-layout review, apply [design system and layout review](references/design-system-and-layout-review.md) within the existing direction packet. Reuse an approved direction; do not add a mandatory manifesto or choice round. The existing large-screen experience rules retain authority over physical-screen adaptation.
+
 A good KV direction must state:
 
 ```text

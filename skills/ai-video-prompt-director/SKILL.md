@@ -5,6 +5,8 @@ description: Turn approved first frames, reference images/videos/audio, storyboa
 
 # AI Video Prompt Director
 
+For LED loops, animated event KV or reveals, inherit the screen owner's [motion design handoff](../led-screen-director/references/motion-design-and-delivery.md). Preserve quiet zones, motion hierarchy, shared screen phase and landing state. Exact countdown digits/timing belong to a deterministic composition route when required; do not promise that a generative-video prompt will reliably count or make a mathematically seamless loop.
+
 ## Role
 
 Own motion semantics and feasibility. Describe what changes over time and what must remain stable.

@@ -57,7 +57,7 @@ Always consider:
 
 ## 社媒切条
 
-Focus on hook, vertical composition, platform pacing, subtitles, and first 3 seconds.
+Focus on dramatic intent, character relationships, source continuity and the specified delivery format. Support 16:9 landscape, 9:16 portrait and custom ratios. Inherit runtime and viewing context; vertical composition and a first-three-seconds hook apply only when appropriate to the project.
 
 Adapt the master idea into:
 

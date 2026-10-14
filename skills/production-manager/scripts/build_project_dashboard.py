@@ -4,6 +4,7 @@ import argparse
 import html
 import json
 import os
+import runpy
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -108,6 +109,10 @@ def summarize(project_root: Path) -> dict:
     shots = shot_registry.get("shots", []) if isinstance(shot_registry.get("shots", []), list) else []
     shot_status = Counter(shot.get("status", "unknown") for shot in shots)
     shot_classes = Counter(shot.get("approval_class", "unknown") for shot in shots)
+    shot_helpers = runpy.run_path(str(Path(__file__).resolve().parents[2] / "project-state-manager" / "scripts" / "manage-shot-production.py"))
+    shot_audit = shot_helpers["audit"](shot_registry, root)
+    warnings.extend(shot_audit["errors"])
+    ready_images = shot_helpers["next_batch"](shot_registry, "prompt_ready", 4) if shot_audit["valid"] else []
     latest_ledger_by_key: dict[str, dict] = {}
     for event in ledger:
         if event.get("idempotency_key"):
@@ -132,10 +137,14 @@ def summarize(project_root: Path) -> dict:
     proposals = feedback.get("promotion_proposals", [])
     if shot_status.get("blocked"):
         next_actions.append(f"处理 {shot_status['blocked']} 个被阻塞镜头，保留已通过镜头")
+    if shot_status.get("stale"):
+        next_actions.append(f"复核 {shot_status['stale']} 个受上游修改影响的镜头，旧文件保留待比对")
     if shot_status.get("continuity_locked"):
         next_actions.append(f"优先完成 {shot_status['continuity_locked']} 个已锁连续性的镜头提示词")
-    if shot_status.get("prompt_ready"):
-        next_actions.append(f"按 anchor/hero 优先顺序生成 {shot_status['prompt_ready']} 个待出图镜头")
+    if ready_images:
+        next_actions.append("下一批具备参考条件的出图镜头：" + "、".join(shot["shot_id"] for shot in ready_images))
+    elif shot_status.get("prompt_ready"):
+        next_actions.append("待出图镜头仍有依赖或状态问题，先完成对应参考和检查")
     if proposals:
         next_actions.append(f"人工审核 {len(proposals)} 条基于重复证据的规则升级建议")
     if not next_actions:
@@ -192,6 +201,8 @@ def summarize(project_root: Path) -> dict:
             "registry": str(shot_registry_path) if shot_registry_path.is_file() else "",
             "status_counts": dict(sorted(shot_status.items())),
             "approval_class_counts": dict(sorted(shot_classes.items())),
+            "next_image_batch": [shot["shot_id"] for shot in ready_images],
+            "items": [{key: shot.get(key, "") for key in ["shot_id", "ratio", "camera_id", "camera_reference_shot_id", "status", "stale_reason"]} for shot in shots],
         },
         "warnings": warnings,
         "next_actions": next_actions[:5],
@@ -203,6 +214,9 @@ def rows(mapping: dict) -> str:
 
 
 def render_html(data: dict) -> str:
+    shot_rows = "".join("<tr>" + "".join(f"<td>{html.escape(str(shot[key]))}</td>" for key in
+        ["shot_id", "ratio", "camera_id", "camera_reference_shot_id", "status", "stale_reason"]) + "</tr>"
+        for shot in data["shots"].get("items", [])) or "<tr><td colspan='6'>暂无登记镜头</td></tr>"
     task_rows = "".join(
         "<tr>"
         f"<td>{html.escape(str(task['task_id']))}</td>"
@@ -230,6 +244,7 @@ body{{font-family:Segoe UI,Microsoft YaHei,sans-serif;background:#0b1020;color:#
 </div>
 <section><h2>分任务状态</h2><table><thead><tr><th>ID</th><th>任务</th><th>负责人</th><th>状态</th><th>交接/原因</th></tr></thead><tbody>{task_rows}</tbody></table></section>
 <section class="grid"><div class="card"><h2>任务状态统计</h2><table>{rows(data['threads']['status_counts'])}</table></div><div class="card"><h2>资产状态统计</h2><table>{rows(data['assets']['state_counts'])}</table></div><div class="card"><h2>镜头状态</h2><table>{rows(data['shots']['status_counts'])}</table></div><div class="card"><h2>运行账本</h2><table>{rows(data['runs']['ledger_status_counts'])}</table></div></section>
+<section><h2>镜头画幅与参考关系</h2><table><thead><tr><th>镜头</th><th>画幅</th><th>机位</th><th>参考镜头</th><th>状态</th><th>待复核原因</th></tr></thead><tbody>{shot_rows}</tbody></table></section>
 <section class="grid"><div class="card"><h2>下一步</h2><ol>{actions}</ol></div><div class="card"><h2>结构警告</h2><ul>{warnings}</ul></div></section>
 </main></body></html>"""
 

@@ -24,6 +24,8 @@ The dashboard combines manifest stages, registered child tasks, canonical shot-p
 
 When `production/shot-production-registry.json` exists, show status counts and prioritize blocked shots, continuity-locked prompt work, and `anchor/hero` generation before coverage/inserts. Never infer a shot as accepted merely because an image or video file exists; use the registry transition and semantic QC decision.
 
+Show each shot's ratio, camera setup, reference shot and stale reason. Derive the next image batch from the state owner's scheduler, so unresolved references are not presented as ready. Display stale shots as needing review while retaining their historical artifacts; this dashboard never approves or resubmits them.
+
 ## Track these stages
 
 | 阶段 | 状态 |

@@ -1,6 +1,6 @@
 ---
 name: short-drama-episode-writer
-description: Write short drama episode outlines, scene structures, opening hooks, conflict escalation, reversal points, cliffhangers, and next-episode leads for vertical micro-series and character-driven short-form drama.
+description: Write short drama episode outlines, scenes, hooks, reversals, endings and novel adaptations for landscape or portrait narrative series, preserving source evidence and the intended runtime.
 ---
 
 # Short Drama Episode Writer
@@ -12,6 +12,10 @@ Turn concept and characters into episode structure.
 Use when the user needs分集大纲, 单集结构, 场次安排, or wants an existing script tightened for short drama rhythm.
 
 ## Episode Rhythm
+
+Inherit the approved runtime, viewing context and narrative intent independently of aspect ratio. The table below is an example for roughly one-minute fast-feed episodes, not a required structure for 16:9, 9:16 or longer short drama. Preserve deliberate pauses, ensemble scenes and closed endings when the story requires them.
+
+For novel/long-source adaptation, follow the director's [source evidence rules](../short-drama-director/references/adaptation-and-shot-production.md): chapter/event map, relevant original passages, shared character facts, and explicit adaptation changes. Do not write later episodes from a compressed summary alone.
 
 | 段落 | 功能 |
 | --- | --- |
@@ -55,7 +59,7 @@ payoff_or_cliffhanger
 ai_execution_risk
 ```
 
-The hook check is not a rewrite request by default. If the script already exists, diagnose whether the first 3-8 seconds are strong enough and suggest targeted fixes only where the hook, information gap, or conflict entry is weak.
+The hook check is not a rewrite request by default. Review the opening against the approved episode length and viewing context; use 3-8 seconds only for fast-feed pacing when applicable. Suggest targeted fixes where information, character motivation or conflict entry is weak, without forcing all dramas into the same timing.
 
 ## Approval Evidence
 

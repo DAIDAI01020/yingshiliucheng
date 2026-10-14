@@ -81,6 +81,8 @@ If the project state lacks the needed asset, prompt, first frame, or audit recor
 
 ## Short-Drama State Workflow
 
+For shot format inheritance, camera reference graphs, candidate selection records or dependency invalidation, read [references/shot-production-extensions.md](references/shot-production-extensions.md). Keep `project-intake.json -> project_intake_packet.format_spec` as the format authority; shot packets and generation packets inherit its declared ratios without assuming portrait. Preserve existing project ratios and do not migrate real productions merely because this skill was updated.
+
 For reusable short-drama projects, initialize the project with:
 
 ```powershell

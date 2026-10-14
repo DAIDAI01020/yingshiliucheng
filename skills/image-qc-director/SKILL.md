@@ -21,6 +21,10 @@ Judge against:
 
 Do not judge only by whether the image looks beautiful.
 
+For poster/KV deliverables, apply the relevant [rendered-layout checks](../kv-director/references/design-system-and-layout-review.md): base art and finished typography are separate review states. Inspect supplied final layouts at full size and reduced viewing size, verify actual Chinese glyphs/copy and compare requested variants. For LED, use stage masks and presenter occupancy rather than generic social-banner safe zones; do not certify motion from a still.
+
+For short-drama candidate first frames, use the director's [candidate comparison rules](../short-drama-director/references/adaptation-and-shot-production.md). Inspect actual candidates at the requested 16:9, 9:16 or custom ratio against identity, geography, eyeline and prop state; record observations and selection reason in `frame_selection`. Select none if all fail. A selected still does not pass video QC, and comparison does not itself authorize another paid run.
+
 ## Route Authority Boundary
 
 Inherit `deliverable_profile`, `response_mode`, `qc_mode`, route decisions, and project state from `$zongkong` when present.

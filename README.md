@@ -18,9 +18,11 @@
 
 | 需求 | 主要负责能力 |
 | --- | --- |
+| 现有音视频分成人声、音乐和音效三轨 | [audio-stem-separator](skills/audio-stem-separator/SKILL.md)；真正三轨模型、同步WAV与试听检查 |
+| 根据视频声音生成剪辑用 SRT、整理已有字幕 | [video-srt-director](skills/video-srt-director/SKILL.md)；语音转写、时间轴及已确认字幕格式 |
 | Blender 建模、材质灯光、动画模拟、渲染及可编辑工程 | [blender-production-director](skills/blender-production-director/SKILL.md)，按需复用现有导演、审核和项目管理 |
 | 影视提案、广告、品牌片 | `yingshisheji` 和对应专项导演 |
-| 短剧 | `short-drama-director`，按需进入人物、分集、场景、镜头与对白能力 |
+| 短剧（16:9、9:16 及指定比例） | `short-drama-director`，按需进入原著依据、人物、分集、场景、机位参考与候选首帧审核 |
 | 商业或活动 KV | `kv-director` → `kv-image-prompt-director` |
 | 电影/短剧海报 | `poster-director` |
 | 一般静帧或改图 | `frame-vision-director` |

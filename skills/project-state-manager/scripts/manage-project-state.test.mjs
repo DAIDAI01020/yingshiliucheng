@@ -29,6 +29,34 @@ async function state(root) {
   };
 }
 
+test("new short-drama intake leaves ratio unresolved instead of assuming portrait", async (t) => {
+  const root = await fixture(t);
+  const intake = JSON.parse(await fs.readFile(path.join(root, "project-intake.json"), "utf8"));
+  assert.equal(intake.project_intake_packet.format_spec.master_ratio, "");
+  const missing = command(root, "check").currentState.generationReadyMissingFields;
+  assert.ok(missing.includes("project-format"));
+  assert.ok(missing.includes("explicit-ratio"));
+});
+
+test("explicit generation ratio must match master or declared rendition", async (t) => {
+  const root = await fixture(t);
+  const intakePath = path.join(root, "project-intake.json");
+  const intake = JSON.parse(await fs.readFile(intakePath, "utf8"));
+  intake.project_intake_packet.format_spec = { master_ratio: "16:9", delivery_ratios: ["9:16", "4:3"] };
+  await write(intakePath, intake);
+  for (const ratio of ["16:9", "9:16", "4:3", "32:18"]) {
+    await write(path.join(root, "generation-jobs", "generation-ready.json"), { generation_ready_packet: { ratio } });
+    const missing = command(root, "check").currentState.generationReadyMissingFields;
+    assert.ok(!missing.includes("ratio-not-in-project-format"), ratio);
+    assert.ok(!missing.includes("explicit-ratio"), ratio);
+  }
+  for (const ratio of ["1:1", "0:9", ""]) {
+    await write(path.join(root, "generation-jobs", "generation-ready.json"), { generation_ready_packet: { ratio } });
+    const missing = command(root, "check").currentState.generationReadyMissingFields;
+    assert.ok(missing.includes("ratio-not-in-project-format") || missing.includes("explicit-ratio"), ratio);
+  }
+});
+
 test("draft status cannot be overridden by an approved example", async (t) => {
   const root = await fixture(t);
   await write(path.join(root, "references", "scene-map.md"), "# Scene\nstatus: draft\n\n```text\nstatus: approved\n```\n");

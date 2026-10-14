@@ -12,6 +12,8 @@ Formal generation requires `status: approved` or `status: complete`.
 
 ## Scene Style Map
 
+Inherit `format_spec` from project intake. Record the actual ratio for each delivery; 16:9 and 9:16 are both supported. Bind recurring `camera_id` setups and their approved `camera_reference_shot_id` separately from edit order. Preserve original-source evidence pointers for adapted scenes.
+
 | 场戏 | 覆盖段落/镜头 | upstream_source | 场景功能 | 地点/时间 | 主体/人物 | 母库应用机制 | 本场风格机制 | mother_library_translation | 顶级摄影锚点转译 | 景别/焦段倾向 | 光线 | 色彩 | 材质 | 构图/调度 | 人物表演状态 | 参考图角色 | AI风险 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 |

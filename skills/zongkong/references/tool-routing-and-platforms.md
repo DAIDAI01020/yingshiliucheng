@@ -21,6 +21,8 @@ Use the independent action, platform/model, and creative-state precedence in [th
 
 | User intent | Route |
 | --- | --- |
+| 将现有音频/视频声音分成人声、音乐、音效 / 提取对白或去配乐 | `$audio-stem-separator` -> inspect selected audio stream -> verified cinematic three-stem backend -> actual synchronized WAVs + source offset + listening review；vocals/instrumental is not three-track cinematic separation |
+| 根据视频声音出字幕 / 语音转SRT / 剪辑用SRT / 清理现有字幕标点 | `$video-srt-director` -> existing media/timed transcript -> ASR when needed -> timing/body cleanup -> actual UTF-8 SRT；preserve timestamp syntax and digits；apply its confirmed text style only to cue bodies |
 | Blender / 已有.blend / 可编辑三维模型或场景 / 建模材质灯光 / 骨骼动画 / 几何节点 / 三维模拟渲染 | `$blender-production-director` -> actual environment/scene inspection -> applicable 3D modules -> versioned scene and verified outputs；plan stays plan；rendered is not QC-approved；a 3D-looking AI image alone stays on its image route |
 | 新建工程 / 继续工程 / 项目根目录 / 输出路径 / 文件散落 / 目录混乱 / 不要放总文件夹 / 整理工程但先不移动 | `$project-folder-director` -> `$project-state-manager` / `$asset-librarian` |
 | 大稿件多部分 / 一个总项目拆多个聊天 / 上下文隔离 / 分聊天并行 / 总控汇总 / 同步分聊天 | explicit separate-chat request -> project/root and director split -> `$project-thread-orchestrator` with authorization for the concrete plan -> same-project local child threads (max 4)；reuse existing registered tasks for continuation/status；a split proposal alone creates no chats |
@@ -56,6 +58,8 @@ For image故事板 routes, do not call built-in imagegen until `image_storyboard
 ```
 
 ## Image Routing
+
+Existing-media audio separation and subtitle transcription take precedence over generic “video” keyword routing. They are local postproduction operations, without mandatory prompt-platform audit, regeneration or film-project intake. If both are requested, keep the speech stem aligned to the original timeline before SRT creation; separation is optional for clear speech.
 
 Explicit Blender or editable 3D requirements take precedence over generic image/video/3D-text rows. Blender rendering uses its own task and scene checks, not AI image/video prompt gates. Preserve an existing film/KV/stage creative owner while Blender owns scene implementation. Rendering a first frame does not by itself authorize AI-video submission.
 

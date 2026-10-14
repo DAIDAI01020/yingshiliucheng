@@ -14,6 +14,8 @@ description: 活动开场片专项导演。用于发布会、颁奖礼、盛典�
 
 ## Structure
 
+For countdowns, animated KV or title reveals, use the LED director's [motion timing and delivery rules](../led-screen-director/references/motion-design-and-delivery.md). Own the reveal/hold/host-or-lighting cue; let the screen owner validate geometry and motion constraints. Preserve an approved event structure rather than treating the outline below as mandatory.
+
 1. 空间、时代、行业或情绪开篇。
 2. 主题元素聚合。
 3. 品牌/人物/行业能量推进。

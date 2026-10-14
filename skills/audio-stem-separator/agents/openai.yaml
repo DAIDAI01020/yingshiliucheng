@@ -1,0 +1,4 @@
+interface:
+  display_name: "影视音频分轨"
+  short_description: "将影视混音分成人声、音乐和音效三轨，检查同步并交付剪辑文件"
+  default_prompt: "使用 $audio-stem-separator 将这段音频或视频的声音分成人声、音乐和音效三条同步音轨。"

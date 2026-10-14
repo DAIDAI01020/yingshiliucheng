@@ -35,6 +35,10 @@ Use when the user provides:
 
 ## Scene Merging Rules
 
+Inherit the project's `format_spec` and actual shot `ratio` from intake; short drama supports 16:9, 9:16 and other specified formats. Preserve the ratio in scene, image and video handoffs. For multi-format scenes, design each rendition's framing while preserving identities, axis and prop state; never assume a centre crop preserves the scene. See the short-drama director's [format and camera reference rules](../short-drama-director/references/adaptation-and-shot-production.md).
+
+For recurring setups, add `camera_id`, camera position/height/direction, axis side and reference role to the existing coverage packet. Bind `camera_reference_shot_id` to the approved frame actually used, not automatically the preceding edit. Inherit current blocking and prop changes instead of copying outdated state. The state owner validates this reference graph before dependent batches.
+
 Do not create one image prompt per script sentence by default.
 
 Merge shots into scene-level concepts when they share:
@@ -141,7 +145,7 @@ Do not treat 大景、全景、远景 as decorative wide shots. Use them only wh
 后续正反打的轴线和背景侧
 ```
 
-For vertical short drama, prefer a readable master wide or medium-wide only when it clarifies geography, isolation, threat, or final pressure. After the master wide, all close/OTS/reaction prompts must preserve the same `scene_continuity_lock`.
+For 16:9, use readable lateral relationships, environmental clues and depth where appropriate. For 9:16, check that the master still communicates the important geography at viewing size. Choose shot size from narrative function in either format. After the master wide, all close/OTS/reaction prompts must preserve the same `scene_continuity_lock`.
 
 ### Continuity Reference Board Handoff
 
@@ -296,7 +300,7 @@ For managed projects, also preserve the state path or packet source in `upstream
 - Screens, phones, documents, monitors, case files, and court signs should not contain readable long text.
 - Complex fights, crying, kissing, crowds, and hand-object interaction need simplified shots.
 - Preserve character identity over fancy camera movement.
-- For vertical short drama, prioritize close-up, over-shoulder, two-shot, reaction shot, and controlled blocking.
+- Match coverage to the chosen frame and scene: 16:9 can carry lateral two-shots and spatial action; 9:16 needs attention to shoulder occlusion, vertical depth and readable faces. Neither format mandates a sequence of close-ups.
 - For same-scene coverage, missing scene_continuity_lock, background_continuity_lock, camera axis, eyeline direction, background side, or wide/master inheritance is a workflow gap, not a prompt-writing detail.
 - Missing applicable source, reference, continuity or director decisions must be resolved before final execution. Still-image handoffs do not require motion, ending or audio fields; camera/realism controls are profile-specific.
 

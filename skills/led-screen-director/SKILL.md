@@ -12,7 +12,9 @@ description: LED大屏与舞美视觉专项导演。用于发布会大屏、晚�
 - Avoid dense small text, fragile details, and uncontrolled edge motion.
 - Mention ratio, resolution, screen shape, and split-screen needs whenever available.
 
-## Output addition
+## Dynamic Screen Work
+
+For standby loops, animated KV, countdowns, reveals, chapter packages or live visuals, read [motion design and delivery](references/motion-design-and-delivery.md). Add its applicable `motion_design` fields to the existing handoff, retaining actual screen geometry, protected stage areas and the chosen execution route. A still brief needs no motion package; a real-time brief requires an actual runtime rather than a rendered-video claim.
 
 ## P1 No Lazy Handoff
 
