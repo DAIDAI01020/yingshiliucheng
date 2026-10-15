@@ -81,6 +81,8 @@ Only record returned media and verified paths. Inline-only results remain pendin
 
 ## Upload And Publish Assistance
 
+For service-backed publishing of a ready pack, hand off to [Xiaohongshu Publisher](../xiaohongshu-publisher/SKILL.md), which owns transport, account verification and submission receipts. Keep creative and QC ownership here. The publisher's REST endpoints submit immediately or schedule; draft-only filling stays with the browser path below. Both paths reuse the same post_id and account receipts; never switch transports to retry an uncertain submission. Daily continuation uses [daily execution](../xiaohongshu-operator/references/daily-execution.md).
+
 Prepare the exact ordered files, title, body, tags and applicable AI-content disclosure before browser work. A no-text art cover does not become a poster-design task just because it is the first image.
 
 When upload is requested, read the available in-app browser skill first. Use the computer-use skill only if native desktop/file-picker interaction is needed and supported. Inspect the actual creator page; do not guess UI controls, accepted limits, login state or success.

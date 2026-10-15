@@ -44,6 +44,8 @@ If goal/account data is absent, produce a clearly labeled provisional cold-start
 
 ## Operating Cycle
 
+For daily preparation, recurring authorized publishing, queue continuation or scheduling setup, read [Daily execution](references/daily-execution.md). It defines execution modes, required schedule/account settings and receipt-aware continuation. Use [Xiaohongshu Publisher](../xiaohongshu-publisher/SKILL.md) for transport after xiaohongshu has a ready reviewed pack; do not make the operator a second publisher.
+
 1. **Read the plan and actual state:** current annual chapter, month/week calendar, pending post IDs, approved direction, real production/publication state, then any relevant feedback.
 2. **Choose the next planned unit:** continue the earliest appropriate unfinished slot; preserve the month's visual progression and weekly capacity. Do not invent a fresh topic simply because a new chat turn started.
 3. **Resolve only needed changes:** check duplication, visual readability, continuity and feasibility. Put extra ideas in reserve; record substitutions without rewriting the entire series.

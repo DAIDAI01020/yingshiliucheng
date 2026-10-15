@@ -71,6 +71,8 @@ prompt_only 是只交付提示词的任务模式，不触发生成。正式项�
 
 ## 小红书艺术图旁路
 
+审核成品的服务端发布交给 [小红书发布执行](skills/xiaohongshu-publisher/SKILL.md)：本地 xiaohongshu-mcp 接口、账号校验、内容指纹、一次提交和真实回执。每日准备/发布遵循 [每日执行](skills/xiaohongshu-operator/references/daily-execution.md)，复用排期与未完成队列。服务接受提交、平台预约成功和实际观察到发布分别记录；安装能力不等于登录、启用定时任务或实测发布成功。
+
 年度主题、月度日历、周制作队列和每日续接由独立的 [小红书运营](skills/xiaohongshu-operator/SKILL.md) 负责，按需补充定位、包装和数据复盘。它向制作分支交付计划中的具体post_id与视觉简报，制作分支交回真实成品与发布记录；已有方向直接编排，不把逐篇“为什么发”或数据研究当作制作前提。已有明确制作brief或仅上传素材时，不重复跑账号定位。
 
 从总控进入 [小红书分支](skills/xiaohongshu/SKILL.md)，完整规则见 [神秘超现实艺术图流程](skills/xiaohongshu/references/surreal-art-workflow.md)。长期方向为“日常空间里的神秘超现实”，允许温柔、梦境和轻微不安；《日常之外》作为工作栏目名。原有影视场景设计和一日一镜仍按需使用。

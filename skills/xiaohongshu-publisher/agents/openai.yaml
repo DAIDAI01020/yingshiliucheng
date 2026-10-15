@@ -1,0 +1,6 @@
+interface:
+  display_name: "小红书发布执行"
+  short_description: "接收审核成品，检查账号与内容版本，执行发布或预约并保存防重复回执"
+  default_prompt: "使用 $xiaohongshu-publisher 检查现有成品包与发布记录，在已有授权范围内完成小红书发布或定时提交，并核实实际结果。"
+policy:
+  allow_implicit_invocation: true
