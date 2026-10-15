@@ -32,6 +32,14 @@ Use Chinese visible-frame instruction with concise English camera/lens/light/mat
 
 Put the strongest image target first. Keep one dominant visual goal per image. Assign narrow roles to every reference.
 
+For KV, product advertising, environments, and concept posters, use the relevant semantic owner's approved design. The original paired examples in `$banana-pro`'s `references/design-prompt-examples.md` illustrate adaptation; they do not replace the brief or become global style defaults.
+
+When producing paired built-in / Banana prompts, lock the same subject, concept, composition, palette, text, and reference roles across both. Adapt instruction structure only. Use explicit object relationships and visible light/material behavior where relevant; do not assert that Banana needs a fixed magic syntax or that wording alone guarantees better images.
+
+For manual website/app use, return copyable natural language plus aspect ratio and reference mapping as needed. Keep JSON, model IDs, and unsupported parameter suffixes outside the image prompt. Unless the selected execution interface explicitly supports a separate negative field, express a few relevant exclusions as natural-language constraints in the prompt.
+
+Keep typography/graphic tasks governed by shape, spacing, hierarchy, and medium. Use camera/perspective/light instructions for photographic or spatial tasks when they affect the intended image. Do not add cinema, megastructures, rim light, film grain, or lens brands by default.
+
 Use a compact prompt when the user requests speed/token saving. A compact prompt must still preserve exact structure, identity, composition, light, material, reference roles, ratio, and the few risks most likely to damage the output.
 
 Do not treat Banana as a fallback for built-in imagegen or vice versa.

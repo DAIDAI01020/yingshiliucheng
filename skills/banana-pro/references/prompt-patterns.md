@@ -2,6 +2,8 @@
 
 Use these patterns as compact starting points. Keep prompts specific to the user's subject and avoid copying placeholder text.
 
+For commercial KV, product advertising, environments, and concept posters, read [design-prompt-examples.md](design-prompt-examples.md). Use the approved creative direction from the relevant director; examples illustrate concrete composition and material decisions, not a universal style preset.
+
 ## Text-to-Image
 
 ```text
@@ -94,8 +96,8 @@ For multi-shot storyboard output, repeat the complete style, camera, lighting, c
 
 Before handing off, check:
 
-- The model is `google/gemini-3-pro-image-preview`.
-- `image_config.aspect_ratio` and `image_config.image_size` match the task.
+- For execution/API handoffs, the model matches the selected Banana variant and the execution owner's supported settings; do not silently switch models.
+- Aspect ratio and size match the task. Keep API fields out of manual copyable prompts.
 - Reference image roles are explicit when images are used.
 - Identity, product, UI, or scene continuity anchors are stated.
 - The prompt avoids random text, watermarks, QR codes, and unrelated objects.

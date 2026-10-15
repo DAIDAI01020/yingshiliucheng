@@ -48,12 +48,14 @@ Preserve requested aspect ratio or size when the user specifies them. Prefer `16
    - Multi-reference: use when character, scene, product, UI, or style references must be combined.
    - Asset generation: use specialized templates for character, scene, product, prop, or storyboard first-frame work.
    - Read `references/prompt-patterns.md` for reusable prompt structures.
+   - For commercial KV, product advertising, environment design, or concept posters, also read `references/design-prompt-examples.md`. Its example briefs are demonstrations, not project defaults or approved generation jobs.
 
 3. Produce a compact handoff.
-   - Include the OpenRouter model and `image_config`.
+   - For prompts the user will paste into a website or app, deliver the copyable Chinese prompt, recommended aspect ratio, and reference roles when needed. Omit API payloads and model IDs unless requested.
+   - For an execution/API handoff, include the selected model and `image_config`. Preserve the chosen Banana variant; the Pro defaults below do not override an explicit Nano Banana 2 target or the execution owner's model selection.
    - Provide the final prompt as a clean block, not a long explanation.
    - For image-reference workflows, list each input image role, such as `character reference`, `product reference`, `scene reference`, or `composition reference`.
-   - Include a short QA checklist for continuity, aspect ratio, subject fidelity, text legibility, and unwanted extra objects.
+   - Check continuity, aspect ratio, subject fidelity, text legibility, and unwanted extra objects internally. Show a short checklist when requested or when it materially helps the handoff.
 
 4. Add API details only when useful.
    - Read `references/openrouter-direct.md` when the user asks for raw API payloads, SDK shape, response parsing, or OpenRouter-specific request notes.
@@ -68,6 +70,8 @@ Write prompts as direct visual production instructions:
 
 - Lead with the subject and output type.
 - Specify composition, camera/framing, lighting, material, environment, and visual style.
+- Select fields by deliverable: graphic KV and illustrated posters need hierarchy, shape, spacing, typography, and medium; photographic products and environments need plausible light, material, perspective, and spatial relationships. Do not force camera brands or cinematic lighting into every design.
+- For paired built-in image / Banana prompts, preserve the approved concept, subject, composition, palette, reference roles, and exact text. Change only platform wording and supported settings; never invent a second concept while adapting.
 - Describe exact continuity anchors for characters, products, logos, colors, proportions, and UI layout.
 - Use positive constraints over long negative-prompt lists.
 - Avoid random text, watermarks, QR codes, subtitles, logos, or labels unless requested.
@@ -154,9 +158,11 @@ Use targeted retries instead of rewriting the whole prompt:
 
 ## Output Contract
 
-When preparing a Banana Pro handoff, use this shape:
+For manual website/app use, provide the final prompt first and only the settings the user needs to select. If no references were supplied, do not invent numbered input images. Do not promise exact product or character fidelity without an appropriate reference.
 
-```markdown
+For an execution/API Banana Pro handoff, use this shape (substitute the selected model/settings when the target is another Banana variant):
+
+````markdown
 ## Banana Pro Settings
 - model: `google/gemini-3-pro-image-preview`
 - modalities: `["image", "text"]`
@@ -176,7 +182,7 @@ When preparing a Banana Pro handoff, use this shape:
 
 ## QA Checklist
 [3-5 concise checks]
-```
+````
 
 For raw OpenRouter API requests, include a JSON or TypeScript payload using the same model ID and the `image_config` object.
 
@@ -207,4 +213,5 @@ H:\yingshi\skills\banana-pro\bin\banana-pro.cmd --dry-run "Generate a clean 16:9
 ## Resource Guide
 
 - Read `references/prompt-patterns.md` for task-specific prompt templates and examples.
+- Read `references/design-prompt-examples.md` for original paired image/Banana examples across KV, product advertising, environments, and concept posters, including reference and revision rules.
 - Read `references/openrouter-direct.md` for OpenRouter payload format, image reference input, response parsing, and source links.
