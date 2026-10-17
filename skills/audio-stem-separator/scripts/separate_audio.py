@@ -51,13 +51,52 @@ def model_config(path):
     return labels, rate
 
 
+def backend_profile_path():
+    explicit = os.environ.get("AUDIO_STEM_BACKEND_PROFILE")
+    if explicit:
+        return Path(explicit)
+    codex_root = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
+    return codex_root / "tools/audio-separation/backend.json"
+
+
+def resolve_backend(args):
+    """Reuse a persistent local installation; never install or download implicitly."""
+    profile_path = Path(args.backend_profile) if getattr(args, "backend_profile", None) else backend_profile_path()
+    profile = {}
+    if profile_path.is_file():
+        profile = json.loads(profile_path.read_text(encoding="utf-8-sig"))
+        if not isinstance(profile, dict) or profile.get("version") != 1:
+            raise ValueError("Unsupported audio backend profile: " + str(profile_path))
+        for key in ("backend_root", "backend_python", "config", "checkpoint"):
+            value = profile.get(key)
+            if value is not None and (not isinstance(value, str) or not Path(value).is_absolute()):
+                raise ValueError("Backend profile needs an absolute path for " + key)
+            if not getattr(args, key, None):
+                setattr(args, key, value)
+        for key in ("config", "checkpoint"):
+            expected = profile.get(key + "_sha256")
+            selected = getattr(args, key, None)
+            if expected and selected and profile.get(key) and Path(selected).resolve() == Path(profile[key]).resolve():
+                if Path(selected).is_file() and digest(selected) != expected:
+                    raise ValueError(key + " hash differs from the registered local model; inspect it before repair, do not redownload automatically.")
+    elif getattr(args, "backend_profile", None) or os.environ.get("AUDIO_STEM_BACKEND_PROFILE"):
+        raise ValueError("Explicit backend profile does not exist: " + str(profile_path))
+    args.model_type = getattr(args, "model_type", None) or profile.get("model_type", "bandit_v2")
+    if args.model_type not in ("bandit", "bandit_v2"):
+        raise ValueError("Unsupported cinematic model type in backend profile.")
+    return str(profile_path) if profile else None
+
+
 def doctor(args):
+    profile = resolve_backend(args)
     fields = {"backend_root": args.backend_root, "backend_python": args.backend_python,
               "config": args.config, "checkpoint": args.checkpoint}
     missing = []
     for name, value in fields.items():
         target = Path(value) if value else None
-        if target is None or not target.exists():
+        if target is None or (not target.is_dir() if name == "backend_root" else not target.is_file()):
+            missing.append(name)
+        elif name == "checkpoint" and target.stat().st_size == 0:
             missing.append(name)
     if args.backend_root and not (Path(args.backend_root) / "inference.py").is_file():
         missing.append("inference.py")
@@ -67,6 +106,7 @@ def doctor(args):
     if args.config and Path(args.config).is_file():
         model_config(args.config)
     return {"configured": not missing, "missing": missing, "inference_verified": False,
+            "backend_profile": profile, "local_paths": fields, "downloads_performed": False,
             "semantic_targets": ["speech", "music", "sfx"]}
 
 
@@ -112,6 +152,7 @@ def separate(args):
     record = {"status": "running", "source": str(original), "source_sha256": digest(original),
               "source_audio_stream": args.audio_stream, "source_audio_offset": source["source_offset"],
               "model_type": args.model_type, "config_sha256": digest(args.config), "checkpoint_sha256": digest(args.checkpoint),
+              "backend_profile": readiness["backend_profile"], "local_model_reused": True,
               "inference_script_sha256": digest(backend / "inference.py"), "listening_status": "not_reviewed"}
     manifest = root / "separation-manifest.json"
     def save():
@@ -165,7 +206,8 @@ def parser():
         p.add_argument("--" + name)
     for name, env in [("backend-root", "MSST_ROOT"), ("backend-python", "MSST_PYTHON"), ("config", "MSST_CONFIG"), ("checkpoint", "MSST_CHECKPOINT")]:
         p.add_argument("--" + name, default=os.environ.get(env))
-    p.add_argument("--model-type", choices=["bandit", "bandit_v2"], default="bandit_v2")
+    p.add_argument("--backend-profile", help="Persistent local backend JSON; defaults to CODEX_HOME/tools/audio-separation/backend.json")
+    p.add_argument("--model-type", choices=["bandit", "bandit_v2"], default=os.environ.get("MSST_MODEL_TYPE"))
     p.add_argument("--audio-stream", type=int, default=0)
     p.add_argument("--force-cpu", action="store_true")
     p.add_argument("--ffmpeg", default="ffmpeg")

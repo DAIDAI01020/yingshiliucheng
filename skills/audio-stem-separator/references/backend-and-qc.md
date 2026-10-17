@@ -10,6 +10,23 @@ Keep code/environment/model weights in a local tools/cache location, not the wor
 
 ## Commands
 
+### Persistent local reuse
+
+After the initial setup, save a version-1 JSON profile to `$CODEX_HOME/tools/audio-separation/backend.json` (fallback `~/.codex/tools/audio-separation/backend.json`). It contains absolute `backend_root`, `backend_python`, `config`, `checkpoint` paths, `model_type`, and preferably `config_sha256` / `checkpoint_sha256` from the verified files. This machine-specific file stays outside Git. For another location use `--backend-profile` or `AUDIO_STEM_BACKEND_PROFILE`.
+
+Explicit CLI fields override `MSST_*` environment values, which override the profile. A missing default profile reports missing configuration; a missing explicit profile or mismatching registered hash fails clearly. Neither case downloads anything. Inspect local files and repair registration before treating the model as absent. Retain matching configuration and model architecture; a partial download is not a valid checkpoint.
+
+With registration complete, ordinary calls are:
+
+```powershell
+python scripts/separate_audio.py doctor
+python scripts/separate_audio.py separate --input "PATH/video.mp4" --output-dir "PATH/project/audio-runs/v002"
+```
+
+Do not repeat clone, pip installation, model conversion or downloads per run. Keep output directories separate from the persistent runtime. Any setup downloader must reuse a complete checksum-verified file; only missing/corrupt weights or an explicitly chosen model/version change warrants another download. Loading a model into GPU/RAM is normal on a new process and is not downloading it again.
+
+### Explicit backend selection
+
 ```powershell
 python scripts/separate_audio.py doctor --backend-root "PATH/MSST" --backend-python "PATH/python.exe" --config "PATH/cinematic.yaml" --checkpoint "PATH/model.ckpt"
 python scripts/separate_audio.py separate --input "PATH/video.mp4" --output-dir "PATH/project/audio-runs/v001" --backend-root "PATH/MSST" --backend-python "PATH/python.exe" --config "PATH/cinematic.yaml" --checkpoint "PATH/model.ckpt" --model-type bandit_v2

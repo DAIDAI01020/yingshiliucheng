@@ -1,9 +1,12 @@
 import importlib.util
+import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
 import sys
 import unittest
+from unittest.mock import patch
 import wave
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "separate_audio.py"
@@ -17,6 +20,62 @@ class SeparationTests(unittest.TestCase):
         temp = tempfile.TemporaryDirectory(prefix="stem-test-")
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name)
+        environment = {k: v for k, v in os.environ.items() if not k.startswith("MSST_") and k != "AUDIO_STEM_BACKEND_PROFILE"}
+        environment["CODEX_HOME"] = str(self.root)
+        self.environment = patch.dict(os.environ, environment, clear=True)
+        self.environment.start()
+        self.addCleanup(self.environment.stop)
+
+    def profile(self):
+        backend = self.root / "backend"
+        backend.mkdir()
+        (backend / "inference.py").write_text("# fixture", encoding="utf-8")
+        checkpoint = self.root / "model.ckpt"
+        checkpoint.write_bytes(b"local fixture")
+        config = self.config(["speech", "music", "sfx"])
+        data = {"version": 1, "backend_root": str(backend), "backend_python": sys.executable,
+                "config": str(config), "checkpoint": str(checkpoint), "model_type": "bandit",
+                "checkpoint_sha256": audio.digest(checkpoint)}
+        profile = self.root / "tools/audio-separation/backend.json"
+        profile.parent.mkdir(parents=True)
+        profile.write_text(json.dumps(data), encoding="utf-8")
+        return profile, data
+
+    def test_persistent_profile_is_reused_without_network_or_process(self):
+        profile, data = self.profile()
+        for _ in range(2):
+            args = audio.parser().parse_args(["doctor"])
+            with patch.object(audio.subprocess, "run", side_effect=AssertionError("No setup or download allowed")):
+                result = audio.doctor(args)
+            self.assertEqual(args.checkpoint, data["checkpoint"])
+            self.assertEqual(args.model_type, "bandit")
+            self.assertEqual(result["backend_profile"], str(profile))
+            self.assertFalse(result["downloads_performed"])
+
+    def test_explicit_and_environment_paths_override_profile(self):
+        _, data = self.profile()
+        os.environ["MSST_CONFIG"] = str(self.config(["speech", "music", "effects"]))
+        os.environ["MSST_CHECKPOINT"] = str(self.root / "environment.ckpt")
+        explicit = self.root / "explicit.ckpt"
+        args = audio.parser().parse_args(["doctor", "--checkpoint", str(explicit), "--model-type", "bandit_v2"])
+        audio.resolve_backend(args)
+        self.assertEqual(args.checkpoint, str(explicit))
+        self.assertEqual(args.config, os.environ["MSST_CONFIG"])
+        self.assertEqual(args.backend_root, data["backend_root"])
+        self.assertEqual(args.model_type, "bandit_v2")
+
+    def test_corrupt_cached_model_fails_without_repair(self):
+        _, data = self.profile()
+        checkpoint = Path(data["checkpoint"])
+        checkpoint.write_bytes(b"partial or changed")
+        with self.assertRaisesRegex(ValueError, "hash differs"):
+            audio.doctor(audio.parser().parse_args(["doctor"]))
+        self.assertEqual(checkpoint.read_bytes(), b"partial or changed")
+
+    def test_explicit_missing_profile_does_not_fall_back(self):
+        self.profile()
+        with self.assertRaisesRegex(ValueError, "does not exist"):
+            audio.doctor(audio.parser().parse_args(["doctor", "--backend-profile", str(self.root / "wrong.json")]))
 
     def config(self, labels):
         file = self.root / "model.yaml"
