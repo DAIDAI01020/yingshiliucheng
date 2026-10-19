@@ -27,6 +27,7 @@
 | 电影/短剧海报 | `poster-director` |
 | 一般静帧或改图 | `frame-vision-director` |
 | 小红书每日艺术图、神秘超现实、出图审核上传 | `xiaohongshu`，复用总控的专业审核与生成链路 |
+| 小红书《不存在的电影》、虚构电影海报与无字壁纸 | `xiaohongshu` 的 `fictional_film` 分支 → `xiaohongshu-design-director`，再回到制作分支完成成稿与发布交接 |
 | 小红书账号运营、选题排期、数据复盘 | `xiaohongshu-operator`，向制作分支交接具体运营简报 |
 | 小红书成品发布、预约、回执与防重复提交 | `xiaohongshu-publisher`，接入本地 xiaohongshu-mcp；每日任务按指定账号、时间和模式另行启用 |
 | 独立故事板设定板 | `image-storyboard-workflow` |

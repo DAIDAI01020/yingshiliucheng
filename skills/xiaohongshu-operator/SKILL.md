@@ -40,6 +40,8 @@ Reuse known answers and existing documents before asking. For an actual position
 
 For the established mysterious surreal art series, preserve **日常空间里的神秘超现实**. The user's interest in daily sharing establishes a desired editorial cadence, not verified audience demand, production capacity, best posting time or automatic publishing permission.
 
+For the established **不存在的电影** series, preserve the promise “为从未上映的电影，留下海报、剧照和壁纸” and hand each selected post to `$xiaohongshu` with `content_branch:fictional_film`. Keep it distinct from the surreal-art and film-diary calendars. A requested one- or two-day cadence is an editorial plan, not automatic scheduling or publication permission.
+
 If goal/account data is absent, produce a clearly labeled provisional cold-start plan with testable audience hypotheses. Ask concise bundled questions only when answers change the work; continue unaffected planning. Never invent follower counts, growth targets, benchmarks or analytics. Do not require analytics just to deliver today's authorized creative work.
 
 ## Operating Cycle

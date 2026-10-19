@@ -1,6 +1,6 @@
 ---
 name: xiaohongshu
-description: Produce Xiaohongshu art-image and film-diary posts through visual concepts, image sets, finished copy, reviewed posting packs and authorized upload/publishing assistance. Use for explicit Xiaohongshu production or continuation of an established series. Account strategy, editorial calendars and performance analysis belong to xiaohongshu-operator; generic surreal imagery alone does not select this skill.
+description: Produce Xiaohongshu surreal-art, fictional-film and film-diary posts through visual concepts, image sets, finished copy, reviewed posting packs and authorized upload/publishing assistance. Use for explicit Xiaohongshu production or continuation of an established series. Account strategy, editorial calendars and performance analysis belong to xiaohongshu-operator; generic cinematic or surreal imagery alone does not select this skill.
 ---
 
 # Xiaohongshu
@@ -31,6 +31,7 @@ Apply the [branch isolation rules](references/surreal-art-workflow.md#branch-iso
 | Branch | When | Reference |
 | --- | --- | --- |
 | `surreal_art` | 明确的小红书艺术栏目需求，或继续已建立的每日艺术图 / 日常之外栏目；仅“神秘感、超现实”不足以触发 | [Mysterious surreal art production](references/surreal-art-workflow.md) |
+| `fictional_film` | 明确继续《不存在的电影》，或要求为小红书虚构一部不存在的电影并形成海报封面、无字壁纸和同世界观图组 | [Fictional-film visual director](../xiaohongshu-design-director/SKILL.md) and its [post packet](../xiaohongshu-design-director/references/post-patterns-and-packet.md) |
 | `film_diary` | 明确要求影视场景设计、一日一镜、可拍摄场景、商业练习 | [Film diary playbook](references/film-diary.md) and [post templates](references/post-templates.md) |
 
 The approved creative direction for the current art series is **日常空间里的神秘超现实**. Gentle, dreamlike, lonely, curious and mildly unsettling moods are allowed. The suggested series name **日常之外** is a working label, not an approved account rename.
@@ -38,6 +39,8 @@ The approved creative direction for the current art series is **日常空间里�
 For every `surreal_art` issue, apply the [long-term art direction standards](references/art-direction-standards.md). The user's requirement for sustained imagination and artistic quality applies to the entire series, not only a rejected first image. Specific proposed palettes, media and compositions remain proposals until selected; no single revision becomes the universal template. These standards do not change `film_diary` or shared production skills.
 
 Do not impose the film diary's Saturday commercial exercise, Sunday teaching format, growth pivot, or content percentages on `surreal_art`. Do not require intentional impossible scenes to be physically filmable.
+
+For `fictional_film`, `$xiaohongshu-design-director` owns the fictional premise, visual contradiction, shared world invariants, cover/wallpaper relationship and series-specific aesthetic floor. `$xiaohongshu` still owns the finished post, image-production coordination, copy and publishing handoff. Do not add issue or season numbers unless the user asks. Do not use this branch for an ordinary client film poster, an existing real-film campaign, or a generic cinematic image with no Xiaohongshu target.
 
 ## Resolve The Requested Action
 
@@ -59,7 +62,7 @@ Keep the compact `xiaohongshu_route_packet` internally:
 
 ```text
 task_mode: strategy / calendar / image_prompt / image_generation / copywriting / publish_assist / review
-content_branch: surreal_art / film_diary
+content_branch: surreal_art / fictional_film / film_diary
 series:
 post_id:
 post_unit: single_image / three_image_set / five_card_post / collection

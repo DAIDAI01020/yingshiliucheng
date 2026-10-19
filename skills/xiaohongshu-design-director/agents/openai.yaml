@@ -1,0 +1,6 @@
+interface:
+  display_name: "不存在的电影视觉导演"
+  short_description: "为小红书《不存在的电影》设计原创电影概念、海报封面、无字壁纸与同世界观图组"
+  default_prompt: "通过 $xiaohongshu 进入 fictional_film 分支，再使用 $xiaohongshu-design-director 为《不存在的电影》完成有导演审美的原创世界、海报与壁纸图组，并交回小红书单篇制作流程。"
+policy:
+  allow_implicit_invocation: true

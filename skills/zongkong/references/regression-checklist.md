@@ -447,6 +447,11 @@ Use this checklist after editing `$zongkong` or downstream route boundaries.
     - Read the existing file, retain cue timing and source, write a new actual SRT.
     - Preserve other punctuation and ordinary English spaces unless requested; review numeric semantics.
 
+96. `继续《不存在的电影》，做一张海报封面和两张无字壁纸，不要期数`
+    - Route through `$xiaohongshu` with `content_branch:fictional_film`, then use `$xiaohongshu-design-director` for the fictional premise, visual contradiction, shared world invariants and cover/wallpaper relationship.
+    - `$xiaohongshu` retains finished-post, copy and publishing-handoff ownership; the fictional-film director does not become a second account, prompt, generation or publication owner.
+    - Do not add issue/season numbers, reuse a real film campaign, migrate an ordinary client poster, or write series preferences into another project's state.
+
 ## Boundary Checks
 
 Xiaohongshu operations smoke scenarios:
@@ -467,6 +472,8 @@ Branch-isolation smoke scenarios:
 - `继续原来的一日一镜，这次超现实一点` -> keep film_diary and its existing project; change only the requested aesthetic property.
 - `把已通过的广告图上传小红书` -> posting handoff only; preserve source assets, ratio, platform, QC and project, without forced three-image regeneration.
 - `继续日常之外，做今天的一套` in the established art-column context -> surreal_art with its local defaults and requested review scope.
+- `继续《不存在的电影》，不要期数` -> xiaohongshu `fictional_film` -> xiaohongshu-design-director; preserve the no-number default and return through xiaohongshu for the finished post.
+- `给客户的真实电影做一张小红书宣传海报` -> preserve the client poster/project route and add only the requested posting handoff; do not migrate it into the fictional-film series.
 
 For any downstream skill touched by a change, confirm:
 

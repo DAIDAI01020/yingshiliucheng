@@ -1,6 +1,6 @@
 interface:
-  display_name: "小红书艺术图与场景设计"
-  short_description: "总控下的神秘超现实艺术图分支，串联选题、出图、审核、文案与上传"
-  default_prompt: "使用 $xiaohongshu 继续日常空间里的神秘超现实栏目，继承已有方向和授权，完成本次要求的选题、真实出图、适用技能审核或小红书发布素材与上传；保留实际证据并从未完成阶段续接。"
+  display_name: "小红书视觉内容制作"
+  short_description: "总控下的小红书单篇制作分支，覆盖神秘超现实、《不存在的电影》与影视日记"
+  default_prompt: "使用 $xiaohongshu 继承既有栏目、计划和授权，选择 surreal_art、fictional_film 或 film_diary 分支，完成本次要求的视觉方案、真实出图、适用审核、文案或发布交接；保留实际证据并从未完成阶段续接。"
 policy:
   allow_implicit_invocation: true
